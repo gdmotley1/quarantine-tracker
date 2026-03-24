@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "quarantine-tracker",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:/Users/motle/quarantine-tracker/server.js"],
+      "port": 3000
+    }
+  ]
+}

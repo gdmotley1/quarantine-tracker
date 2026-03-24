@@ -1,0 +1,63 @@
+{
+  "parts": [
+    {
+      "id": "mmcfh4oo7lgc",
+      "partNumber": "54566",
+      "description": "Ryder Decal",
+      "checkinDate": "2026-03-04T19:26:49.080Z",
+      "sentFrom": "Ryder",
+      "checkedInBy": "Grant Motley",
+      "shelf": "16",
+      "notes": "",
+      "notesThread": []
+    }
+  ],
+  "log": [
+    {
+      "partNumber": "12334",
+      "description": "Penske Decal",
+      "action": "CHECK IN",
+      "date": "2026-03-04T19:19:10.905Z",
+      "user": "Grant Motley",
+      "sentFrom": "Penske",
+      "shelf": "13",
+      "salesOrder": null,
+      "duration": null,
+      "notes": "",
+      "logId": 1,
+      "timestamp": 1772651950906,
+      "hash": "j951wd"
+    },
+    {
+      "partNumber": "54566",
+      "description": "Ryder Decal",
+      "action": "CHECK IN",
+      "date": "2026-03-04T19:26:49.080Z",
+      "user": "Grant Motley",
+      "sentFrom": "Ryder",
+      "shelf": "16",
+      "salesOrder": null,
+      "duration": null,
+      "notes": "",
+      "logId": 2,
+      "timestamp": 1772652409080,
+      "hash": "-l6u6xt"
+    },
+    {
+      "partNumber": "12334",
+      "description": "Penske Decal",
+      "action": "CHECK OUT",
+      "date": "2026-03-04T19:43:33.178Z",
+      "user": "Kevin Johnson",
+      "sentFrom": "Penske",
+      "shelf": "13",
+      "salesOrder": "SO-78183",
+      "duration": 0,
+      "notes": "",
+      "logId": 3,
+      "timestamp": 1772653413178,
+      "hash": "75dg49"
+    }
+  ],
+  "logId": 3
+}
