@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fouts Bros Inc — Customer Part Tracker</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -798,14 +800,24 @@ function playSound(type){
   o.start();o.stop(audioCtx.currentTime+.5);
 }
 
-// ---- SUPABASE CONFIG ----
-const SUPABASE_URL = 'https://ckaidadqnnjlkoxwezvz.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrYWlkYWRxbm5qbGtveHdlenZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTkwMjksImV4cCI6MjA4ODI5NTAyOX0.-YEt3zF_dvPRGzwYDVNlqW2hSBqiCpKbN67AqpAaV5U';
-const SB_HEADERS={'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'};
+// ---- FIREBASE CONFIG ----
+const firebaseConfig = {
+  apiKey: "AIzaSyAeZjfLUTHITovNbKksV49yNUE_IY2cvHk",
+  authDomain: "foutsbros-quarantine.firebaseapp.com",
+  databaseURL: "https://foutsbros-quarantine-default-rtdb.firebaseio.com",
+  projectId: "foutsbros-quarantine",
+  storageBucket: "foutsbros-quarantine.firebasestorage.app",
+  messagingSenderId: "1067768304865",
+  appId: "1:1067768304865:web:84052289b3d5f2360813a0"
+};
+firebase.initializeApp(firebaseConfig);
+const fbDb = firebase.database();
+const fbRef = fbDb.ref('app_state');
 
-// ---- DATA LAYER (Supabase-backed) ----
+// ---- DATA LAYER (Firebase-backed) ----
 const KEYS={parts:'parts',log:'log',logId:'logId'};
 let DB={parts:[],log:[],logId:0};
+let _fbReady=false;
 
 function loadData(k){return DB[k]||[];}
 function saveData(k,d){DB[k]=d;debouncedSave();}
@@ -815,13 +827,7 @@ let _saveTimer=null;
 function debouncedSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(saveToServer,50);}
 function saveToServer(){
   clearTimeout(_saveTimer);
-  fetch(SUPABASE_URL+'/rest/v1/app_state?id=eq.1',{method:'PATCH',headers:SB_HEADERS,body:JSON.stringify({data:DB})}).catch(()=>{});
-}
-async function syncFromServer(){
-  try{
-    const r=await fetch(SUPABASE_URL+'/rest/v1/app_state?id=eq.1&select=data',{headers:SB_HEADERS});
-    if(r.ok){const rows=await r.json();if(rows.length&&rows[0].data){DB=rows[0].data;refreshAll();}}
-  }catch(e){}
+  fbRef.set(DB).catch(()=>{});
 }
 
 // ---- AUDIT LOG (append-only) ----
@@ -851,7 +857,7 @@ async function restoreData(e){
     const ok=await showModal('Restore Backup','This will replace ALL current data with the backup from '+(data.exportedAt?new Date(data.exportedAt).toLocaleString():'unknown date')+'. This includes '+data.parts.length+' active part(s) and '+data.log.length+' log record(s). Continue?');
     if(!ok){e.target.value='';return;}
     DB.parts=data.parts;DB.log=data.log;DB.logId=parseInt(data.logId)||0;
-    saveToServer();
+    fbRef.set(DB).catch(()=>{});
     refreshAll();showToast('Restored '+data.parts.length+' parts and '+data.log.length+' log records','success');
   }catch(err){showToast('Invalid backup file: '+err.message,'error');}
   e.target.value='';
@@ -1420,22 +1426,21 @@ function exportLogCSV(){
 // ---- REFRESH ALL ----
 function refreshAll(){renderDashboard();renderActiveTable(document.getElementById('search-active').value);renderLogTable(document.getElementById('search-log').value);populateCheckoutDropdown();}
 
-// ---- INIT ----
-(async function(){
-  try{
-    const r=await fetch(SUPABASE_URL+'/rest/v1/app_state?id=eq.1&select=data',{headers:SB_HEADERS});
-    if(r.ok){const rows=await r.json();if(rows.length&&rows[0].data)DB=rows[0].data;}
-  }catch(e){}
-  refreshAll();
-  // Poll Supabase every 5 seconds so other browsers see updates
-  setInterval(async()=>{
-    try{
-      const r=await fetch(SUPABASE_URL+'/rest/v1/app_state?id=eq.1&select=data',{headers:SB_HEADERS});
-      if(r.ok){const rows=await r.json();if(rows.length&&rows[0].data){DB=rows[0].data;refreshAll();}}
-    }catch(e){}
-  },5000);
+// ---- INIT (Firebase real-time) ----
+(function(){
+  fbRef.on('value', snap => {
+    const data = snap.val();
+    if(data){
+      DB = data;
+      if(!DB.parts) DB.parts = [];
+      if(!DB.log) DB.log = [];
+      if(!DB.logId) DB.logId = 0;
+    }
+    if(!_fbReady){ _fbReady = true; }
+    refreshAll();
+  });
   // Also refresh days every minute
-  setInterval(refreshAll,60000);
+  setInterval(refreshAll, 60000);
 })();
 </script>
 </body>
