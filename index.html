@@ -83,8 +83,10 @@ nav button.active::after{left:10%;right:10%;background:linear-gradient(90deg,var
 @media(max-width:800px){.card-row{grid-template-columns:1fr}}
 
 /* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
-.stat-card{background:var(--card);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.35rem 1.5rem;display:flex;align-items:center;gap:1.15rem;transition:all .4s var(--ease);position:relative;overflow:hidden;cursor:default}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+@media(max-width:1100px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.1rem 1.25rem;display:flex;align-items:center;gap:1rem;transition:all .4s var(--ease);position:relative;overflow:hidden;cursor:default;min-width:0}
 .stat-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;border-radius:inherit}
 .stat-card:hover{border-color:var(--border-light);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
 .stat-card:hover::before{opacity:1}
@@ -106,7 +108,7 @@ nav button.active::after{left:10%;right:10%;background:linear-gradient(90deg,var
 .stat-icon svg{width:24px;height:24px}
 .stat-info{position:relative;z-index:1}
 .stat-info .stat-value{font-size:2.2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
-.stat-info .stat-label{font-size:.68rem;color:var(--text-muted);margin-top:.35rem;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.stat-info .stat-label{font-size:.68rem;color:var(--text-muted);margin-top:.35rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;white-space:nowrap}
 .stat-card.s-total .stat-value{color:var(--text)}
 .stat-card.s-crit .stat-value{color:var(--red)}
 .stat-card.s-today .stat-value{color:var(--green)}
@@ -245,7 +247,7 @@ textarea{resize:vertical;min-height:70px}
 /* TABLES */
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 th{padding:.75rem .7rem;text-align:left;font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:.66rem;letter-spacing:.8px;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(0,0,0,.2)}
-td{padding:.7rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;transition:all .2s var(--ease)}
+td{padding:.7rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;transition:all .2s var(--ease);white-space:nowrap}
 tbody tr{transition:all .25s var(--ease)}
 tbody tr:hover{background:rgba(255,255,255,.02)}
 tbody tr:hover td{color:var(--text)}
@@ -259,6 +261,7 @@ tr.status-yellow:hover{background:rgba(234,179,8,.14)}
 tr.status-red{background:var(--red-bg);border-left:3px solid var(--red)}
 tr.status-red:hover{background:rgba(239,68,68,.14)}
 tr.damage-highlight{border-left:3px solid var(--amber)!important}
+td.td-wrap{white-space:normal;min-width:140px;max-width:240px}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .65rem;border-radius:20px;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;transition:all .3s var(--ease)}
@@ -548,15 +551,15 @@ body.readonly-mode .readonly-banner{display:flex}
       </div>
       <div class="stat-card s-today stat-clickable" onclick="switchTab('log')">
         <div class="stat-icon today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="stat-info"><div class="stat-value" id="stat-today">0</div><div class="stat-label">Checked In Today</div></div>
+        <div class="stat-info"><div class="stat-value" id="stat-today">0</div><div class="stat-label">In Today</div></div>
       </div>
       <div class="stat-card s-out stat-clickable" onclick="switchTab('log')">
         <div class="stat-icon out-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-        <div class="stat-info"><div class="stat-value" id="stat-out-today">0</div><div class="stat-label">Checked Out Today</div></div>
+        <div class="stat-info"><div class="stat-value" id="stat-out-today">0</div><div class="stat-label">Out Today</div></div>
       </div>
       <div class="stat-card s-avg">
         <div class="stat-icon avg-turn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-        <div class="stat-info"><div class="stat-value" id="stat-avg-turn">0</div><div class="stat-label">Avg Days in Quarantine</div></div>
+        <div class="stat-info"><div class="stat-value" id="stat-avg-turn">0</div><div class="stat-label">Avg Turnaround</div></div>
       </div>
     </div>
 
@@ -1200,7 +1203,7 @@ function renderActiveTable(filter=''){
       const noteCount=(p.notesThread||[]).length;
       const hasDamage=p.condition&&p.condition!=='No damage';
       const rowClass=hasDamage?'damage-highlight':'status-'+statusClass(d);
-      return'<tr class="'+rowClass+'" style="cursor:pointer" onclick="openNotesModal(\''+p.id+'\')"><td>'+esc(p.partNumber)+'</td><td>'+esc(p.unitNumber||'-')+'</td><td>'+esc(p.description)+'</td><td>'+fmtDate(p.checkinDate)+'</td><td>'+d+'</td><td>'+shelfBadge(p.shelf)+'</td><td>'+esc(p.sentFrom)+'</td><td>'+esc(p.checkedInBy)+'</td><td>'+statusLabel(d)+'</td><td>'+stageBadgeHtml(p.stage||'Checked In',p.id)+'</td><td>'+conditionBadge(p.condition)+(hasDamage&&p.damageNotes?' <span style="font-size:.7rem;color:var(--text-dim)" title="'+esc(p.damageNotes)+'">&#9432;</span>':'')+'</td><td>'+esc(p.notes)+(noteCount?' <span style="color:var(--accent);font-size:.7rem;font-weight:700">['+noteCount+' note'+(noteCount>1?'s':'')+']</span>':'')+'</td></tr>';
+      return'<tr class="'+rowClass+'" style="cursor:pointer" onclick="openNotesModal(\''+p.id+'\')"><td>'+esc(p.partNumber)+'</td><td>'+esc(p.unitNumber||'-')+'</td><td class="td-wrap">'+esc(p.description)+'</td><td>'+fmtDate(p.checkinDate)+'</td><td>'+d+'</td><td>'+shelfBadge(p.shelf)+'</td><td>'+esc(p.sentFrom)+'</td><td>'+esc(p.checkedInBy)+'</td><td>'+statusLabel(d)+'</td><td>'+stageBadgeHtml(p.stage||'Checked In',p.id)+'</td><td>'+conditionBadge(p.condition)+(hasDamage&&p.damageNotes?' <span style="font-size:.7rem;color:var(--text-dim)" title="'+esc(p.damageNotes)+'">&#9432;</span>':'')+'</td><td class="td-wrap">'+esc(p.notes)+(noteCount?' <span style="color:var(--accent);font-size:.7rem;font-weight:700">['+noteCount+' note'+(noteCount>1?'s':'')+']</span>':'')+'</td></tr>';
     }).join('');}
 }
 
@@ -1268,7 +1271,7 @@ function renderLogTable(filter=''){
       if(l.action==='CHECK IN')ab='<span class="badge badge-checkin"><span class="badge-dot" style="background:var(--blue)"></span>CHECK IN</span>';
       else if(l.action==='CHECK OUT')ab='<span class="badge badge-checkout"><span class="badge-dot" style="background:var(--red)"></span>CHECK OUT</span>';
       else ab='<span class="badge" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)"><span class="badge-dot" style="background:var(--amber)"></span>'+esc(l.action)+'</span>';
-      return'<tr><td>'+l.logId+'</td><td>'+esc(l.partNumber)+'</td><td>'+esc(l.unitNumber||'-')+'</td><td>'+esc(l.description)+'</td><td>'+ab+'</td><td>'+fmtDate(l.date)+'</td><td>'+fmtTime(l.date)+'</td><td>'+esc(l.user)+'</td><td>'+esc(l.sentFrom||'-')+'</td><td>'+shelfBadge(l.shelf)+'</td><td>'+esc(l.salesOrder||'-')+'</td><td>'+(l.duration!=null?l.duration+' day(s)':'-')+'</td><td>'+esc(l.notes||'-')+'</td></tr>';
+      return'<tr><td>'+l.logId+'</td><td>'+esc(l.partNumber)+'</td><td>'+esc(l.unitNumber||'-')+'</td><td class="td-wrap">'+esc(l.description)+'</td><td>'+ab+'</td><td>'+fmtDate(l.date)+'</td><td>'+fmtTime(l.date)+'</td><td>'+esc(l.user)+'</td><td>'+esc(l.sentFrom||'-')+'</td><td>'+shelfBadge(l.shelf)+'</td><td>'+esc(l.salesOrder||'-')+'</td><td>'+(l.duration!=null?l.duration+' day(s)':'-')+'</td><td class="td-wrap">'+esc(l.notes||'-')+'</td></tr>';
     }).join('');}
 }
 
