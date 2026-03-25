@@ -166,8 +166,7 @@ svg { display: block; }
   </div>
   <div class="topbar-pills">
     <div class="pill">Tracker: <span>gdmotley1.github.io/quarantine-tracker</span></div>
-    <div class="pill">Backend: <span>Firebase Realtime DB</span></div>
-    <div class="pill">Cage: <span>Customer Decal Cage — BDP Warehouse</span></div>
+    <div class="pill">Cage: <span>Customer Decal Cage</span></div>
     <div class="pill">Directive: <span>Gary Pacilio — expedite</span></div>
     <div class="pill">Rev: <span>D · Mar 2026</span></div>
   </div>
@@ -182,17 +181,16 @@ svg { display: block; }
   <div class="bottom-toggle" onclick="toggleQ()">
     <span class="caret" id="caret">▲</span>
     <span style="font-size:12px;font-weight:500;color:var(--text)">Open questions</span>
-    <span class="q-badge">7 items</span>
+    <span class="q-badge">6 items</span>
     <span style="margin-left:auto;font-size:11px;color:var(--faint)" id="toggleHint">click to collapse</span>
   </div>
   <div class="bottom-content" id="qContent">
-    <div class="q-item"><div class="q-num">01</div><div class="q-text">Confirm AX non-inv. description standard: <code style="font-family:var(--mono);font-size:10.5px">CUST-DECAL – [Customer Name]</code> on every order with customer supplied decals.</div></div>
+    <div class="q-item"><div class="q-num">01</div><div class="q-text">Confirm AX non-inv. part standard: <code style="font-family:var(--mono);font-size:10.5px">CUST-DECAL – [Customer Name]</code> on every order with customer supplied decals.</div></div>
     <div class="q-item"><div class="q-num">02</div><div class="q-text">Confirm tracker damage field values are correct for Dawn in practice: No damage / Minor damage / Significant damage.</div></div>
     <div class="q-item"><div class="q-num">03</div><div class="q-text">Does QC actively check the tracker after every install run, or does the contractor or sales rep notify QC when the batch is done?</div></div>
     <div class="q-item"><div class="q-num">04</div><div class="q-text">How do multi-truck orders get tracked — one SO with multiple unit#s, or separate SOs per unit?</div></div>
     <div class="q-item"><div class="q-num">05</div><div class="q-text">Do we notify the customer upon confirmed install, or only if there is a problem?</div></div>
-    <div class="q-item"><div class="q-num">06</div><div class="q-text">Tracker is hosted on GitHub Pages with Firebase backend — confirm the Firebase project and GitHub repo are under a Fouts Bros account, not a personal one, before going live.</div></div>
-    <div class="q-item"><div class="q-num">07</div><div class="q-text">Clear the 10 sample Ryder/Penske/Enterprise test records from the tracker before Dawn starts using it for real parts.</div></div>
+    <div class="q-item"><div class="q-num">06</div><div class="q-text">Clear the 10 sample Ryder/Penske/Enterprise test records from the tracker before Dawn starts using it for real parts.</div></div>
   </div>
 </div>
 
@@ -262,8 +260,8 @@ function toggleQ() {
   const nodes = [
     // Phase 1 (cols 0-2)
     { id: 'n1a', col: 0,  lane: 'customer',  label: 'Notify sales of\ndecal requirements',       type: 'oval',    color: 'teal' },
-    { id: 'n1b', col: 1,  lane: 'sales',     label: 'Enter SO in AX\n(CUST-DECAL line)',         type: 'rect',    color: 'teal' },
-    { id: 'n1c', col: 2,  lane: 'sales',     label: 'Log in Parts\nTracker (Firebase)',          type: 'rect',    color: 'purple' },
+    { id: 'n1b', col: 1,  lane: 'sales',     label: 'Enter SO in AX\n(CUST-DECAL part)',         type: 'rect',    color: 'teal' },
+    { id: 'n1c', col: 2,  lane: 'sales',     label: 'Log in Parts\nTracker',                     type: 'rect',    color: 'purple' },
 
     // Phase 2 (cols 3-5)
     { id: 'n2a', col: 3,  lane: 'sales',     label: 'Request unit#\nfrom customer',              type: 'rect',    color: 'amber' },
@@ -272,7 +270,7 @@ function toggleQ() {
 
     // Phase 3 (cols 6-7)
     { id: 'n3a', col: 6,  lane: 'customer',  label: 'Ship decals\nATTN: Decal Cage / SO#',      type: 'rect',    color: 'teal' },
-    { id: 'n3b', col: 7,  lane: 'sales',     label: 'Alert warehouse\n+ tracking# in tracker',   type: 'rect',    color: 'amber' },
+    { id: 'n3b', col: 7,  lane: 'sales',     label: 'Alert warehouse\n+ enter tracking#',          type: 'rect',    color: 'amber' },
 
     // Phase 4 (cols 8-11)
     { id: 'n4a', col: 8,  lane: 'warehouse', label: 'Package arrives\nrouted to Dawn',           type: 'rect',    color: 'neutral' },
