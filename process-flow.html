@@ -106,6 +106,39 @@ body {
 
 svg { display: block; }
 
+/* ── Frozen lane labels ── */
+.swim-container {
+  display: flex;
+  align-items: flex-start;
+  min-width: max-content;
+}
+.lane-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.lane-spacer {
+  height: 52px; /* matches PAD_TOP */
+}
+.lane-label {
+  height: 110px; /* matches LANE_H */
+  width: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.9;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.025);
+}
+.lane-label:nth-child(odd) {
+  background: rgba(255,255,255,0.04);
+}
+
 /* ── Bottom panel ── */
 .bottom-panel {
   flex-shrink: 0;
@@ -173,7 +206,10 @@ svg { display: block; }
 </div>
 
 <div class="canvas-wrap" id="canvasWrap">
-  <svg id="swimSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="swim-container">
+    <div class="lane-col" id="laneCol"></div>
+    <svg id="swimSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
 </div>
 
 <!-- Bottom questions panel -->
@@ -210,7 +246,7 @@ function toggleQ() {
   const NS = 'http://www.w3.org/2000/svg';
 
   // ── Config ──
-  const LABEL_W   = 170;
+  const LABEL_W   = 0;
   const COL_W     = 180;
   const LANE_H    = 110;
   const NODE_W    = 148;
@@ -384,22 +420,26 @@ function toggleQ() {
   defs.appendChild(mk2);
   svg.appendChild(defs);
 
-  // ── Lane backgrounds & labels ──
+  // ── Lane backgrounds (SVG stripes only — labels are frozen HTML) ──
   lanes.forEach((lane, i) => {
     const y = PAD_TOP + i * LANE_H;
     if (i % 2 === 0) svg.appendChild(el('rect', { x: 0, y, width: totalW, height: LANE_H, fill: 'rgba(255,255,255,0.015)' }));
     svg.appendChild(el('line', { x1: 0, y1: y, x2: totalW, y2: y, stroke: 'rgba(255,255,255,0.06)', 'stroke-width': 1 }));
-    svg.appendChild(el('rect', { x: 0, y, width: LABEL_W, height: LANE_H, fill: 'rgba(255,255,255,0.025)' }));
-    const txt = el('text', {
-      x: LABEL_W / 2, y: y + LANE_H / 2,
-      fill: lane.color, 'font-family': "'DM Sans', sans-serif", 'font-size': 12, 'font-weight': 600,
-      'text-anchor': 'middle', 'dominant-baseline': 'central', opacity: 0.9
-    });
-    txt.textContent = lane.label;
-    svg.appendChild(txt);
-    svg.appendChild(el('line', { x1: LABEL_W, y1: y, x2: LABEL_W, y2: y + LANE_H, stroke: 'rgba(255,255,255,0.08)', 'stroke-width': 1 }));
   });
   svg.appendChild(el('line', { x1: 0, y1: PAD_TOP + lanes.length * LANE_H, x2: totalW, y2: PAD_TOP + lanes.length * LANE_H, stroke: 'rgba(255,255,255,0.06)', 'stroke-width': 1 }));
+
+  // ── Frozen HTML lane labels ──
+  const laneCol = document.getElementById('laneCol');
+  const spacer = document.createElement('div');
+  spacer.className = 'lane-spacer';
+  laneCol.appendChild(spacer);
+  lanes.forEach((lane) => {
+    const div = document.createElement('div');
+    div.className = 'lane-label';
+    div.style.color = lane.color;
+    div.textContent = lane.label;
+    laneCol.appendChild(div);
+  });
 
   // ── Phase headers (span across columns) ──
   phases.forEach((ph) => {
