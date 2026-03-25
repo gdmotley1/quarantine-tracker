@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Customer Supplied Decals — Process Flow</title>
+<title>Customer Supplied Decals — Swim Lane Process Map</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,9 +37,14 @@
   --blue-bg:    rgba(96,175,245,0.10);
   --blue-bd:    rgba(96,175,245,0.28);
 
-  --card-w:     220px;
   --font:       'DM Sans', sans-serif;
   --mono:       'DM Mono', monospace;
+
+  --lane-h:     120px;
+  --col-w:      200px;
+  --label-w:    160px;
+  --node-h:     52px;
+  --diamond-sz: 48px;
 }
 
 html, body { height: 100%; }
@@ -55,6 +60,7 @@ body {
   height: 100vh;
 }
 
+/* ── Topbar ── */
 .topbar {
   flex-shrink: 0;
   padding: 16px 32px 14px;
@@ -73,12 +79,7 @@ body {
   color: var(--muted);
   margin-bottom: 4px;
 }
-.topbar-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.02em;
-}
+.topbar-title { font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
 .topbar-pills { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
 .pill {
   font-family: var(--mono);
@@ -92,186 +93,20 @@ body {
 }
 .pill span { color: var(--text); }
 
+/* ── Canvas ── */
 .canvas-wrap {
   flex: 1;
-  overflow-x: auto;
-  overflow-y: auto;
-  padding: 32px 40px 48px;
+  overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--faint) transparent;
 }
-.canvas-wrap::-webkit-scrollbar { height: 6px; width: 6px; }
+.canvas-wrap::-webkit-scrollbar { height: 8px; width: 8px; }
 .canvas-wrap::-webkit-scrollbar-track { background: transparent; }
-.canvas-wrap::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 3px; }
+.canvas-wrap::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 4px; }
 
-.flow-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0;
-  min-width: max-content;
-}
+svg { display: block; }
 
-.phase {
-  display: flex;
-  align-items: flex-start;
-  opacity: 0;
-  animation: fi 0.35s forwards;
-}
-.phase:nth-child(1)  { animation-delay: 0.04s; }
-.phase:nth-child(2)  { animation-delay: 0.08s; }
-.phase:nth-child(3)  { animation-delay: 0.12s; }
-.phase:nth-child(4)  { animation-delay: 0.16s; }
-.phase:nth-child(5)  { animation-delay: 0.20s; }
-.phase:nth-child(6)  { animation-delay: 0.24s; }
-.phase:nth-child(7)  { animation-delay: 0.28s; }
-.phase:nth-child(8)  { animation-delay: 0.32s; }
-.phase:nth-child(9)  { animation-delay: 0.36s; }
-.phase:nth-child(10) { animation-delay: 0.40s; }
-.phase:nth-child(11) { animation-delay: 0.44s; }
-.phase:nth-child(12) { animation-delay: 0.48s; }
-.phase:nth-child(13) { animation-delay: 0.52s; }
-@keyframes fi { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:none; } }
-
-.phase-inner { display: flex; flex-direction: column; }
-.phase-label-bar {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-  white-space: nowrap;
-}
-.phase-col {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  width: var(--card-w);
-}
-
-.connector {
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  margin-top: 30px;
-  flex-shrink: 0;
-}
-.conn-dash { width: 24px; height: 1px; background: var(--border2); }
-.conn-arrow {
-  width: 0; height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 6px solid var(--border2);
-}
-
-.card {
-  width: var(--card-w);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 13px 15px;
-  transition: border-color 0.18s, transform 0.14s, box-shadow 0.18s;
-  cursor: default;
-}
-.card:hover {
-  border-color: var(--border2);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.35);
-}
-.card.teal    { border-left: 3px solid var(--teal);   background: linear-gradient(150deg, var(--teal-bg),   var(--surface) 55%); }
-.card.purple  { border-left: 3px solid var(--purple); background: linear-gradient(150deg, var(--purple-bg), var(--surface) 55%); }
-.card.amber   { border-left: 3px solid var(--amber);  background: linear-gradient(150deg, var(--amber-bg),  var(--surface) 55%); }
-.card.red     { border-left: 3px solid var(--red);    background: linear-gradient(150deg, var(--red-bg),    var(--surface) 55%); }
-.card.green   { border-left: 3px solid var(--green);  background: linear-gradient(150deg, var(--green-bg),  var(--surface) 55%); }
-.card.blue    { border-left: 3px solid var(--blue);   background: linear-gradient(150deg, var(--blue-bg),   var(--surface) 55%); }
-.card.neutral { border-left: 3px solid var(--faint); }
-
-.card-owner {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  margin-bottom: 5px;
-  line-height: 1.3;
-}
-.card.teal    .card-owner { color: var(--teal); }
-.card.purple  .card-owner { color: var(--purple); }
-.card.amber   .card-owner { color: var(--amber); }
-.card.red     .card-owner { color: var(--red); }
-.card.green   .card-owner { color: var(--green); }
-.card.blue    .card-owner { color: var(--blue); }
-.card.neutral .card-owner { color: var(--muted); }
-
-.card-title { font-size: 12.5px; font-weight: 500; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
-.card-sub   { font-size: 11px; color: var(--muted); line-height: 1.5; }
-
-.card-tag {
-  display: inline-block;
-  font-family: var(--mono);
-  font-size: 9px;
-  border-radius: 4px;
-  padding: 2px 6px;
-  margin-top: 8px;
-  font-weight: 500;
-}
-.tag-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-bd); }
-.tag-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
-.tag-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bd); }
-.tag-teal   { background: var(--teal-bg);   color: var(--teal);   border: 1px solid var(--teal-bd); }
-.tag-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
-.tag-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid var(--blue-bd); }
-.tag-gray   { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
-
-.req-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-size: 9px;
-  border-radius: 4px;
-  padding: 3px 7px;
-  margin-top: 8px;
-  font-weight: 500;
-  background: rgba(240,192,64,0.15);
-  color: var(--amber);
-  border: 1px solid var(--amber-bd);
-}
-.req-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
-
-.v-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: 18px;
-  height: 22px;
-  color: var(--faint);
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-.branch-div {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 20px;
-}
-.branch-div .bl { flex:1; height:1px; background: var(--border); }
-.branch-div .bt { font-family: var(--mono); font-size: 9px; color: var(--faint); white-space: nowrap; }
-
-/* new: added phase marker for new gaps */
-.phase-new .phase-label-bar { color: var(--teal); }
-.phase-new .phase-label-bar::after {
-  content: ' NEW';
-  font-size: 8px;
-  color: var(--teal);
-  border: 1px solid var(--teal-bd);
-  background: var(--teal-bg);
-  border-radius: 3px;
-  padding: 1px 4px;
-  margin-left: 5px;
-  vertical-align: middle;
-}
-
+/* ── Bottom panel ── */
 .bottom-panel {
   flex-shrink: 0;
   border-top: 1px solid var(--border);
@@ -327,333 +162,27 @@ body {
 <div class="topbar">
   <div>
     <div class="topbar-eye">Fouts Bros Inc. — SDT</div>
-    <div class="topbar-title">Customer Supplied Decals — Process Flow</div>
+    <div class="topbar-title">Customer Supplied Decals — Swim Lane Process Map</div>
   </div>
   <div class="topbar-pills">
     <div class="pill">Tracker: <span>gdmotley1.github.io/quarantine-tracker</span></div>
     <div class="pill">Backend: <span>Firebase Realtime DB</span></div>
-    <div class="pill">Cage: <span>BDP Warehouse</span></div>
+    <div class="pill">Cage: <span>Customer Decal Cage — BDP Warehouse</span></div>
     <div class="pill">Directive: <span>Gary Pacilio — expedite</span></div>
-    <div class="pill">Rev: <span>C · Mar 2026</span></div>
+    <div class="pill">Rev: <span>D · Mar 2026</span></div>
   </div>
 </div>
 
-<div class="canvas-wrap">
-  <div class="flow-row">
-
-    <!-- PHASE 1 — Sales & Order Entry -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 1 — Sales &amp; order entry</div>
-        <div class="phase-col">
-          <div class="card teal">
-            <div class="card-owner">Customer → Sales rep</div>
-            <div class="card-title">Customer notifies sales</div>
-            <div class="card-sub">Decal type, quantity, who is providing them</div>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card teal">
-            <div class="card-owner">Sales rep</div>
-            <div class="card-title">Enter SO in AX</div>
-            <div class="card-sub">Non-inv. line: <code style="font-family:var(--mono);font-size:10px;color:var(--teal)">CUST-DECAL</code> added to flag the order</div>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card purple">
-            <div class="card-owner">Sales rep</div>
-            <div class="card-title">Log in Parts Tracker</div>
-            <div class="card-sub">SO#, customer, decal description, expected arrival. Syncs real-time via Firebase.</div>
-            <span class="card-tag tag-purple">Tracker update #1</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 2 — Unit Number Requirement -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 2 — Unit # requirement</div>
-        <div class="phase-col">
-          <div class="card amber">
-            <div class="card-owner">Sales rep → Customer</div>
-            <div class="card-title">Require unit# from customer</div>
-            <div class="card-sub">All customers must provide a unit# per truck. Required to place decals — no unit#, no install.</div>
-            <div class="req-badge"><div class="req-dot"></div>Required from all customers</div>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card purple">
-            <div class="card-owner">Sales rep</div>
-            <div class="card-title">Enter unit# in Parts Tracker</div>
-            <div class="card-sub">Unit# matched to SO# at order creation. Required field at check-in — Dawn cannot proceed without it.</div>
-            <span class="card-tag tag-purple">Tracker update #2</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 3 — Inbound & Alert -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 3 — Inbound &amp; alert</div>
-        <div class="phase-col">
-          <div class="card teal">
-            <div class="card-owner">Customer</div>
-            <div class="card-title">Ships decals</div>
-            <div class="card-sub">Sales provides label instructions:<br><strong style="color:var(--text);font-weight:500">ATTN: Decal Cage / SO#</strong></div>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card amber">
-            <div class="card-owner">Sales rep → Dawn</div>
-            <div class="card-title">Alert warehouse</div>
-            <div class="card-sub">Tracking# entered in Parts Tracker. Dawn sees it in real time via Firebase — no separate email needed.</div>
-            <span class="card-tag tag-amber">Tracker update #3</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 4 — Receiving (with Gap 2: no SO found branch) -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 4 — Receiving</div>
-        <div class="phase-col">
-          <div class="card neutral">
-            <div class="card-owner">Any entry point</div>
-            <div class="card-title">Package arrives</div>
-            <div class="card-sub">Any dock, front desk, or bay — all unidentified packages routed to Dawn</div>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card amber">
-            <div class="card-owner">Dawn — warehouse</div>
-            <div class="card-title">Look up SO# in tracker</div>
-            <div class="card-sub">Dawn checks Parts Tracker for a matching SO# before accepting the package.</div>
-          </div>
-          <div class="branch-div"><div class="bl"></div><div class="bt">if no SO found</div><div class="bl"></div></div>
-          <div class="card red">
-            <div class="card-owner">Dawn → Sales rep</div>
-            <div class="card-title">Unmatched package — hold</div>
-            <div class="card-sub">Package held in temporary holding area. Sales rep notified to create SO and log in tracker before decal enters cage.</div>
-            <span class="card-tag tag-red">Do not check in yet</span>
-          </div>
-          <div class="branch-div"><div class="bl"></div><div class="bt">if SO found</div><div class="bl"></div></div>
-          <div class="card amber">
-            <div class="card-owner">Dawn — warehouse</div>
-            <div class="card-title">Route to cage &amp; inspect</div>
-            <div class="card-sub">Dawn is single funnel point. Visual inspection per Gary's directive. Log condition in tracker.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 5 — Damage Check -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 5 — Damage check</div>
-        <div class="phase-col">
-          <div class="card red">
-            <div class="card-owner">Dawn → Lori (purchasing)</div>
-            <div class="card-title">Damage found — escalate</div>
-            <div class="card-sub">Select condition at check-in: No damage / Minor / Significant. If damaged, damage notes required. Notify Lori immediately — Lori contacts supplier.</div>
-            <span class="card-tag tag-red">Escalation path</span>
-          </div>
-          <div class="branch-div"><div class="bl"></div><div class="bt">or — no damage</div><div class="bl"></div></div>
-          <div class="card amber">
-            <div class="card-owner">Dawn — warehouse</div>
-            <div class="card-title">Mark &amp; check in parts</div>
-            <div class="card-sub">Write SO# and unit# on back of each decal. Keep each order grouped together.</div>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card purple">
-            <div class="card-owner">Dawn</div>
-            <div class="card-title">Parts Tracker — check in parts</div>
-            <div class="card-sub">Enter: unit#, SO# (optional), condition, shelf location. Stage auto-sets to Checked In.</div>
-            <span class="card-tag tag-purple">Tracker update #4</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 6 — Damage Resolution (Gap 6 — NEW) -->
-    <div class="phase phase-new">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 6 — Damage resolution</div>
-        <div class="phase-col">
-          <div class="card amber">
-            <div class="card-owner">Lori (purchasing)</div>
-            <div class="card-title">Determine resolution with supplier</div>
-            <div class="card-sub">Lori works with supplier to confirm: replacement shipment or on-site rework. Sales rep looped in if truck timing is at risk.</div>
-          </div>
-          <div class="branch-div"><div class="bl"></div><div class="bt">replacement ships</div><div class="bl"></div></div>
-          <div class="card teal">
-            <div class="card-owner">Supplier → Dawn</div>
-            <div class="card-title">Replacement re-enters at check-in</div>
-            <div class="card-sub">New decal arrives and goes through Phase 4 onward as a fresh check-in. Old damaged record closed in tracker.</div>
-            <span class="card-tag tag-teal">Re-enters Phase 4</span>
-          </div>
-          <div class="branch-div"><div class="bl"></div><div class="bt">reworked on site</div><div class="bl"></div></div>
-          <div class="card teal">
-            <div class="card-owner">Chavise / Dawn</div>
-            <div class="card-title">Rework &amp; re-inspect</div>
-            <div class="card-sub">Decal reworked on site per Ben's approval. Re-inspected by Dawn. Condition updated in tracker. Re-enters cage if cleared.</div>
-            <span class="card-tag tag-teal">Re-enters Phase 6 storage</span>
-          </div>
-          <div class="branch-div"><div class="bl"></div><div class="bt">truck ready, part unresolved</div><div class="bl"></div></div>
-          <div class="card red">
-            <div class="card-owner">Sales rep</div>
-            <div class="card-title">Sales decides — case by case</div>
-            <div class="card-sub">Sales evaluates whether truck holds or ships without decal. Decision logged in tracker notes. Exception noted on SO.</div>
-            <span class="card-tag tag-red">Exception path</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 7 — Cage Storage -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 7 — Cage storage</div>
-        <div class="phase-col">
-          <div class="card neutral">
-            <div class="card-owner">Dawn</div>
-            <div class="card-title">Store on cage shelving</div>
-            <div class="card-sub">BDP warehouse. Grouped by SO#, organized by unit# within each order.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 8 — Install Scheduling (Gap 4: contractor gets a list) -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 8 — Install scheduling</div>
-        <div class="phase-col">
-          <div class="card blue">
-            <div class="card-owner">Sales rep</div>
-            <div class="card-title">Coordinate install schedule</div>
-            <div class="card-sub">Sales schedules outside contractor with production. Installer comes in batches of 6–8 trucks at a time.</div>
-            <span class="card-tag tag-blue">Outside contractor</span>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card blue">
-            <div class="card-owner">Sales rep + Production</div>
-            <div class="card-title">Generate install list</div>
-            <div class="card-sub">Sales rep and production produce a printed list of truck unit#s, SO#s, and shelf locations for that install run. Handed to contractor on arrival.</div>
-            <span class="card-tag tag-blue">Contractor's work order</span>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card blue">
-            <div class="card-owner">Sales rep → Production</div>
-            <div class="card-title">Confirm trucks are built &amp; ready</div>
-            <div class="card-sub">Decals are the last step after truck is fully built. Production confirms build-complete before installer arrives.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 9 — Staging -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 9 — Staging</div>
-        <div class="phase-col">
-          <div class="card amber">
-            <div class="card-owner">Chavise or Dawn</div>
-            <div class="card-title">Pull batch for install day</div>
-            <div class="card-sub">Pull all decals on the install list from cage shelving. Match SO# and unit# per truck.</div>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card purple">
-            <div class="card-owner">Chavise or Dawn</div>
-            <div class="card-title">Parts Tracker — Staged</div>
-            <div class="card-sub">Update stage inline on the Active Quarantine table. Badge turns amber. Logged in movement log.</div>
-            <span class="card-tag tag-purple">Tracker update #5</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 10 — Contractor Install -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 10 — Contractor install</div>
-        <div class="phase-col">
-          <div class="card blue">
-            <div class="card-owner">Outside contractor</div>
-            <div class="card-title">Installer arrives on site</div>
-            <div class="card-sub">Works from printed install list. Installs decals across batch of 6–8 fully built trucks. Last step in the build process.</div>
-          </div>
-          <div class="branch-div"><div class="bl"></div><div class="bt">if decal missing</div><div class="bl"></div></div>
-          <div class="card red">
-            <div class="card-owner">Contractor → Sales rep</div>
-            <div class="card-title">Missing decal — escalate</div>
-            <div class="card-sub">Set stage to Missing in tracker — prompts for note, logs in movement log. Notify sales rep. Sales contacts customer.</div>
-            <span class="card-tag tag-red">Escalation path</span>
-          </div>
-          <div class="branch-div"><div class="bl"></div><div class="bt">if all present</div><div class="bl"></div></div>
-          <div class="card teal">
-            <div class="card-owner">Outside contractor</div>
-            <div class="card-title">Install decals on trucks</div>
-            <div class="card-sub">Verify SO# and unit# match on each truck before applying</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
-
-    <!-- PHASE 11 — QC & Closeout -->
-    <div class="phase">
-      <div class="phase-inner">
-        <div class="phase-label-bar">Phase 11 — QC &amp; closeout</div>
-        <div class="phase-col">
-          <div class="card teal">
-            <div class="card-owner">QC inspector</div>
-            <div class="card-title">Verify decals installed</div>
-            <div class="card-sub">Check tracker for any open SO#s after install run. Every flagged truck must be verified before ship.</div>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card purple">
-            <div class="card-owner">QC inspector</div>
-            <div class="card-title">Parts Tracker — Installed</div>
-            <div class="card-sub">Set stage to Installed — prompts for QC sign-off name and truck ID. Badge turns green. Logged in movement log.</div>
-            <span class="card-tag tag-purple">Tracker update #6</span>
-          </div>
-          <div class="v-arrow">↓</div>
-          <div class="card green">
-            <div class="card-owner">Complete</div>
-            <div class="card-title">Truck ships</div>
-            <div class="card-sub">All tracker statuses closed. Process complete.</div>
-            <span class="card-tag tag-green">Done</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+<div class="canvas-wrap" id="canvasWrap">
+  <svg id="swimSvg" xmlns="http://www.w3.org/2000/svg"></svg>
 </div>
 
 <!-- Bottom questions panel -->
 <div class="bottom-panel">
-  <div class="bottom-toggle" id="toggleBtn" onclick="toggleQ()">
+  <div class="bottom-toggle" onclick="toggleQ()">
     <span class="caret" id="caret">▲</span>
     <span style="font-size:12px;font-weight:500;color:var(--text)">Open questions</span>
-    <span class="q-badge">8 items</span>
+    <span class="q-badge">7 items</span>
     <span style="margin-left:auto;font-size:11px;color:var(--faint)" id="toggleHint">click to collapse</span>
   </div>
   <div class="bottom-content" id="qContent">
@@ -662,28 +191,366 @@ body {
     <div class="q-item"><div class="q-num">03</div><div class="q-text">Does QC actively check the tracker after every install run, or does the contractor or sales rep notify QC when the batch is done?</div></div>
     <div class="q-item"><div class="q-num">04</div><div class="q-text">How do multi-truck orders get tracked — one SO with multiple unit#s, or separate SOs per unit?</div></div>
     <div class="q-item"><div class="q-num">05</div><div class="q-text">Do we notify the customer upon confirmed install, or only if there is a problem?</div></div>
-    <div class="q-item"><div class="q-num">06</div><div class="q-text">What is the formal cage location designation in BDP warehouse — needs to be named and posted per Gary's directive.</div></div>
-    <div class="q-item"><div class="q-num">07</div><div class="q-text">Tracker is hosted on GitHub Pages with Firebase backend — confirm the Firebase project and GitHub repo are under a Fouts Bros account, not a personal one, before going live.</div></div>
-    <div class="q-item"><div class="q-num">08</div><div class="q-text">Clear the 10 sample Ryder/Penske/Enterprise test records from the tracker before Dawn starts using it for real parts.</div></div>
+    <div class="q-item"><div class="q-num">06</div><div class="q-text">Tracker is hosted on GitHub Pages with Firebase backend — confirm the Firebase project and GitHub repo are under a Fouts Bros account, not a personal one, before going live.</div></div>
+    <div class="q-item"><div class="q-num">07</div><div class="q-text">Clear the 10 sample Ryder/Penske/Enterprise test records from the tracker before Dawn starts using it for real parts.</div></div>
   </div>
 </div>
 
 <script>
-  function toggleQ() {
-    const c = document.getElementById('qContent');
-    const caret = document.getElementById('caret');
-    const hint = document.getElementById('toggleHint');
-    const open = !c.classList.contains('hidden');
-    if (open) {
-      c.classList.add('hidden');
-      caret.textContent = '▼';
-      hint.textContent = 'click to expand';
-    } else {
-      c.classList.remove('hidden');
-      caret.textContent = '▲';
-      hint.textContent = 'click to collapse';
-    }
+function toggleQ() {
+  const c = document.getElementById('qContent');
+  const caret = document.getElementById('caret');
+  const hint = document.getElementById('toggleHint');
+  const open = !c.classList.contains('hidden');
+  if (open) { c.classList.add('hidden'); caret.textContent = '▼'; hint.textContent = 'click to expand'; }
+  else { c.classList.remove('hidden'); caret.textContent = '▲'; hint.textContent = 'click to collapse'; }
+}
+
+// ── Swim Lane Renderer ──
+(function() {
+  const svg = document.getElementById('swimSvg');
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // ── Config ──
+  const LABEL_W   = 170;
+  const COL_W     = 180;
+  const LANE_H    = 110;
+  const NODE_W    = 148;
+  const NODE_H    = 48;
+  const DIAM_SZ   = 54;
+  const PAD_TOP   = 52;
+  const PAD_LEFT  = 10;
+  const PAD_RIGHT = 40;
+
+  const COLORS = {
+    teal:   { fill: 'rgba(46,207,164,0.12)',   stroke: '#2ecfa4' },
+    purple: { fill: 'rgba(157,143,245,0.12)',  stroke: '#9d8ff5' },
+    amber:  { fill: 'rgba(240,192,64,0.12)',   stroke: '#f0c040' },
+    red:    { fill: 'rgba(238,110,110,0.12)',   stroke: '#ee6e6e' },
+    green:  { fill: 'rgba(88,217,138,0.12)',    stroke: '#58d98a' },
+    blue:   { fill: 'rgba(96,175,245,0.12)',    stroke: '#60aff5' },
+    neutral:{ fill: 'rgba(255,255,255,0.04)',   stroke: 'rgba(255,255,255,0.2)' },
+  };
+
+  const lanes = [
+    { id: 'customer',   label: 'Customer',               color: '#2ecfa4' },
+    { id: 'sales',      label: 'Sales Rep',               color: '#f0c040' },
+    { id: 'warehouse',  label: 'Dawn / Warehouse',        color: '#f0c040' },
+    { id: 'purchasing', label: 'Lori (Purchasing)',        color: '#ee6e6e' },
+    { id: 'production', label: 'Production / Contractor',  color: '#60aff5' },
+    { id: 'qc',         label: 'QC Inspector',             color: '#58d98a' },
+  ];
+
+  // Each step gets its own column. Phases span ranges of columns.
+  // col = unique sequential column index for each step
+  const phases = [
+    { label: 'Phase 1 — Sales & Order Entry', startCol: 0,  endCol: 2  },
+    { label: 'Phase 2 — Unit # Requirement',  startCol: 3,  endCol: 5  },
+    { label: 'Phase 3 — Inbound & Alert',     startCol: 6,  endCol: 7  },
+    { label: 'Phase 4 — Receiving',           startCol: 8,  endCol: 11 },
+    { label: 'Phase 5 — Damage Check',        startCol: 12, endCol: 15 },
+    { label: 'Phase 6 — Damage Resolution',   startCol: 16, endCol: 19 },
+    { label: 'Phase 7 — Cage Storage',        startCol: 20, endCol: 20 },
+    { label: 'Phase 8 — Install Scheduling',  startCol: 21, endCol: 23 },
+    { label: 'Phase 9 — Staging',             startCol: 24, endCol: 25 },
+    { label: 'Phase 10 — Contractor Install', startCol: 26, endCol: 29 },
+    { label: 'Phase 11 — QC & Closeout',      startCol: 30, endCol: 32 },
+  ];
+
+  const TOTAL_COLS = 33;
+
+  const nodes = [
+    // Phase 1 (cols 0-2)
+    { id: 'n1a', col: 0,  lane: 'customer',  label: 'Notify sales of\ndecal requirements',       type: 'oval',    color: 'teal' },
+    { id: 'n1b', col: 1,  lane: 'sales',     label: 'Enter SO in AX\n(CUST-DECAL line)',         type: 'rect',    color: 'teal' },
+    { id: 'n1c', col: 2,  lane: 'sales',     label: 'Log in Parts\nTracker (Firebase)',          type: 'rect',    color: 'purple' },
+
+    // Phase 2 (cols 3-5)
+    { id: 'n2a', col: 3,  lane: 'sales',     label: 'Request unit#\nfrom customer',              type: 'rect',    color: 'amber' },
+    { id: 'n2b', col: 4,  lane: 'customer',  label: 'Provide unit#\nper truck',                  type: 'rect',    color: 'teal' },
+    { id: 'n2c', col: 5,  lane: 'sales',     label: 'Enter unit# in\nParts Tracker',             type: 'rect',    color: 'purple' },
+
+    // Phase 3 (cols 6-7)
+    { id: 'n3a', col: 6,  lane: 'customer',  label: 'Ship decals\nATTN: Decal Cage / SO#',      type: 'rect',    color: 'teal' },
+    { id: 'n3b', col: 7,  lane: 'sales',     label: 'Alert warehouse\n+ tracking# in tracker',   type: 'rect',    color: 'amber' },
+
+    // Phase 4 (cols 8-11)
+    { id: 'n4a', col: 8,  lane: 'warehouse', label: 'Package arrives\nrouted to Dawn',           type: 'rect',    color: 'neutral' },
+    { id: 'n4b', col: 9,  lane: 'warehouse', label: 'SO# in\ntracker?',                         type: 'diamond', color: 'amber' },
+    { id: 'n4no',col: 10, lane: 'sales',     label: 'Hold — sales\ncreates SO first',            type: 'rect',    color: 'red' },
+    { id: 'n4c', col: 11, lane: 'warehouse', label: 'Route to cage\n& visual inspect',           type: 'rect',    color: 'amber' },
+
+    // Phase 5 (cols 12-15)
+    { id: 'n5a', col: 12, lane: 'warehouse', label: 'Damage\nfound?',                           type: 'diamond', color: 'red' },
+    { id: 'n5yes',col:13, lane: 'purchasing',label: 'Escalate to Lori\ncontact supplier',        type: 'rect',    color: 'red' },
+    { id: 'n5b', col: 14, lane: 'warehouse', label: 'Write SO#/unit#\non each decal',            type: 'rect',    color: 'amber' },
+    { id: 'n5c', col: 15, lane: 'warehouse', label: 'Tracker update\nStage → Checked In',       type: 'rect',    color: 'purple' },
+
+    // Phase 6 (cols 16-19)
+    { id: 'n6a', col: 16, lane: 'purchasing',label: 'Work w/ supplier\non resolution',           type: 'rect',    color: 'amber' },
+    { id: 'n6b', col: 17, lane: 'purchasing',label: 'Replace or\nrework?',                      type: 'diamond', color: 'amber' },
+    { id: 'n6rep',col:18, lane: 'warehouse', label: 'Replacement\nre-enters Phase 4',            type: 'rect',    color: 'teal' },
+    { id: 'n6rw', col:18, lane: 'purchasing',label: 'Rework on site\nre-inspect',                type: 'rect',    color: 'teal' },
+    { id: 'n6ex', col:19, lane: 'sales',     label: 'Unresolved — sales\ndecides case by case',  type: 'rect',    color: 'red' },
+
+    // Phase 7 (col 20)
+    { id: 'n7a', col: 20, lane: 'warehouse', label: 'Store in Customer\nDecal Cage by SO#',      type: 'rect',    color: 'neutral' },
+
+    // Phase 8 (cols 21-23)
+    { id: 'n8a', col: 21, lane: 'sales',     label: 'Schedule contractor\n(6-8 truck batches)',   type: 'rect',    color: 'blue' },
+    { id: 'n8b', col: 22, lane: 'sales',     label: 'Generate install list\nunit#, SO#, shelf',  type: 'rect',    color: 'blue' },
+    { id: 'n8c', col: 23, lane: 'production',label: 'Confirm trucks\nbuilt & ready',             type: 'rect',    color: 'blue' },
+
+    // Phase 9 (cols 24-25)
+    { id: 'n9a', col: 24, lane: 'warehouse', label: 'Pull batch from\ncage for install day',     type: 'rect',    color: 'amber' },
+    { id: 'n9b', col: 25, lane: 'warehouse', label: 'Tracker update\nStage → Staged',           type: 'rect',    color: 'purple' },
+
+    // Phase 10 (cols 26-29)
+    { id: 'n10a', col: 26, lane: 'production',label: 'Installer arrives\nworks from list',       type: 'rect',    color: 'blue' },
+    { id: 'n10d', col: 27, lane: 'production',label: 'Decal\nmissing?',                          type: 'diamond', color: 'red' },
+    { id: 'n10miss',col:28,lane:'sales',      label: 'Escalate — contact\ncustomer for reship',  type: 'rect',    color: 'red' },
+    { id: 'n10b', col: 29, lane: 'production',label: 'Install decals\non trucks',                type: 'rect',    color: 'teal' },
+
+    // Phase 11 (cols 30-32)
+    { id: 'n11a', col: 30, lane: 'qc',       label: 'Verify decals\ninstalled per tracker',      type: 'rect',    color: 'teal' },
+    { id: 'n11b', col: 31, lane: 'qc',       label: 'Tracker update\nStage → Installed',        type: 'rect',    color: 'purple' },
+    { id: 'n11c', col: 32, lane: 'qc',       label: 'Truck ships',                               type: 'oval',    color: 'green' },
+  ];
+
+  const arrows = [
+    ['n1a', 'n1b'],
+    ['n1b', 'n1c'],
+    ['n1c', 'n2a'],
+    ['n2a', 'n2b'],
+    ['n2b', 'n2c'],
+    ['n2c', 'n3a'],
+    ['n3a', 'n3b'],
+    ['n3b', 'n4a'],
+    ['n4a', 'n4b'],
+    ['n4b', 'n4no', { label: 'No' }],
+    ['n4b', 'n4c',  { label: 'Yes' }],
+    ['n4no','n4b',  { style: 'back', label: 'After SO created' }],
+    ['n4c', 'n5a'],
+    ['n5a', 'n5yes',{ label: 'Yes' }],
+    ['n5a', 'n5b',  { label: 'No' }],
+    ['n5b', 'n5c'],
+    ['n5yes','n6a'],
+    ['n6a', 'n6b'],
+    ['n6b', 'n6rep',{ label: 'Replace' }],
+    ['n6b', 'n6rw', { label: 'Rework' }],
+    ['n6b', 'n6ex', { label: 'Unresolved' }],
+    ['n5c', 'n7a'],
+    ['n6rep','n4a',  { style: 'back', label: 'Re-enter' }],
+    ['n6rw', 'n7a'],
+    ['n7a', 'n8a'],
+    ['n8a', 'n8b'],
+    ['n8b', 'n8c'],
+    ['n8c', 'n9a'],
+    ['n9a', 'n9b'],
+    ['n9b', 'n10a'],
+    ['n10a','n10d'],
+    ['n10d','n10miss',{ label: 'Yes' }],
+    ['n10d','n10b',   { label: 'No' }],
+    ['n10b','n11a'],
+    ['n11a','n11b'],
+    ['n11b','n11c'],
+  ];
+
+  // ── Layout helpers ──
+  const laneIdx = {};
+  lanes.forEach((l, i) => laneIdx[l.id] = i);
+
+  function nodeCenter(n) {
+    return {
+      x: LABEL_W + PAD_LEFT + n.col * COL_W + COL_W / 2,
+      y: PAD_TOP + laneIdx[n.lane] * LANE_H + LANE_H / 2
+    };
   }
+
+  function nodeHalfW(n) { return n.type === 'diamond' ? DIAM_SZ / 2 : NODE_W / 2; }
+  function nodeHalfH(n) { return n.type === 'diamond' ? DIAM_SZ / 2 : NODE_H / 2; }
+
+  const totalW = LABEL_W + PAD_LEFT + TOTAL_COLS * COL_W + PAD_RIGHT;
+  const totalH = PAD_TOP + lanes.length * LANE_H + 20;
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', totalH);
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+  // ── Defs ──
+  const defs = el('defs');
+  const mk1 = el('marker', { id: 'ah', markerWidth: 8, markerHeight: 6, refX: 7, refY: 3, orient: 'auto', markerUnits: 'strokeWidth' });
+  mk1.appendChild(el('path', { d: 'M0,0 L8,3 L0,6 Z', fill: 'rgba(255,255,255,0.5)' }));
+  defs.appendChild(mk1);
+  const mk2 = el('marker', { id: 'ahb', markerWidth: 8, markerHeight: 6, refX: 7, refY: 3, orient: 'auto', markerUnits: 'strokeWidth' });
+  mk2.appendChild(el('path', { d: 'M0,0 L8,3 L0,6 Z', fill: 'rgba(255,255,255,0.25)' }));
+  defs.appendChild(mk2);
+  svg.appendChild(defs);
+
+  // ── Lane backgrounds & labels ──
+  lanes.forEach((lane, i) => {
+    const y = PAD_TOP + i * LANE_H;
+    if (i % 2 === 0) svg.appendChild(el('rect', { x: 0, y, width: totalW, height: LANE_H, fill: 'rgba(255,255,255,0.015)' }));
+    svg.appendChild(el('line', { x1: 0, y1: y, x2: totalW, y2: y, stroke: 'rgba(255,255,255,0.06)', 'stroke-width': 1 }));
+    svg.appendChild(el('rect', { x: 0, y, width: LABEL_W, height: LANE_H, fill: 'rgba(255,255,255,0.025)' }));
+    const txt = el('text', {
+      x: LABEL_W / 2, y: y + LANE_H / 2,
+      fill: lane.color, 'font-family': "'DM Sans', sans-serif", 'font-size': 12, 'font-weight': 600,
+      'text-anchor': 'middle', 'dominant-baseline': 'central', opacity: 0.9
+    });
+    txt.textContent = lane.label;
+    svg.appendChild(txt);
+    svg.appendChild(el('line', { x1: LABEL_W, y1: y, x2: LABEL_W, y2: y + LANE_H, stroke: 'rgba(255,255,255,0.08)', 'stroke-width': 1 }));
+  });
+  svg.appendChild(el('line', { x1: 0, y1: PAD_TOP + lanes.length * LANE_H, x2: totalW, y2: PAD_TOP + lanes.length * LANE_H, stroke: 'rgba(255,255,255,0.06)', 'stroke-width': 1 }));
+
+  // ── Phase headers (span across columns) ──
+  phases.forEach((ph) => {
+    const x1 = LABEL_W + PAD_LEFT + ph.startCol * COL_W;
+    const x2 = LABEL_W + PAD_LEFT + (ph.endCol + 1) * COL_W;
+    const cx = (x1 + x2) / 2;
+    // divider line at start of phase
+    svg.appendChild(el('line', { x1: x1, y1: PAD_TOP - 8, x2: x1, y2: totalH, stroke: 'rgba(255,255,255,0.04)', 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
+    // phase label
+    const txt = el('text', {
+      x: cx, y: 18, fill: '#6b7090',
+      'font-family': "'DM Mono', monospace", 'font-size': 9, 'text-anchor': 'middle', 'letter-spacing': '0.06em'
+    });
+    txt.textContent = ph.label.toUpperCase();
+    svg.appendChild(txt);
+    // subtitle line
+    const w = x2 - x1 - 20;
+    svg.appendChild(el('line', { x1: cx - w/2, y1: 26, x2: cx + w/2, y2: 26, stroke: 'rgba(255,255,255,0.05)', 'stroke-width': 1 }));
+  });
+
+  // ── Draw arrows (behind nodes) ──
+  const nodeMap = {};
+  nodes.forEach(n => nodeMap[n.id] = n);
+
+  arrows.forEach(([fromId, toId, opts]) => {
+    opts = opts || {};
+    const fn = nodeMap[fromId], tn = nodeMap[toId];
+    const from = nodeCenter(fn), to = nodeCenter(tn);
+    const isBack = opts.style === 'back';
+    const sc = isBack ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)';
+    const mk = isBack ? 'url(#ahb)' : 'url(#ah)';
+    const da = isBack ? '5,4' : 'none';
+
+    const fhw = nodeHalfW(fn), fhh = nodeHalfH(fn);
+    const thw = nodeHalfW(tn), thh = nodeHalfH(tn);
+
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    let pathEl;
+
+    if (isBack && fromId === 'n6rep') {
+      // long back: down under all lanes, then left, then up
+      const sx = from.x, sy = from.y + fhh;
+      const botY = PAD_TOP + lanes.length * LANE_H + 10;
+      const ex = to.x, ey = to.y + thh;
+      pathEl = el('path', { d: `M${sx},${sy} L${sx},${botY} L${ex},${botY} L${ex},${ey+8}`, fill:'none', stroke:sc, 'stroke-width':1.2, 'stroke-dasharray':da, 'marker-end':mk });
+    } else if (isBack && fromId === 'n4no') {
+      // loop back left and down to diamond
+      const sx = from.x, sy = from.y - fhh;
+      const topY = from.y - fhh - 15;
+      const ex = to.x, ey = to.y - thh;
+      pathEl = el('path', { d: `M${sx},${sy} L${sx},${topY} L${ex},${topY} L${ex},${ey-8}`, fill:'none', stroke:sc, 'stroke-width':1.2, 'stroke-dasharray':da, 'marker-end':mk });
+    } else if (Math.abs(dy) < 5) {
+      // same lane — straight horizontal
+      const sx = from.x + fhw;
+      const ex = to.x - thw - 6;
+      pathEl = el('line', { x1:sx, y1:from.y, x2:ex, y2:to.y, stroke:sc, 'stroke-width':1.2, 'marker-end':mk, 'stroke-dasharray':da });
+    } else {
+      // cross-lane: L-shaped routing
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        // exit right, bend to target lane
+        const sx = from.x + fhw, sy = from.y;
+        const ex = to.x - thw - 6, ey = to.y;
+        const midX = (sx + ex) / 2;
+        pathEl = el('path', { d: `M${sx},${sy} L${midX},${sy} L${midX},${ey} L${ex},${ey}`, fill:'none', stroke:sc, 'stroke-width':1.2, 'marker-end':mk, 'stroke-dasharray':da });
+      } else {
+        // exit bottom/top, bend to target column
+        const goDown = dy > 0;
+        const sx = from.x, sy = from.y + (goDown ? fhh : -fhh);
+        const ex = to.x, ey = to.y + (goDown ? -thh - 6 : thh + 6);
+        const midY = (sy + ey) / 2;
+        pathEl = el('path', { d: `M${sx},${sy} L${sx},${midY} L${ex},${midY} L${ex},${ey}`, fill:'none', stroke:sc, 'stroke-width':1.2, 'marker-end':mk, 'stroke-dasharray':da });
+      }
+    }
+    svg.appendChild(pathEl);
+
+    // Label on arrow
+    if (opts.label) {
+      let lx, ly, anchor = 'middle';
+      if (Math.abs(dy) < 5) {
+        lx = (from.x + to.x) / 2;
+        ly = from.y - 10;
+      } else if (Math.abs(dx) >= Math.abs(dy)) {
+        lx = (from.x + to.x) / 2;
+        ly = Math.min(from.y, to.y) - 6;
+      } else {
+        lx = from.x + 12;
+        ly = (from.y + to.y) / 2 - 2;
+        anchor = 'start';
+      }
+      const lt = el('text', { x: lx, y: ly, fill: 'rgba(255,255,255,0.45)', 'font-family': "'DM Mono', monospace", 'font-size': 8, 'text-anchor': anchor });
+      lt.textContent = opts.label;
+      svg.appendChild(lt);
+    }
+  });
+
+  // ── Draw nodes ──
+  nodes.forEach(n => {
+    const c = nodeCenter(n);
+    const col = COLORS[n.color] || COLORS.neutral;
+    const g = el('g');
+
+    if (n.type === 'diamond') {
+      const h = DIAM_SZ / 2;
+      g.appendChild(el('path', {
+        d: `M${c.x},${c.y-h} L${c.x+h},${c.y} L${c.x},${c.y+h} L${c.x-h},${c.y} Z`,
+        fill: col.fill, stroke: col.stroke, 'stroke-width': 1.5
+      }));
+      const lines = n.label.split('\n');
+      lines.forEach((line, i) => {
+        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 11, line, 8.5));
+      });
+    } else if (n.type === 'oval') {
+      g.appendChild(el('rect', {
+        x: c.x - NODE_W/2, y: c.y - NODE_H/2, width: NODE_W, height: NODE_H,
+        rx: NODE_H/2, ry: NODE_H/2, fill: col.fill, stroke: col.stroke, 'stroke-width': 1.5
+      }));
+      const lines = n.label.split('\n');
+      lines.forEach((line, i) => {
+        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 13, line, 10));
+      });
+    } else {
+      g.appendChild(el('rect', {
+        x: c.x - NODE_W/2, y: c.y - NODE_H/2, width: NODE_W, height: NODE_H,
+        rx: 6, fill: col.fill, stroke: col.stroke, 'stroke-width': 1.2
+      }));
+      const lines = n.label.split('\n');
+      lines.forEach((line, i) => {
+        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 13, line, 10));
+      });
+    }
+    svg.appendChild(g);
+  });
+
+  // ── Helpers ──
+  function el(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    if (attrs) Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+    return e;
+  }
+  function textEl(x, y, text, size) {
+    const t = el('text', {
+      x, y, fill: '#e2e4ec', 'font-family': "'DM Sans', sans-serif",
+      'font-size': size, 'font-weight': 500, 'text-anchor': 'middle', 'dominant-baseline': 'central'
+    });
+    t.textContent = text;
+    return t;
+  }
+})();
 </script>
 </body>
 </html>
