@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Customer Supplied Decals — Process Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #0d1018;
+  --surface:    #151820;
+  --surface2:   #1c2030;
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.14);
+  --text:       #e2e4ec;
+  --muted:      #6b7090;
+  --faint:      #2a2f42;
+
+  --teal:       #2ecfa4;
+  --teal-bg:    rgba(46,207,164,0.10);
+  --teal-bd:    rgba(46,207,164,0.28);
+  --purple:     #9d8ff5;
+  --purple-bg:  rgba(157,143,245,0.10);
+  --purple-bd:  rgba(157,143,245,0.28);
+  --amber:      #f0c040;
+  --amber-bg:   rgba(240,192,64,0.10);
+  --amber-bd:   rgba(240,192,64,0.28);
+  --red:        #ee6e6e;
+  --red-bg:     rgba(238,110,110,0.10);
+  --red-bd:     rgba(238,110,110,0.28);
+  --green:      #58d98a;
+  --green-bg:   rgba(88,217,138,0.10);
+  --green-bd:   rgba(88,217,138,0.28);
+  --blue:       #60aff5;
+  --blue-bg:    rgba(96,175,245,0.10);
+  --blue-bd:    rgba(96,175,245,0.28);
+
+  --card-w:     220px;
+  --font:       'DM Sans', sans-serif;
+  --mono:       'DM Mono', monospace;
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.topbar {
+  flex-shrink: 0;
+  padding: 16px 32px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--bg);
+}
+.topbar-eye {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.topbar-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.topbar-pills { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.pill span { color: var(--text); }
+
+.canvas-wrap {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 32px 40px 48px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--faint) transparent;
+}
+.canvas-wrap::-webkit-scrollbar { height: 6px; width: 6px; }
+.canvas-wrap::-webkit-scrollbar-track { background: transparent; }
+.canvas-wrap::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 3px; }
+
+.flow-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  min-width: max-content;
+}
+
+.phase {
+  display: flex;
+  align-items: flex-start;
+  opacity: 0;
+  animation: fi 0.35s forwards;
+}
+.phase:nth-child(1)  { animation-delay: 0.04s; }
+.phase:nth-child(2)  { animation-delay: 0.08s; }
+.phase:nth-child(3)  { animation-delay: 0.12s; }
+.phase:nth-child(4)  { animation-delay: 0.16s; }
+.phase:nth-child(5)  { animation-delay: 0.20s; }
+.phase:nth-child(6)  { animation-delay: 0.24s; }
+.phase:nth-child(7)  { animation-delay: 0.28s; }
+.phase:nth-child(8)  { animation-delay: 0.32s; }
+.phase:nth-child(9)  { animation-delay: 0.36s; }
+.phase:nth-child(10) { animation-delay: 0.40s; }
+.phase:nth-child(11) { animation-delay: 0.44s; }
+.phase:nth-child(12) { animation-delay: 0.48s; }
+.phase:nth-child(13) { animation-delay: 0.52s; }
+@keyframes fi { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:none; } }
+
+.phase-inner { display: flex; flex-direction: column; }
+.phase-label-bar {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+.phase-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: var(--card-w);
+}
+
+.connector {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  margin-top: 30px;
+  flex-shrink: 0;
+}
+.conn-dash { width: 24px; height: 1px; background: var(--border2); }
+.conn-arrow {
+  width: 0; height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid var(--border2);
+}
+
+.card {
+  width: var(--card-w);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 15px;
+  transition: border-color 0.18s, transform 0.14s, box-shadow 0.18s;
+  cursor: default;
+}
+.card:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+}
+.card.teal    { border-left: 3px solid var(--teal);   background: linear-gradient(150deg, var(--teal-bg),   var(--surface) 55%); }
+.card.purple  { border-left: 3px solid var(--purple); background: linear-gradient(150deg, var(--purple-bg), var(--surface) 55%); }
+.card.amber   { border-left: 3px solid var(--amber);  background: linear-gradient(150deg, var(--amber-bg),  var(--surface) 55%); }
+.card.red     { border-left: 3px solid var(--red);    background: linear-gradient(150deg, var(--red-bg),    var(--surface) 55%); }
+.card.green   { border-left: 3px solid var(--green);  background: linear-gradient(150deg, var(--green-bg),  var(--surface) 55%); }
+.card.blue    { border-left: 3px solid var(--blue);   background: linear-gradient(150deg, var(--blue-bg),   var(--surface) 55%); }
+.card.neutral { border-left: 3px solid var(--faint); }
+
+.card-owner {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+.card.teal    .card-owner { color: var(--teal); }
+.card.purple  .card-owner { color: var(--purple); }
+.card.amber   .card-owner { color: var(--amber); }
+.card.red     .card-owner { color: var(--red); }
+.card.green   .card-owner { color: var(--green); }
+.card.blue    .card-owner { color: var(--blue); }
+.card.neutral .card-owner { color: var(--muted); }
+
+.card-title { font-size: 12.5px; font-weight: 500; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
+.card-sub   { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+.card-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9px;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+.tag-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-bd); }
+.tag-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
+.tag-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bd); }
+.tag-teal   { background: var(--teal-bg);   color: var(--teal);   border: 1px solid var(--teal-bd); }
+.tag-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
+.tag-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid var(--blue-bd); }
+.tag-gray   { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+
+.req-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  border-radius: 4px;
+  padding: 3px 7px;
+  margin-top: 8px;
+  font-weight: 500;
+  background: rgba(240,192,64,0.15);
+  color: var(--amber);
+  border: 1px solid var(--amber-bd);
+}
+.req-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+
+.v-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 18px;
+  height: 22px;
+  color: var(--faint);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.branch-div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+}
+.branch-div .bl { flex:1; height:1px; background: var(--border); }
+.branch-div .bt { font-family: var(--mono); font-size: 9px; color: var(--faint); white-space: nowrap; }
+
+/* new: added phase marker for new gaps */
+.phase-new .phase-label-bar { color: var(--teal); }
+.phase-new .phase-label-bar::after {
+  content: ' NEW';
+  font-size: 8px;
+  color: var(--teal);
+  border: 1px solid var(--teal-bd);
+  background: var(--teal-bg);
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+.bottom-panel {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.bottom-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 32px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.bottom-toggle:hover { color: var(--text); }
+.caret { font-size: 9px; display: inline-block; }
+.q-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid var(--amber-bd);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+.bottom-content {
+  padding: 4px 32px 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 7px;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--faint) transparent;
+}
+.bottom-content.hidden { display: none; }
+.q-item {
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.q-num { font-family: var(--mono); font-size: 10px; color: var(--faint); min-width: 18px; padding-top: 1px; }
+.q-text { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-eye">Fouts Bros Inc. — SDT</div>
+    <div class="topbar-title">Customer Supplied Decals — Process Flow</div>
+  </div>
+  <div class="topbar-pills">
+    <div class="pill">Tracker: <span>gdmotley1.github.io/quarantine-tracker</span></div>
+    <div class="pill">Backend: <span>Firebase Realtime DB</span></div>
+    <div class="pill">Cage: <span>BDP Warehouse</span></div>
+    <div class="pill">Directive: <span>Gary Pacilio — expedite</span></div>
+    <div class="pill">Rev: <span>C · Mar 2026</span></div>
+  </div>
+</div>
+
+<div class="canvas-wrap">
+  <div class="flow-row">
+
+    <!-- PHASE 1 — Sales & Order Entry -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 1 — Sales &amp; order entry</div>
+        <div class="phase-col">
+          <div class="card teal">
+            <div class="card-owner">Customer → Sales rep</div>
+            <div class="card-title">Customer notifies sales</div>
+            <div class="card-sub">Decal type, quantity, who is providing them</div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card teal">
+            <div class="card-owner">Sales rep</div>
+            <div class="card-title">Enter SO in AX</div>
+            <div class="card-sub">Non-inv. line: <code style="font-family:var(--mono);font-size:10px;color:var(--teal)">CUST-DECAL</code> added to flag the order</div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card purple">
+            <div class="card-owner">Sales rep</div>
+            <div class="card-title">Log in Parts Tracker</div>
+            <div class="card-sub">SO#, customer, decal description, expected arrival. Syncs real-time via Firebase.</div>
+            <span class="card-tag tag-purple">Tracker update #1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 2 — Unit Number Requirement -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 2 — Unit # requirement</div>
+        <div class="phase-col">
+          <div class="card amber">
+            <div class="card-owner">Sales rep → Customer</div>
+            <div class="card-title">Require unit# from customer</div>
+            <div class="card-sub">All customers must provide a unit# per truck. Required to place decals — no unit#, no install.</div>
+            <div class="req-badge"><div class="req-dot"></div>Required from all customers</div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card purple">
+            <div class="card-owner">Sales rep</div>
+            <div class="card-title">Enter unit# in Parts Tracker</div>
+            <div class="card-sub">Unit# matched to SO# at order creation. Required field at check-in — Dawn cannot proceed without it.</div>
+            <span class="card-tag tag-purple">Tracker update #2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 3 — Inbound & Alert -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 3 — Inbound &amp; alert</div>
+        <div class="phase-col">
+          <div class="card teal">
+            <div class="card-owner">Customer</div>
+            <div class="card-title">Ships decals</div>
+            <div class="card-sub">Sales provides label instructions:<br><strong style="color:var(--text);font-weight:500">ATTN: Decal Cage / SO#</strong></div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card amber">
+            <div class="card-owner">Sales rep → Dawn</div>
+            <div class="card-title">Alert warehouse</div>
+            <div class="card-sub">Tracking# entered in Parts Tracker. Dawn sees it in real time via Firebase — no separate email needed.</div>
+            <span class="card-tag tag-amber">Tracker update #3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 4 — Receiving (with Gap 2: no SO found branch) -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 4 — Receiving</div>
+        <div class="phase-col">
+          <div class="card neutral">
+            <div class="card-owner">Any entry point</div>
+            <div class="card-title">Package arrives</div>
+            <div class="card-sub">Any dock, front desk, or bay — all unidentified packages routed to Dawn</div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card amber">
+            <div class="card-owner">Dawn — warehouse</div>
+            <div class="card-title">Look up SO# in tracker</div>
+            <div class="card-sub">Dawn checks Parts Tracker for a matching SO# before accepting the package.</div>
+          </div>
+          <div class="branch-div"><div class="bl"></div><div class="bt">if no SO found</div><div class="bl"></div></div>
+          <div class="card red">
+            <div class="card-owner">Dawn → Sales rep</div>
+            <div class="card-title">Unmatched package — hold</div>
+            <div class="card-sub">Package held in temporary holding area. Sales rep notified to create SO and log in tracker before decal enters cage.</div>
+            <span class="card-tag tag-red">Do not check in yet</span>
+          </div>
+          <div class="branch-div"><div class="bl"></div><div class="bt">if SO found</div><div class="bl"></div></div>
+          <div class="card amber">
+            <div class="card-owner">Dawn — warehouse</div>
+            <div class="card-title">Route to cage &amp; inspect</div>
+            <div class="card-sub">Dawn is single funnel point. Visual inspection per Gary's directive. Log condition in tracker.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 5 — Damage Check -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 5 — Damage check</div>
+        <div class="phase-col">
+          <div class="card red">
+            <div class="card-owner">Dawn → Lori (purchasing)</div>
+            <div class="card-title">Damage found — escalate</div>
+            <div class="card-sub">Select condition at check-in: No damage / Minor / Significant. If damaged, damage notes required. Notify Lori immediately — Lori contacts supplier.</div>
+            <span class="card-tag tag-red">Escalation path</span>
+          </div>
+          <div class="branch-div"><div class="bl"></div><div class="bt">or — no damage</div><div class="bl"></div></div>
+          <div class="card amber">
+            <div class="card-owner">Dawn — warehouse</div>
+            <div class="card-title">Mark &amp; check in parts</div>
+            <div class="card-sub">Write SO# and unit# on back of each decal. Keep each order grouped together.</div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card purple">
+            <div class="card-owner">Dawn</div>
+            <div class="card-title">Parts Tracker — check in parts</div>
+            <div class="card-sub">Enter: unit#, SO# (optional), condition, shelf location. Stage auto-sets to Checked In.</div>
+            <span class="card-tag tag-purple">Tracker update #4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 6 — Damage Resolution (Gap 6 — NEW) -->
+    <div class="phase phase-new">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 6 — Damage resolution</div>
+        <div class="phase-col">
+          <div class="card amber">
+            <div class="card-owner">Lori (purchasing)</div>
+            <div class="card-title">Determine resolution with supplier</div>
+            <div class="card-sub">Lori works with supplier to confirm: replacement shipment or on-site rework. Sales rep looped in if truck timing is at risk.</div>
+          </div>
+          <div class="branch-div"><div class="bl"></div><div class="bt">replacement ships</div><div class="bl"></div></div>
+          <div class="card teal">
+            <div class="card-owner">Supplier → Dawn</div>
+            <div class="card-title">Replacement re-enters at check-in</div>
+            <div class="card-sub">New decal arrives and goes through Phase 4 onward as a fresh check-in. Old damaged record closed in tracker.</div>
+            <span class="card-tag tag-teal">Re-enters Phase 4</span>
+          </div>
+          <div class="branch-div"><div class="bl"></div><div class="bt">reworked on site</div><div class="bl"></div></div>
+          <div class="card teal">
+            <div class="card-owner">Chavise / Dawn</div>
+            <div class="card-title">Rework &amp; re-inspect</div>
+            <div class="card-sub">Decal reworked on site per Ben's approval. Re-inspected by Dawn. Condition updated in tracker. Re-enters cage if cleared.</div>
+            <span class="card-tag tag-teal">Re-enters Phase 6 storage</span>
+          </div>
+          <div class="branch-div"><div class="bl"></div><div class="bt">truck ready, part unresolved</div><div class="bl"></div></div>
+          <div class="card red">
+            <div class="card-owner">Sales rep</div>
+            <div class="card-title">Sales decides — case by case</div>
+            <div class="card-sub">Sales evaluates whether truck holds or ships without decal. Decision logged in tracker notes. Exception noted on SO.</div>
+            <span class="card-tag tag-red">Exception path</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 7 — Cage Storage -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 7 — Cage storage</div>
+        <div class="phase-col">
+          <div class="card neutral">
+            <div class="card-owner">Dawn</div>
+            <div class="card-title">Store on cage shelving</div>
+            <div class="card-sub">BDP warehouse. Grouped by SO#, organized by unit# within each order.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 8 — Install Scheduling (Gap 4: contractor gets a list) -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 8 — Install scheduling</div>
+        <div class="phase-col">
+          <div class="card blue">
+            <div class="card-owner">Sales rep</div>
+            <div class="card-title">Coordinate install schedule</div>
+            <div class="card-sub">Sales schedules outside contractor with production. Installer comes in batches of 6–8 trucks at a time.</div>
+            <span class="card-tag tag-blue">Outside contractor</span>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card blue">
+            <div class="card-owner">Sales rep + Production</div>
+            <div class="card-title">Generate install list</div>
+            <div class="card-sub">Sales rep and production produce a printed list of truck unit#s, SO#s, and shelf locations for that install run. Handed to contractor on arrival.</div>
+            <span class="card-tag tag-blue">Contractor's work order</span>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card blue">
+            <div class="card-owner">Sales rep → Production</div>
+            <div class="card-title">Confirm trucks are built &amp; ready</div>
+            <div class="card-sub">Decals are the last step after truck is fully built. Production confirms build-complete before installer arrives.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 9 — Staging -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 9 — Staging</div>
+        <div class="phase-col">
+          <div class="card amber">
+            <div class="card-owner">Chavise or Dawn</div>
+            <div class="card-title">Pull batch for install day</div>
+            <div class="card-sub">Pull all decals on the install list from cage shelving. Match SO# and unit# per truck.</div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card purple">
+            <div class="card-owner">Chavise or Dawn</div>
+            <div class="card-title">Parts Tracker — Staged</div>
+            <div class="card-sub">Update stage inline on the Active Quarantine table. Badge turns amber. Logged in movement log.</div>
+            <span class="card-tag tag-purple">Tracker update #5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 10 — Contractor Install -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 10 — Contractor install</div>
+        <div class="phase-col">
+          <div class="card blue">
+            <div class="card-owner">Outside contractor</div>
+            <div class="card-title">Installer arrives on site</div>
+            <div class="card-sub">Works from printed install list. Installs decals across batch of 6–8 fully built trucks. Last step in the build process.</div>
+          </div>
+          <div class="branch-div"><div class="bl"></div><div class="bt">if decal missing</div><div class="bl"></div></div>
+          <div class="card red">
+            <div class="card-owner">Contractor → Sales rep</div>
+            <div class="card-title">Missing decal — escalate</div>
+            <div class="card-sub">Set stage to Missing in tracker — prompts for note, logs in movement log. Notify sales rep. Sales contacts customer.</div>
+            <span class="card-tag tag-red">Escalation path</span>
+          </div>
+          <div class="branch-div"><div class="bl"></div><div class="bt">if all present</div><div class="bl"></div></div>
+          <div class="card teal">
+            <div class="card-owner">Outside contractor</div>
+            <div class="card-title">Install decals on trucks</div>
+            <div class="card-sub">Verify SO# and unit# match on each truck before applying</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="conn-dash"></div><div class="conn-arrow"></div></div>
+
+    <!-- PHASE 11 — QC & Closeout -->
+    <div class="phase">
+      <div class="phase-inner">
+        <div class="phase-label-bar">Phase 11 — QC &amp; closeout</div>
+        <div class="phase-col">
+          <div class="card teal">
+            <div class="card-owner">QC inspector</div>
+            <div class="card-title">Verify decals installed</div>
+            <div class="card-sub">Check tracker for any open SO#s after install run. Every flagged truck must be verified before ship.</div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card purple">
+            <div class="card-owner">QC inspector</div>
+            <div class="card-title">Parts Tracker — Installed</div>
+            <div class="card-sub">Set stage to Installed — prompts for QC sign-off name and truck ID. Badge turns green. Logged in movement log.</div>
+            <span class="card-tag tag-purple">Tracker update #6</span>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="card green">
+            <div class="card-owner">Complete</div>
+            <div class="card-title">Truck ships</div>
+            <div class="card-sub">All tracker statuses closed. Process complete.</div>
+            <span class="card-tag tag-green">Done</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom questions panel -->
+<div class="bottom-panel">
+  <div class="bottom-toggle" id="toggleBtn" onclick="toggleQ()">
+    <span class="caret" id="caret">▲</span>
+    <span style="font-size:12px;font-weight:500;color:var(--text)">Open questions</span>
+    <span class="q-badge">8 items</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--faint)" id="toggleHint">click to collapse</span>
+  </div>
+  <div class="bottom-content" id="qContent">
+    <div class="q-item"><div class="q-num">01</div><div class="q-text">Confirm AX non-inv. description standard: <code style="font-family:var(--mono);font-size:10.5px">CUST-DECAL – [Customer Name]</code> on every order with customer supplied decals.</div></div>
+    <div class="q-item"><div class="q-num">02</div><div class="q-text">Confirm tracker damage field values are correct for Dawn in practice: No damage / Minor damage / Significant damage.</div></div>
+    <div class="q-item"><div class="q-num">03</div><div class="q-text">Does QC actively check the tracker after every install run, or does the contractor or sales rep notify QC when the batch is done?</div></div>
+    <div class="q-item"><div class="q-num">04</div><div class="q-text">How do multi-truck orders get tracked — one SO with multiple unit#s, or separate SOs per unit?</div></div>
+    <div class="q-item"><div class="q-num">05</div><div class="q-text">Do we notify the customer upon confirmed install, or only if there is a problem?</div></div>
+    <div class="q-item"><div class="q-num">06</div><div class="q-text">What is the formal cage location designation in BDP warehouse — needs to be named and posted per Gary's directive.</div></div>
+    <div class="q-item"><div class="q-num">07</div><div class="q-text">Tracker is hosted on GitHub Pages with Firebase backend — confirm the Firebase project and GitHub repo are under a Fouts Bros account, not a personal one, before going live.</div></div>
+    <div class="q-item"><div class="q-num">08</div><div class="q-text">Clear the 10 sample Ryder/Penske/Enterprise test records from the tracker before Dawn starts using it for real parts.</div></div>
+  </div>
+</div>
+
+<script>
+  function toggleQ() {
+    const c = document.getElementById('qContent');
+    const caret = document.getElementById('caret');
+    const hint = document.getElementById('toggleHint');
+    const open = !c.classList.contains('hidden');
+    if (open) {
+      c.classList.add('hidden');
+      caret.textContent = '▼';
+      hint.textContent = 'click to expand';
+    } else {
+      c.classList.remove('hidden');
+      caret.textContent = '▲';
+      hint.textContent = 'click to collapse';
+    }
+  }
+</script>
+</body>
+</html>
