@@ -355,12 +355,12 @@ function toggleQ() {
     ['n3a', 'n3b'],
     ['n3b', 'n4a'],
     ['n4a', 'n4b'],
-    ['n4b', 'n4no', { label: 'No' }],
+    ['n4b', 'n4no', { label: 'No', labelDx: -30, labelDy: -14 }],
     ['n4b', 'n4c',  { label: 'Yes' }],
-    ['n4no','n4b',  { style: 'back', label: 'After SO created' }],
+    ['n4no','n4b',  { style: 'back', label: 'After SO created', labelDy: -30 }],
     ['n4c', 'n5a'],
-    ['n5a', 'n5yes',{ label: 'Yes' }],
-    ['n5a', 'n5b',  { label: 'No' }],
+    ['n5a', 'n5yes',{ label: 'Yes', labelDx: -20 }],
+    ['n5a', 'n5b',  { label: 'No', labelDx: -20 }],
     ['n5b', 'n5c'],
     ['n5yes','n6a'],
     ['n6a', 'n6b'],
@@ -368,7 +368,7 @@ function toggleQ() {
     ['n6b', 'n6rw', { label: 'Rework' }],
     ['n6b', 'n6ex', { label: 'Unresolved' }],
     ['n5c', 'n7a'],
-    ['n6rep','n4a',  { style: 'back', label: 'Re-enter' }],
+    ['n6rep','n4a',  { style: 'back', label: 'Re-enter', labelDx: 60, labelDy: 14 }],
     ['n6rw', 'n7a'],
     ['n7a', 'n8a'],
     ['n8a', 'n8b'],
@@ -522,6 +522,8 @@ function toggleQ() {
         ly = (from.y + to.y) / 2 - 4;
         anchor = 'start';
       }
+      lx += (opts.labelDx || 0);
+      ly += (opts.labelDy || 0);
       const lt = el('text', { x: lx, y: ly, fill: 'rgba(255,255,255,0.55)', 'font-family': "'DM Mono', monospace", 'font-size': 10, 'font-weight': 500, 'text-anchor': anchor });
       lt.textContent = opts.label;
       svg.appendChild(lt);
