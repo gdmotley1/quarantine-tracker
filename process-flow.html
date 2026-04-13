@@ -215,12 +215,12 @@ svg { display: block; }
 <!-- Bottom questions panel -->
 <div class="bottom-panel">
   <div class="bottom-toggle" onclick="toggleQ()">
-    <span class="caret" id="caret">▲</span>
+    <span class="caret" id="caret">▼</span>
     <span style="font-size:12px;font-weight:500;color:var(--text)">Open questions</span>
     <span class="q-badge">6 items</span>
-    <span style="margin-left:auto;font-size:11px;color:var(--faint)" id="toggleHint">click to collapse</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--faint)" id="toggleHint">click to expand</span>
   </div>
-  <div class="bottom-content" id="qContent">
+  <div class="bottom-content hidden" id="qContent">
     <div class="q-item"><div class="q-num">01</div><div class="q-text">Confirm AX non-inv. part standard: <code style="font-family:var(--mono);font-size:10.5px">CUST-DECAL – [Customer Name]</code> on every order with customer supplied decals.</div></div>
     <div class="q-item"><div class="q-num">02</div><div class="q-text">Confirm tracker damage field values are correct for Dawn in practice: No damage / Minor damage / Significant damage.</div></div>
     <div class="q-item"><div class="q-num">03</div><div class="q-text">Does QC actively check the tracker after every install run, or does the installer or sales rep notify QC when the batch is done?</div></div>
