@@ -201,7 +201,7 @@ svg { display: block; }
     <div class="pill">Tracker: <span>gdmotley1.github.io/quarantine-tracker</span></div>
     <div class="pill">Cage: <span>Customer Decal Cage</span></div>
     <div class="pill">Directive: <span>Gary Pacilio — expedite</span></div>
-    <div class="pill">Rev: <span>D · Mar 2026</span></div>
+    <div class="pill">Rev: <span>E · Apr 2026</span></div>
   </div>
 </div>
 
@@ -223,7 +223,7 @@ svg { display: block; }
   <div class="bottom-content" id="qContent">
     <div class="q-item"><div class="q-num">01</div><div class="q-text">Confirm AX non-inv. part standard: <code style="font-family:var(--mono);font-size:10.5px">CUST-DECAL – [Customer Name]</code> on every order with customer supplied decals.</div></div>
     <div class="q-item"><div class="q-num">02</div><div class="q-text">Confirm tracker damage field values are correct for Dawn in practice: No damage / Minor damage / Significant damage.</div></div>
-    <div class="q-item"><div class="q-num">03</div><div class="q-text">Does QC actively check the tracker after every install run, or does the contractor or sales rep notify QC when the batch is done?</div></div>
+    <div class="q-item"><div class="q-num">03</div><div class="q-text">Does QC actively check the tracker after every install run, or does the installer or sales rep notify QC when the batch is done?</div></div>
     <div class="q-item"><div class="q-num">04</div><div class="q-text">How do multi-truck orders get tracked — one SO with multiple unit#s, or separate SOs per unit?</div></div>
     <div class="q-item"><div class="q-num">05</div><div class="q-text">Do we notify the customer upon confirmed install, or only if there is a problem?</div></div>
     <div class="q-item"><div class="q-num">06</div><div class="q-text">Clear the 10 sample Ryder/Penske/Enterprise test records from the tracker before Dawn starts using it for real parts.</div></div>
@@ -271,7 +271,6 @@ function toggleQ() {
     { id: 'sales',      label: 'Sales Rep',               color: '#f0c040' },
     { id: 'warehouse',  label: 'Dawn / Warehouse',        color: '#f0c040' },
     { id: 'purchasing', label: 'Lori (Purchasing)',        color: '#ee6e6e' },
-    { id: 'production', label: 'Production / Contractor',  color: '#60aff5' },
     { id: 'qc',         label: 'QC Inspector',             color: '#58d98a' },
   ];
 
@@ -287,7 +286,7 @@ function toggleQ() {
     { label: 'Phase 7 — Cage Storage',        startCol: 20, endCol: 20 },
     { label: 'Phase 8 — Install Scheduling',  startCol: 21, endCol: 23 },
     { label: 'Phase 9 — Staging',             startCol: 24, endCol: 25 },
-    { label: 'Phase 10 — Contractor Install', startCol: 26, endCol: 29 },
+    { label: 'Phase 10 — Decal Install',      startCol: 26, endCol: 29 },
     { label: 'Phase 11 — QC & Closeout',      startCol: 30, endCol: 32 },
   ];
 
@@ -331,19 +330,19 @@ function toggleQ() {
     { id: 'n7a', col: 20, lane: 'warehouse', label: 'Store in Customer\nDecal Cage by SO#',      type: 'rect',    color: 'neutral' },
 
     // Phase 8 (cols 21-23)
-    { id: 'n8a', col: 21, lane: 'sales',     label: 'Schedule contractor\n(6-8 truck batches)',   type: 'rect',    color: 'blue' },
+    { id: 'n8a', col: 21, lane: 'sales',     label: 'Schedule install\n(6-8 truck batches)',      type: 'rect',    color: 'blue' },
     { id: 'n8b', col: 22, lane: 'sales',     label: 'Generate install list\nunit#, SO#, shelf',  type: 'rect',    color: 'blue' },
-    { id: 'n8c', col: 23, lane: 'production',label: 'Confirm trucks\nbuilt & ready',             type: 'rect',    color: 'blue' },
+    { id: 'n8c', col: 23, lane: 'warehouse', label: 'Confirm trucks\nbuilt & ready',             type: 'rect',    color: 'blue' },
 
     // Phase 9 (cols 24-25)
     { id: 'n9a', col: 24, lane: 'warehouse', label: 'Pull batch from\ncage for install day',     type: 'rect',    color: 'amber' },
     { id: 'n9b', col: 25, lane: 'warehouse', label: 'Tracker update\nStage → Staged',           type: 'rect',    color: 'purple' },
 
     // Phase 10 (cols 26-29)
-    { id: 'n10a', col: 26, lane: 'production',label: 'Installer arrives\nworks from list',       type: 'rect',    color: 'blue' },
-    { id: 'n10d', col: 27, lane: 'production',label: 'Decal\nmissing?',                          type: 'diamond', color: 'red' },
+    { id: 'n10a', col: 26, lane: 'warehouse', label: 'Begin install\nper list',                   type: 'rect',    color: 'blue' },
+    { id: 'n10d', col: 27, lane: 'warehouse', label: 'Decal\nmissing?',                          type: 'diamond', color: 'red' },
     { id: 'n10miss',col:28,lane:'sales',      label: 'Escalate — contact\ncustomer for reship',  type: 'rect',    color: 'red' },
-    { id: 'n10b', col: 29, lane: 'production',label: 'Install decals\non trucks',                type: 'rect',    color: 'teal' },
+    { id: 'n10b', col: 29, lane: 'warehouse', label: 'Install decals\non trucks',                type: 'rect',    color: 'teal' },
 
     // Phase 11 (cols 30-32)
     { id: 'n11a', col: 30, lane: 'qc',       label: 'Verify decals\ninstalled per tracker',      type: 'rect',    color: 'teal' },
