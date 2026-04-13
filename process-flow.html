@@ -120,15 +120,15 @@ svg { display: block; }
   background: var(--bg);
 }
 .lane-spacer {
-  height: 52px; /* matches PAD_TOP */
+  height: 64px; /* matches PAD_TOP */
 }
 .lane-label {
-  height: 110px; /* matches LANE_H */
-  width: 170px;
+  height: 140px; /* matches LANE_H */
+  width: 190px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   opacity: 0.9;
   border-right: 1px solid rgba(255,255,255,0.08);
@@ -247,12 +247,12 @@ function toggleQ() {
 
   // ── Config ──
   const LABEL_W   = 0;
-  const COL_W     = 180;
-  const LANE_H    = 110;
-  const NODE_W    = 148;
-  const NODE_H    = 48;
-  const DIAM_SZ   = 54;
-  const PAD_TOP   = 52;
+  const COL_W     = 220;
+  const LANE_H    = 140;
+  const NODE_W    = 170;
+  const NODE_H    = 58;
+  const DIAM_SZ   = 68;
+  const PAD_TOP   = 64;
   const PAD_LEFT  = 10;
   const PAD_RIGHT = 40;
 
@@ -284,13 +284,12 @@ function toggleQ() {
     { label: 'Phase 5 — Damage Check',        startCol: 12, endCol: 15 },
     { label: 'Phase 6 — Damage Resolution',   startCol: 16, endCol: 19 },
     { label: 'Phase 7 — Cage Storage',        startCol: 20, endCol: 20 },
-    { label: 'Phase 8 — Install Scheduling',  startCol: 21, endCol: 23 },
-    { label: 'Phase 9 — Staging',             startCol: 24, endCol: 25 },
-    { label: 'Phase 10 — Decal Install',      startCol: 26, endCol: 29 },
-    { label: 'Phase 11 — QC & Closeout',      startCol: 30, endCol: 32 },
+    { label: 'Phase 8 — Install Prep',         startCol: 21, endCol: 23 },
+    { label: 'Phase 9 — Decal Install',       startCol: 24, endCol: 27 },
+    { label: 'Phase 10 — QC & Closeout',      startCol: 28, endCol: 30 },
   ];
 
-  const TOTAL_COLS = 33;
+  const TOTAL_COLS = 31;
 
   const nodes = [
     // Phase 1 (cols 0-2)
@@ -330,24 +329,20 @@ function toggleQ() {
     { id: 'n7a', col: 20, lane: 'warehouse', label: 'Store in Customer\nDecal Cage by SO#',      type: 'rect',    color: 'neutral' },
 
     // Phase 8 (cols 21-23)
-    { id: 'n8a', col: 21, lane: 'sales',     label: 'Schedule install\n(6-8 truck batches)',      type: 'rect',    color: 'blue' },
-    { id: 'n8b', col: 22, lane: 'sales',     label: 'Generate install list\nunit#, SO#, shelf',  type: 'rect',    color: 'blue' },
-    { id: 'n8c', col: 23, lane: 'warehouse', label: 'Confirm trucks\nbuilt & ready',             type: 'rect',    color: 'blue' },
+    { id: 'n8a', col: 21, lane: 'warehouse', label: 'Truck nears RAF\nin production',             type: 'rect',    color: 'blue' },
+    { id: 'n8b', col: 22, lane: 'warehouse', label: 'Pull decals from\ncage for unit#',           type: 'rect',    color: 'amber' },
+    { id: 'n8c', col: 23, lane: 'warehouse', label: 'Tracker update\nStage → Staged',            type: 'rect',    color: 'purple' },
 
-    // Phase 9 (cols 24-25)
-    { id: 'n9a', col: 24, lane: 'warehouse', label: 'Pull batch from\ncage for install day',     type: 'rect',    color: 'amber' },
-    { id: 'n9b', col: 25, lane: 'warehouse', label: 'Tracker update\nStage → Staged',           type: 'rect',    color: 'purple' },
+    // Phase 9 (cols 24-27)
+    { id: 'n9a', col: 24, lane: 'warehouse', label: 'Install decals\non truck',                   type: 'rect',    color: 'teal' },
+    { id: 'n9d', col: 25, lane: 'warehouse', label: 'Decal\nmissing?',                            type: 'diamond', color: 'red' },
+    { id: 'n9miss',col:26, lane:'sales',     label: 'Escalate — contact\ncustomer for reship',    type: 'rect',    color: 'red' },
+    { id: 'n9b', col: 27, lane: 'warehouse', label: 'Tracker update\nStage → Installed',          type: 'rect',    color: 'purple' },
 
-    // Phase 10 (cols 26-29)
-    { id: 'n10a', col: 26, lane: 'warehouse', label: 'Begin install\nper list',                   type: 'rect',    color: 'blue' },
-    { id: 'n10d', col: 27, lane: 'warehouse', label: 'Decal\nmissing?',                          type: 'diamond', color: 'red' },
-    { id: 'n10miss',col:28,lane:'sales',      label: 'Escalate — contact\ncustomer for reship',  type: 'rect',    color: 'red' },
-    { id: 'n10b', col: 29, lane: 'warehouse', label: 'Install decals\non trucks',                type: 'rect',    color: 'teal' },
-
-    // Phase 11 (cols 30-32)
-    { id: 'n11a', col: 30, lane: 'qc',       label: 'Verify decals\ninstalled per tracker',      type: 'rect',    color: 'teal' },
-    { id: 'n11b', col: 31, lane: 'qc',       label: 'Tracker update\nStage → Installed',        type: 'rect',    color: 'purple' },
-    { id: 'n11c', col: 32, lane: 'qc',       label: 'Truck ships',                               type: 'oval',    color: 'green' },
+    // Phase 10 (cols 28-30)
+    { id: 'n11a', col: 28, lane: 'qc',       label: 'Verify decals\ninstalled per tracker',      type: 'rect',    color: 'teal' },
+    { id: 'n11b', col: 29, lane: 'qc',       label: 'QC sign-off\nin tracker',                   type: 'rect',    color: 'purple' },
+    { id: 'n11c', col: 30, lane: 'qc',       label: 'Truck RAFs',                                type: 'oval',    color: 'green' },
   ];
 
   const arrows = [
@@ -379,12 +374,10 @@ function toggleQ() {
     ['n8a', 'n8b'],
     ['n8b', 'n8c'],
     ['n8c', 'n9a'],
-    ['n9a', 'n9b'],
-    ['n9b', 'n10a'],
-    ['n10a','n10d'],
-    ['n10d','n10miss',{ label: 'Yes' }],
-    ['n10d','n10b',   { label: 'No' }],
-    ['n10b','n11a'],
+    ['n9a', 'n9d'],
+    ['n9d', 'n9miss', { label: 'Yes' }],
+    ['n9d', 'n9b',    { label: 'No' }],
+    ['n9b', 'n11a'],
     ['n11a','n11b'],
     ['n11b','n11c'],
   ];
@@ -411,11 +404,11 @@ function toggleQ() {
 
   // ── Defs ──
   const defs = el('defs');
-  const mk1 = el('marker', { id: 'ah', markerWidth: 8, markerHeight: 6, refX: 7, refY: 3, orient: 'auto', markerUnits: 'strokeWidth' });
-  mk1.appendChild(el('path', { d: 'M0,0 L8,3 L0,6 Z', fill: 'rgba(255,255,255,0.5)' }));
+  const mk1 = el('marker', { id: 'ah', markerWidth: 10, markerHeight: 8, refX: 9, refY: 4, orient: 'auto', markerUnits: 'strokeWidth' });
+  mk1.appendChild(el('path', { d: 'M0,0 L10,4 L0,8 Z', fill: 'rgba(255,255,255,0.55)' }));
   defs.appendChild(mk1);
-  const mk2 = el('marker', { id: 'ahb', markerWidth: 8, markerHeight: 6, refX: 7, refY: 3, orient: 'auto', markerUnits: 'strokeWidth' });
-  mk2.appendChild(el('path', { d: 'M0,0 L8,3 L0,6 Z', fill: 'rgba(255,255,255,0.25)' }));
+  const mk2 = el('marker', { id: 'ahb', markerWidth: 10, markerHeight: 8, refX: 9, refY: 4, orient: 'auto', markerUnits: 'strokeWidth' });
+  mk2.appendChild(el('path', { d: 'M0,0 L10,4 L0,8 Z', fill: 'rgba(255,255,255,0.3)' }));
   defs.appendChild(mk2);
   svg.appendChild(defs);
 
@@ -450,7 +443,7 @@ function toggleQ() {
     // phase label
     const txt = el('text', {
       x: cx, y: 18, fill: '#6b7090',
-      'font-family': "'DM Mono', monospace", 'font-size': 9, 'text-anchor': 'middle', 'letter-spacing': '0.06em'
+      'font-family': "'DM Mono', monospace", 'font-size': 11, 'text-anchor': 'middle', 'letter-spacing': '0.06em'
     });
     txt.textContent = ph.label.toUpperCase();
     svg.appendChild(txt);
@@ -468,7 +461,7 @@ function toggleQ() {
     const fn = nodeMap[fromId], tn = nodeMap[toId];
     const from = nodeCenter(fn), to = nodeCenter(tn);
     const isBack = opts.style === 'back';
-    const sc = isBack ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)';
+    const sc = isBack ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.35)';
     const mk = isBack ? 'url(#ahb)' : 'url(#ah)';
     const da = isBack ? '5,4' : 'none';
 
@@ -484,18 +477,18 @@ function toggleQ() {
       const sx = from.x, sy = from.y + fhh;
       const botY = PAD_TOP + lanes.length * LANE_H + 10;
       const ex = to.x, ey = to.y + thh;
-      pathEl = el('path', { d: `M${sx},${sy} L${sx},${botY} L${ex},${botY} L${ex},${ey+8}`, fill:'none', stroke:sc, 'stroke-width':1.2, 'stroke-dasharray':da, 'marker-end':mk });
+      pathEl = el('path', { d: `M${sx},${sy} L${sx},${botY} L${ex},${botY} L${ex},${ey+8}`, fill:'none', stroke:sc, 'stroke-width':1.5, 'stroke-dasharray':da, 'marker-end':mk });
     } else if (isBack && fromId === 'n4no') {
       // loop back left and down to diamond
       const sx = from.x, sy = from.y - fhh;
       const topY = from.y - fhh - 15;
       const ex = to.x, ey = to.y - thh;
-      pathEl = el('path', { d: `M${sx},${sy} L${sx},${topY} L${ex},${topY} L${ex},${ey-8}`, fill:'none', stroke:sc, 'stroke-width':1.2, 'stroke-dasharray':da, 'marker-end':mk });
+      pathEl = el('path', { d: `M${sx},${sy} L${sx},${topY} L${ex},${topY} L${ex},${ey-8}`, fill:'none', stroke:sc, 'stroke-width':1.5, 'stroke-dasharray':da, 'marker-end':mk });
     } else if (Math.abs(dy) < 5) {
       // same lane — straight horizontal
       const sx = from.x + fhw;
       const ex = to.x - thw - 6;
-      pathEl = el('line', { x1:sx, y1:from.y, x2:ex, y2:to.y, stroke:sc, 'stroke-width':1.2, 'marker-end':mk, 'stroke-dasharray':da });
+      pathEl = el('line', { x1:sx, y1:from.y, x2:ex, y2:to.y, stroke:sc, 'stroke-width':1.5, 'marker-end':mk, 'stroke-dasharray':da });
     } else {
       // cross-lane: L-shaped routing
       if (Math.abs(dx) >= Math.abs(dy)) {
@@ -503,14 +496,14 @@ function toggleQ() {
         const sx = from.x + fhw, sy = from.y;
         const ex = to.x - thw - 6, ey = to.y;
         const midX = (sx + ex) / 2;
-        pathEl = el('path', { d: `M${sx},${sy} L${midX},${sy} L${midX},${ey} L${ex},${ey}`, fill:'none', stroke:sc, 'stroke-width':1.2, 'marker-end':mk, 'stroke-dasharray':da });
+        pathEl = el('path', { d: `M${sx},${sy} L${midX},${sy} L${midX},${ey} L${ex},${ey}`, fill:'none', stroke:sc, 'stroke-width':1.5, 'marker-end':mk, 'stroke-dasharray':da });
       } else {
         // exit bottom/top, bend to target column
         const goDown = dy > 0;
         const sx = from.x, sy = from.y + (goDown ? fhh : -fhh);
         const ex = to.x, ey = to.y + (goDown ? -thh - 6 : thh + 6);
         const midY = (sy + ey) / 2;
-        pathEl = el('path', { d: `M${sx},${sy} L${sx},${midY} L${ex},${midY} L${ex},${ey}`, fill:'none', stroke:sc, 'stroke-width':1.2, 'marker-end':mk, 'stroke-dasharray':da });
+        pathEl = el('path', { d: `M${sx},${sy} L${sx},${midY} L${ex},${midY} L${ex},${ey}`, fill:'none', stroke:sc, 'stroke-width':1.5, 'marker-end':mk, 'stroke-dasharray':da });
       }
     }
     svg.appendChild(pathEl);
@@ -520,16 +513,16 @@ function toggleQ() {
       let lx, ly, anchor = 'middle';
       if (Math.abs(dy) < 5) {
         lx = (from.x + to.x) / 2;
-        ly = from.y - 10;
+        ly = from.y - 14;
       } else if (Math.abs(dx) >= Math.abs(dy)) {
         lx = (from.x + to.x) / 2;
-        ly = Math.min(from.y, to.y) - 6;
+        ly = Math.min(from.y, to.y) - 10;
       } else {
-        lx = from.x + 12;
-        ly = (from.y + to.y) / 2 - 2;
+        lx = from.x + 14;
+        ly = (from.y + to.y) / 2 - 4;
         anchor = 'start';
       }
-      const lt = el('text', { x: lx, y: ly, fill: 'rgba(255,255,255,0.45)', 'font-family': "'DM Mono', monospace", 'font-size': 8, 'text-anchor': anchor });
+      const lt = el('text', { x: lx, y: ly, fill: 'rgba(255,255,255,0.55)', 'font-family': "'DM Mono', monospace", 'font-size': 10, 'font-weight': 500, 'text-anchor': anchor });
       lt.textContent = opts.label;
       svg.appendChild(lt);
     }
@@ -549,7 +542,7 @@ function toggleQ() {
       }));
       const lines = n.label.split('\n');
       lines.forEach((line, i) => {
-        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 11, line, 8.5));
+        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 14, line, 11));
       });
     } else if (n.type === 'oval') {
       g.appendChild(el('rect', {
@@ -558,16 +551,16 @@ function toggleQ() {
       }));
       const lines = n.label.split('\n');
       lines.forEach((line, i) => {
-        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 13, line, 10));
+        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 16, line, 12.5));
       });
     } else {
       g.appendChild(el('rect', {
         x: c.x - NODE_W/2, y: c.y - NODE_H/2, width: NODE_W, height: NODE_H,
-        rx: 6, fill: col.fill, stroke: col.stroke, 'stroke-width': 1.2
+        rx: 6, fill: col.fill, stroke: col.stroke, 'stroke-width': 1.5
       }));
       const lines = n.label.split('\n');
       lines.forEach((line, i) => {
-        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 13, line, 10));
+        g.appendChild(textEl(c.x, c.y + (i - (lines.length-1)/2) * 16, line, 12.5));
       });
     }
     svg.appendChild(g);
