@@ -195,6 +195,7 @@ nav button.active::after{left:10%;right:10%;background:linear-gradient(90deg,var
 .bar-fill.red{background:linear-gradient(90deg,rgba(239,68,68,.5),rgba(239,68,68,.75))}
 .bar-fill.blue{background:linear-gradient(90deg,rgba(59,130,246,.5),rgba(59,130,246,.75))}
 .bar-fill.amber{background:linear-gradient(90deg,rgba(245,158,11,.5),rgba(245,158,11,.75))}
+.bar-fill.purple{background:linear-gradient(90deg,rgba(168,85,247,.5),rgba(168,85,247,.75))}
 .mini-chart{display:flex;align-items:flex-end;gap:3px;height:60px;padding-top:.5rem}
 .mini-bar{flex:1;border-radius:3px 3px 0 0;background:rgba(255,255,255,.15);transition:height .6s var(--ease-out),background .2s;position:relative;min-width:8px;cursor:default}
 .mini-bar:hover{background:rgba(255,255,255,.3)}
@@ -283,6 +284,7 @@ td.td-wrap{white-space:normal;min-width:140px;max-width:240px}
 .badge-stage-staged{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
 .badge-stage-installed{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
 .badge-stage-missing{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);animation:pulse 2s ease infinite}
+.badge-stage-escalated{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(168,85,247,.25);animation:pulse 2s ease infinite}
 
 /* CONDITION BADGES */
 .badge-condition{padding:.2rem .55rem;border-radius:16px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:inline-flex;align-items:center;gap:.25rem}
@@ -880,11 +882,12 @@ function shelfBadge(s){return s?'<span class="badge badge-shelf">Zone '+s+'</spa
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 
 // ---- STAGE HELPERS ----
-const STAGES=['Checked In','Missing'];
+const STAGES=['Checked In','Escalated','Missing'];
 function stageBadgeClass(stage){
   switch(stage){
     case 'Staged':return 'badge-stage-staged';
     case 'Installed':return 'badge-stage-installed';
+    case 'Escalated':return 'badge-stage-escalated';
     case 'Missing':return 'badge-stage-missing';
     default:return 'badge-stage-checkedin';
   }
@@ -893,7 +896,7 @@ function stageBadgeHtml(stage,partId){
   const cls=stageBadgeClass(stage||'Checked In');
   return '<div class="stage-dd-wrap"><span class="badge badge-stage '+cls+'" onclick="event.stopPropagation();toggleStageDropdown(\''+partId+'\')">'+(stage||'Checked In')+' &#9662;</span><div class="stage-dd-menu" id="stage-dd-'+partId+'">'+
     STAGES.map(s=>{
-      const dotColor=s==='Checked In'?'var(--blue)':s==='Staged'?'var(--amber)':s==='Installed'?'var(--green)':'var(--red)';
+      const dotColor=s==='Checked In'?'var(--blue)':s==='Escalated'?'var(--purple)':'var(--red)';
       return '<button type="button" onclick="event.stopPropagation();changeStage(\''+partId+'\',\''+s+'\')"><span class="sd-dot" style="background:'+dotColor+'"></span>'+s+'</button>';
     }).join('')+'</div></div>';
 }
@@ -1055,7 +1058,7 @@ function animateValue(id,nv){
 function renderDashboard(){
   const parts=loadData(KEYS.parts),log=loadData(KEYS.log),todayStr=new Date().toLocaleDateString('en-US');
   let total=0,crit=0,today=0,outToday=0,awaitInstall=0,missingCount=0;
-  const stageCounts={'Checked In':0,'Staged':0,'Installed':0,'Missing':0};
+  const stageCounts={'Checked In':0,'Escalated':0,'Missing':0};
   parts.forEach(p=>{
     total++;
     const d=daysBetween(p.checkinDate);
@@ -1063,7 +1066,7 @@ function renderDashboard(){
     if(new Date(p.checkinDate).toLocaleDateString('en-US')===todayStr)today++;
     const stage=p.stage||'Checked In';
     stageCounts[stage]=(stageCounts[stage]||0)+1;
-    if(stage==='Checked In'||stage==='Staged')awaitInstall++;
+    if(stage==='Checked In')awaitInstall++;
     if(stage==='Missing')missingCount++;
   });
   log.forEach(l=>{if(l.action==='CHECK OUT'&&l.date&&new Date(l.date).toLocaleDateString('en-US')===todayStr)outToday++;});
@@ -1073,17 +1076,15 @@ function renderDashboard(){
 
   // Stage breakdown
   const stageEl=document.getElementById('stage-breakdown');
-  const mx2=Math.max(stageCounts['Checked In'],stageCounts['Staged'],stageCounts['Installed'],stageCounts['Missing'],1);
+  const mx2=Math.max(stageCounts['Checked In'],stageCounts['Escalated'],stageCounts['Missing'],1);
   stageEl.innerHTML='<div class="stage-breakdown" style="margin-bottom:1rem">'+
     '<span class="stage-pill badge-stage-checkedin"><span class="sp-dot" style="background:var(--blue)"></span>Checked In: '+stageCounts['Checked In']+'</span>'+
-    '<span class="stage-pill badge-stage-staged"><span class="sp-dot" style="background:var(--amber)"></span>Staged: '+stageCounts['Staged']+'</span>'+
-    '<span class="stage-pill badge-stage-installed"><span class="sp-dot" style="background:var(--green)"></span>Installed: '+stageCounts['Installed']+'</span>'+
+    '<span class="stage-pill badge-stage-escalated"><span class="sp-dot" style="background:var(--purple)"></span>Escalated: '+stageCounts['Escalated']+'</span>'+
     '<span class="stage-pill badge-stage-missing"><span class="sp-dot" style="background:var(--red)"></span>Missing: '+stageCounts['Missing']+'</span>'+
   '</div>'+
   '<div class="bar-chart">'+
     '<div class="bar-row"><span class="bar-label">Checked In</span><div class="bar-track"><div class="bar-fill blue" style="width:'+((stageCounts['Checked In']/mx2)*100)+'%">'+stageCounts['Checked In']+'</div></div></div>'+
-    '<div class="bar-row"><span class="bar-label">Staged</span><div class="bar-track"><div class="bar-fill amber" style="width:'+((stageCounts['Staged']/mx2)*100)+'%">'+stageCounts['Staged']+'</div></div></div>'+
-    '<div class="bar-row"><span class="bar-label">Installed</span><div class="bar-track"><div class="bar-fill green" style="width:'+((stageCounts['Installed']/mx2)*100)+'%">'+stageCounts['Installed']+'</div></div></div>'+
+    '<div class="bar-row"><span class="bar-label">Escalated</span><div class="bar-track"><div class="bar-fill purple" style="width:'+((stageCounts['Escalated']/mx2)*100)+'%">'+stageCounts['Escalated']+'</div></div></div>'+
     '<div class="bar-row"><span class="bar-label">Missing</span><div class="bar-track"><div class="bar-fill red" style="width:'+((stageCounts['Missing']/mx2)*100)+'%">'+stageCounts['Missing']+'</div></div></div>'+
   '</div>';
 
@@ -1250,6 +1251,17 @@ async function changeStage(partId,newStage){
     saveData(KEYS.parts,parts);
     appendLog({partNumber:part.partNumber,unitNumber:part.unitNumber||'',description:part.description,action:'STAGE: Missing',date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:note});
     showToast(part.partNumber+' marked as Missing','warning');
+  } else if(newStage==='Escalated'){
+    const fieldsHtml='<div class="form-grid" style="gap:.75rem"><div class="form-group"><label for="sm-owner">Escalated To *</label><input type="text" id="sm-owner" placeholder="e.g. Lori / supplier contact" style="width:100%"></div><div class="form-group"><label for="sm-note">Reason *</label><textarea id="sm-note" placeholder="What is being escalated and why..." style="width:100%;min-height:60px"></textarea></div></div>';
+    const ok=await showStageModal('Mark as Escalated','Part '+part.partNumber+' will be marked as Escalated.',fieldsHtml);
+    if(!ok)return;
+    const owner=document.getElementById('sm-owner').value.trim();
+    const note=document.getElementById('sm-note').value.trim();
+    if(!owner||!note){showToast('Escalation owner and reason are required','warning');return;}
+    part.stage=newStage;part.escalatedTo=owner;
+    saveData(KEYS.parts,parts);
+    appendLog({partNumber:part.partNumber,unitNumber:part.unitNumber||'',description:part.description,action:'STAGE: Escalated',date:new Date().toISOString(),user:owner,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:'Escalated to '+owner+': '+note});
+    showToast(part.partNumber+' marked as Escalated','warning');
   } else {
     part.stage=newStage;
     saveData(KEYS.parts,parts);
