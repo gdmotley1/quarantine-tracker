@@ -122,8 +122,8 @@ nav button.active::after{left:10%;right:10%;background:linear-gradient(90deg,var
 .stat-icon.missing{background:var(--red-bg);color:var(--red)}
 
 /* SHELF HEATMAP */
-.shelf-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem}
-@media(max-width:640px){.shelf-grid{grid-template-columns:repeat(4,1fr)}}
+.shelf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+@media(max-width:640px){.shelf-grid{grid-template-columns:repeat(2,1fr)}}
 .shelf-cell{border-radius:var(--radius);border:1px solid var(--border);padding:.65rem .5rem;text-align:center;transition:all .35s var(--ease);cursor:default;position:relative;overflow:hidden}
 .shelf-cell::before{content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .35s}
 .shelf-cell:hover{transform:translateY(-2px);border-color:var(--border-light);box-shadow:0 6px 20px rgba(0,0,0,.25)}
@@ -581,7 +581,7 @@ body.readonly-mode .readonly-banner{display:flex}
     </div>
 
     <div class="card">
-      <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Shelf Heatmap</h2>
+      <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Zone Heatmap</h2>
       <div id="shelf-heatmap" class="shelf-grid"></div>
     </div>
 
@@ -601,7 +601,7 @@ body.readonly-mode .readonly-banner{display:flex}
         <div class="status-key"><span class="badge badge-green"><span class="badge-dot"></span>OK</span> 0–6 days <span class="badge badge-yellow"><span class="badge-dot"></span>Warning</span> 7–13 days <span class="badge badge-red"><span class="badge-dot"></span>Critical</span> 14+ days</div>
         <button class="btn btn-outline btn-sm" onclick="exportActiveCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
       </div>
-      <div class="table-wrap"><table id="active-table"><thead><tr><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="unitNumber">Unit #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="checkinDate">Check-In</th><th class="sortable desc" data-sort="days">Days</th><th class="sortable" data-sort="shelf">Shelf</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="checkedInBy">By</th><th>Status</th><th class="sortable" data-sort="stage">Stage</th><th>Condition</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="active-table"><thead><tr><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="unitNumber">Unit #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="checkinDate">Check-In</th><th class="sortable desc" data-sort="days">Days</th><th class="sortable" data-sort="shelf">Zone</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="checkedInBy">By</th><th>Status</th><th class="sortable" data-sort="stage">Stage</th><th>Condition</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
       <div class="empty-state" id="active-empty" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><p>No parts in quarantine</p></div>
     </div>
   </div>
@@ -614,7 +614,7 @@ body.readonly-mode .readonly-banner{display:flex}
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="search-log" placeholder="Search log..."></div>
         <button class="btn btn-outline btn-sm" onclick="exportLogCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
       </div>
-      <div class="table-wrap"><table id="log-table"><thead><tr><th class="sortable" data-sort="logId">Log ID</th><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="unitNumber">Unit #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="action">Action</th><th class="sortable desc" data-sort="date">Date</th><th>Time</th><th class="sortable" data-sort="user">User</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="shelf">Shelf</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="duration">Duration</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="log-table"><thead><tr><th class="sortable" data-sort="logId">Log ID</th><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="unitNumber">Unit #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="action">Action</th><th class="sortable desc" data-sort="date">Date</th><th>Time</th><th class="sortable" data-sort="user">User</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="shelf">Zone</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="duration">Duration</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
       <div class="empty-state" id="log-empty" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No movement records yet</p></div>
     </div>
   </div>
@@ -651,10 +651,10 @@ body.readonly-mode .readonly-banner{display:flex}
             <input type="text" id="ci-by" required placeholder="Your name">
           </div>
           <div class="form-group">
-            <label>Shelf Location *</label>
+            <label>Zone Location *</label>
             <input type="hidden" id="ci-shelf" required>
             <div class="custom-select" id="shelf-select">
-              <div class="custom-select-trigger" tabindex="0"><span class="placeholder">-- Select shelf --</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+              <div class="custom-select-trigger" tabindex="0"><span class="placeholder">-- Select zone --</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
               <div class="custom-select-options" id="shelf-options"></div>
             </div>
           </div>
@@ -730,7 +730,7 @@ body.readonly-mode .readonly-banner{display:flex}
 <!-- Shelf Detail Modal -->
 <div class="modal-overlay" id="shelf-modal-overlay">
   <div class="modal" style="max-width:480px">
-    <h3 id="shelf-modal-title">Shelf</h3>
+    <h3 id="shelf-modal-title">Zone</h3>
     <ul class="shelf-detail-list" id="shelf-modal-list"></ul>
     <div class="modal-actions"><button class="btn btn-secondary" onclick="closeShelfModal()">Close</button></div>
   </div>
@@ -876,7 +876,7 @@ function statusLabel(d){
   if(d>=7)return'<span class="badge badge-yellow"><span class="badge-dot"></span>Warning</span>';
   return'<span class="badge badge-green"><span class="badge-dot"></span>OK</span>';
 }
-function shelfBadge(s){return s?'<span class="badge badge-shelf">Shelf '+s+'</span>':'-';}
+function shelfBadge(s){return s?'<span class="badge badge-shelf">Zone '+s+'</span>':'-';}
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 
 // ---- STAGE HELPERS ----
@@ -1007,14 +1007,14 @@ updateClock();setInterval(updateClock,1000);
   const trigger=container.querySelector('.custom-select-trigger');
   const optionsEl=document.getElementById('shelf-options');
   const hidden=document.getElementById('ci-shelf');
-  for(let i=1;i<=20;i++){
+  for(let i=1;i<=4;i++){
     const opt=document.createElement('div');
     opt.className='custom-select-option';
     opt.dataset.value=i;
-    opt.innerHTML='<span class="opt-badge">'+i+'</span> Shelf '+i;
+    opt.innerHTML='<span class="opt-badge">'+i+'</span> Zone '+i;
     opt.addEventListener('click',()=>{
       hidden.value=i;
-      trigger.innerHTML='<span><span class="opt-badge" style="margin-right:.4rem">'+i+'</span>Shelf '+i+'</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+      trigger.innerHTML='<span><span class="opt-badge" style="margin-right:.4rem">'+i+'</span>Zone '+i+'</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
       optionsEl.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected'));
       opt.classList.add('selected');
       closeShelfDropdown();
@@ -1029,7 +1029,7 @@ updateClock();setInterval(updateClock,1000);
   container.addEventListener('click',e=>e.stopPropagation());
   document.getElementById('checkin-form').addEventListener('reset',()=>{
     hidden.value='';
-    trigger.innerHTML='<span class="placeholder">-- Select shelf --</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+    trigger.innerHTML='<span class="placeholder">-- Select zone --</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
     optionsEl.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected'));
   });
 })();
@@ -1110,20 +1110,20 @@ function renderDashboard(){
   // Shelf heatmap
   const shelfCounts={};parts.forEach(p=>{if(p.shelf){shelfCounts[p.shelf]=(shelfCounts[p.shelf]||0)+1;}});
   const heatEl=document.getElementById('shelf-heatmap');
-  const needsRebuild=heatEl.children.length!==20;
+  const needsRebuild=heatEl.children.length!==4;
   if(needsRebuild){
     let heatHtml='';
-    for(let i=1;i<=20;i++){
+    for(let i=1;i<=4;i++){
       const c=shelfCounts[i]||0;
       const cls=c===0?'shelf-empty':'shelf-occupied';
-      heatHtml+='<div class="shelf-cell '+cls+'" data-shelf="'+i+'"><div class="shelf-num">Shelf '+i+'</div><div class="shelf-count" id="shelf-count-'+i+'">'+(c||'--')+'</div></div>';
+      heatHtml+='<div class="shelf-cell '+cls+'" data-shelf="'+i+'"><div class="shelf-num">Zone '+i+'</div><div class="shelf-count" id="shelf-count-'+i+'">'+(c||'--')+'</div></div>';
     }
     heatEl.innerHTML=heatHtml;
     heatEl.querySelectorAll('.shelf-cell.shelf-occupied').forEach(cell=>{
       cell.addEventListener('click',()=>openShelfModal(parseInt(cell.dataset.shelf)));
     });
   }else{
-    for(let i=1;i<=20;i++){
+    for(let i=1;i<=4;i++){
       const c=shelfCounts[i]||0;
       const cell=heatEl.children[i-1];
       const cls=c===0?'shelf-empty':'shelf-occupied';
@@ -1194,7 +1194,7 @@ function renderActiveTable(filter=''){
     if(f==='critical')return daysBetween(p.checkinDate)>=14;
     if(f==='warning')return daysBetween(p.checkinDate)>=7&&daysBetween(p.checkinDate)<14;
     if(f==='missing')return (p.stage||'Checked In')==='Missing';
-    return p.partNumber.toLowerCase().includes(f)||p.description.toLowerCase().includes(f)||p.sentFrom.toLowerCase().includes(f)||p.checkedInBy.toLowerCase().includes(f)||(p.shelf&&('shelf '+p.shelf).includes(f))||(p.unitNumber||'').toLowerCase().includes(f)||(p.stage||'checked in').toLowerCase().includes(f)||(p.condition||'').toLowerCase().includes(f);
+    return p.partNumber.toLowerCase().includes(f)||p.description.toLowerCase().includes(f)||p.sentFrom.toLowerCase().includes(f)||p.checkedInBy.toLowerCase().includes(f)||(p.shelf&&('zone '+p.shelf).includes(f))||(p.unitNumber||'').toLowerCase().includes(f)||(p.stage||'checked in').toLowerCase().includes(f)||(p.condition||'').toLowerCase().includes(f);
   }),activeSort.col,activeSort.dir,'active');
   if(!filtered.length){tbody.innerHTML='';document.getElementById('active-table').style.display='none';empty.style.display='';}
   else{document.getElementById('active-table').style.display='';empty.style.display='none';
@@ -1279,7 +1279,7 @@ function renderLogTable(filter=''){
 function populateCheckoutDropdown(){
   const parts=loadData(KEYS.parts),sel=document.getElementById('co-part');
   sel.innerHTML='<option value="">-- Select a part --</option>';
-  parts.sort((a,b)=>a.partNumber.localeCompare(b.partNumber)).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.unitNumber?' ('+p.unitNumber+')':'')+' \u2014 '+p.description+' (Shelf '+(p.shelf||'?')+', '+d+' days)';sel.appendChild(o);});
+  parts.sort((a,b)=>a.partNumber.localeCompare(b.partNumber)).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.unitNumber?' ('+p.unitNumber+')':'')+' \u2014 '+p.description+' (Zone '+(p.shelf||'?')+', '+d+' days)';sel.appendChild(o);});
 }
 
 // ---- NOTES THREAD (checkout page) ----
@@ -1348,7 +1348,7 @@ function closeNotesModal(){const o=document.getElementById('notes-modal-overlay'
 // ---- SHELF DETAIL MODAL ----
 function openShelfModal(shelfNum){
   const parts=loadData(KEYS.parts).filter(p=>parseInt(p.shelf)===shelfNum).sort((a,b)=>daysBetween(b.checkinDate)-daysBetween(a.checkinDate));
-  document.getElementById('shelf-modal-title').textContent='Shelf '+shelfNum+' \u2014 '+parts.length+' Part'+(parts.length!==1?'s':'');
+  document.getElementById('shelf-modal-title').textContent='Zone '+shelfNum+' \u2014 '+parts.length+' Part'+(parts.length!==1?'s':'');
   document.getElementById('shelf-modal-list').innerHTML=parts.map(p=>{
     const d=daysBetween(p.checkinDate);const clr=d>=14?'var(--red)':'var(--text-dim)';
     return'<li><div><span class="shelf-detail-part">'+esc(p.partNumber)+(p.unitNumber?' ('+esc(p.unitNumber)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description)+' \u2014 '+esc(p.sentFrom)+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
@@ -1395,7 +1395,7 @@ document.getElementById('checkout-form').addEventListener('submit',async functio
   const parts=loadData(KEYS.parts),idx=parts.findIndex(p=>p.id===partId);
   if(idx===-1){showToast('Part not found','error');return;}
   const part=parts[idx],days=daysBetween(part.checkinDate);
-  const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'" ('+days+' day(s), Shelf '+(part.shelf||'?')+') to SO '+salesOrder+'?');
+  const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'" ('+days+' day(s), Zone '+(part.shelf||'?')+') to SO '+salesOrder+'?');
   if(!ok)return;
   parts.splice(idx,1);saveData(KEYS.parts,parts);
   appendLog({partNumber:part.partNumber,unitNumber:part.unitNumber||'',description:part.description,action:'CHECK OUT',date:new Date().toISOString(),user:checkedOutBy,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder,duration:days,notes});
@@ -1415,14 +1415,14 @@ setupSortHeaders('log-table',logSort,()=>renderLogTable());
 function dlCSV(fn,rows){const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');const b=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();URL.revokeObjectURL(a.href);}
 function exportActiveCSV(){
   const parts=loadData(KEYS.parts);if(!parts.length){showToast('No data','warning');return;}
-  const rows=[['Part Number','Unit Number','Description','Check-In Date','Time','Days','Shelf','Sent From','Checked In By','Status','Stage','Condition','Damage Notes','Sales Order','Notes']];
-  parts.forEach(p=>{const d=daysBetween(p.checkinDate);rows.push([p.partNumber,p.unitNumber||'',p.description,fmtDate(p.checkinDate),fmtTime(p.checkinDate),d,'Shelf '+(p.shelf||'?'),p.sentFrom,p.checkedInBy,d>=14?'Critical':d>=7?'Warning':'OK',p.stage||'Checked In',p.condition||'No damage',p.damageNotes||'',p.salesOrder||'',p.notes]);});
+  const rows=[['Part Number','Unit Number','Description','Check-In Date','Time','Days','Zone','Sent From','Checked In By','Status','Stage','Condition','Damage Notes','Sales Order','Notes']];
+  parts.forEach(p=>{const d=daysBetween(p.checkinDate);rows.push([p.partNumber,p.unitNumber||'',p.description,fmtDate(p.checkinDate),fmtTime(p.checkinDate),d,'Zone '+(p.shelf||'?'),p.sentFrom,p.checkedInBy,d>=14?'Critical':d>=7?'Warning':'OK',p.stage||'Checked In',p.condition||'No damage',p.damageNotes||'',p.salesOrder||'',p.notes]);});
   dlCSV('foutsbros-quarantine-active-'+new Date().toISOString().slice(0,10)+'.csv',rows);showToast('CSV exported','success');
 }
 function exportLogCSV(){
   const log=loadData(KEYS.log);if(!log.length){showToast('No data','warning');return;}
-  const rows=[['Log ID','Part Number','Unit Number','Description','Action','Date','Time','User','Sent From','Shelf','Sales Order','Duration (days)','Notes','Hash']];
-  log.forEach(l=>{rows.push([l.logId,l.partNumber,l.unitNumber||'',l.description,l.action,fmtDate(l.date),fmtTime(l.date),l.user,l.sentFrom||'','Shelf '+(l.shelf||'?'),l.salesOrder||'',l.duration!=null?l.duration:'',l.notes||'',l.hash||'']);});
+  const rows=[['Log ID','Part Number','Unit Number','Description','Action','Date','Time','User','Sent From','Zone','Sales Order','Duration (days)','Notes','Hash']];
+  log.forEach(l=>{rows.push([l.logId,l.partNumber,l.unitNumber||'',l.description,l.action,fmtDate(l.date),fmtTime(l.date),l.user,l.sentFrom||'','Zone '+(l.shelf||'?'),l.salesOrder||'',l.duration!=null?l.duration:'',l.notes||'',l.hash||'']);});
   dlCSV('foutsbros-quarantine-log-'+new Date().toISOString().slice(0,10)+'.csv',rows);showToast('CSV exported','success');
 }
 
