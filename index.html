@@ -635,8 +635,8 @@ body.readonly-mode .readonly-banner{display:flex}
             <input type="text" id="ci-unitnum" required placeholder="e.g. Unit-001">
           </div>
           <div class="form-group">
-            <label for="ci-so">Sales Order # (optional)</label>
-            <input type="text" id="ci-so" placeholder="e.g. SO-98765">
+            <label for="ci-so">Sales Order # *</label>
+            <input type="text" id="ci-so" required placeholder="e.g. SO-98765">
           </div>
           <div class="form-group">
             <label for="ci-desc">Description *</label>
@@ -880,7 +880,7 @@ function shelfBadge(s){return s?'<span class="badge badge-shelf">Zone '+s+'</spa
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 
 // ---- STAGE HELPERS ----
-const STAGES=['Checked In','Staged','Installed','Missing'];
+const STAGES=['Checked In','Missing'];
 function stageBadgeClass(stage){
   switch(stage){
     case 'Staged':return 'badge-stage-staged';
