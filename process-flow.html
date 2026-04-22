@@ -201,7 +201,7 @@ svg { display: block; }
     <div class="pill">Tracker: <span>gdmotley1.github.io/quarantine-tracker</span></div>
     <div class="pill">Cage: <span>Customer Decal Cage</span></div>
     <div class="pill">Directive: <span>Gary Pacilio — expedite</span></div>
-    <div class="pill">Rev: <span>E · Apr 2026</span></div>
+    <div class="pill">Rev: <span>F · Apr 2026</span></div>
   </div>
 </div>
 
@@ -277,87 +277,78 @@ function toggleQ() {
   // Each step gets its own column. Phases span ranges of columns.
   // col = unique sequential column index for each step
   const phases = [
-    { label: 'Phase 1 — Sales & Order Entry', startCol: 0,  endCol: 2  },
-    { label: 'Phase 2 — Unit # Requirement',  startCol: 3,  endCol: 5  },
-    { label: 'Phase 3 — Inbound & Alert',     startCol: 6,  endCol: 7  },
-    { label: 'Phase 4 — Receiving',           startCol: 8,  endCol: 11 },
-    { label: 'Phase 5 — Damage Check',        startCol: 12, endCol: 15 },
-    { label: 'Phase 6 — Damage Resolution',   startCol: 16, endCol: 19 },
-    { label: 'Phase 7 — Cage Storage',        startCol: 20, endCol: 20 },
-    { label: 'Phase 8 — Install Prep',         startCol: 21, endCol: 23 },
-    { label: 'Phase 9 — Decal Install',       startCol: 24, endCol: 27 },
-    { label: 'Phase 10 — QC & Closeout',      startCol: 28, endCol: 30 },
+    { label: 'Phase 1 — Sales & Order Entry', startCol: 0,  endCol: 1  },
+    { label: 'Phase 2 — Unit # Requirement',  startCol: 2,  endCol: 3  },
+    { label: 'Phase 3 — Inbound & Alert',     startCol: 4,  endCol: 5  },
+    { label: 'Phase 4 — Receiving',           startCol: 6,  endCol: 7  },
+    { label: 'Phase 5 — Damage Check',        startCol: 8,  endCol: 11 },
+    { label: 'Phase 6 — Damage Resolution',   startCol: 12, endCol: 15 },
+    { label: 'Phase 7 — Cage Storage',        startCol: 16, endCol: 16 },
+    { label: 'Phase 8 — Install Prep',         startCol: 17, endCol: 19 },
+    { label: 'Phase 9 — Decal Install',       startCol: 20, endCol: 23 },
+    { label: 'Phase 10 — QC & Closeout',      startCol: 24, endCol: 26 },
   ];
 
-  const TOTAL_COLS = 31;
+  const TOTAL_COLS = 27;
 
   const nodes = [
-    // Phase 1 (cols 0-2)
+    // Phase 1 (cols 0-1)
     { id: 'n1a', col: 0,  lane: 'customer',  label: 'Notify sales of\ndecal requirements',       type: 'oval',    color: 'teal' },
     { id: 'n1b', col: 1,  lane: 'sales',     label: 'Enter SO in AX\n(CUST-DECAL part)',         type: 'rect',    color: 'teal' },
-    { id: 'n1c', col: 2,  lane: 'sales',     label: 'Log in Parts\nTracker',                     type: 'rect',    color: 'purple' },
 
-    // Phase 2 (cols 3-5)
-    { id: 'n2a', col: 3,  lane: 'sales',     label: 'Request unit#\nfrom customer',              type: 'rect',    color: 'amber' },
-    { id: 'n2b', col: 4,  lane: 'customer',  label: 'Provide unit#\nper truck',                  type: 'rect',    color: 'teal' },
-    { id: 'n2c', col: 5,  lane: 'sales',     label: 'Enter unit# in\nParts Tracker',             type: 'rect',    color: 'purple' },
+    // Phase 2 (cols 2-3)
+    { id: 'n2a', col: 2,  lane: 'sales',     label: 'Request unit#\nfrom customer',              type: 'rect',    color: 'amber' },
+    { id: 'n2b', col: 3,  lane: 'customer',  label: 'Provide unit#\nper truck',                  type: 'rect',    color: 'teal' },
 
-    // Phase 3 (cols 6-7)
-    { id: 'n3a', col: 6,  lane: 'customer',  label: 'Ship decals\nATTN: Decal Cage / SO#',      type: 'rect',    color: 'teal' },
-    { id: 'n3b', col: 7,  lane: 'sales',     label: 'Alert warehouse\n+ enter tracking#',          type: 'rect',    color: 'amber' },
+    // Phase 3 (cols 4-5)
+    { id: 'n3a', col: 4,  lane: 'customer',  label: 'Ship decals\nATTN: Decal Cage / SO#',      type: 'rect',    color: 'teal' },
+    { id: 'n3b', col: 5,  lane: 'sales',     label: 'Alert warehouse\n+ enter tracking#',          type: 'rect',    color: 'amber' },
 
-    // Phase 4 (cols 8-11)
-    { id: 'n4a', col: 8,  lane: 'warehouse', label: 'Package arrives\nrouted to Dawn',           type: 'rect',    color: 'neutral' },
-    { id: 'n4b', col: 9,  lane: 'warehouse', label: 'SO# in\ntracker?',                         type: 'diamond', color: 'amber' },
-    { id: 'n4no',col: 10, lane: 'sales',     label: 'Hold — sales\ncreates SO first',            type: 'rect',    color: 'red' },
-    { id: 'n4c', col: 11, lane: 'warehouse', label: 'Route to cage\n& visual inspect',           type: 'rect',    color: 'amber' },
+    // Phase 4 (cols 6-7)
+    { id: 'n4a', col: 6,  lane: 'warehouse', label: 'Package arrives\nrouted to Dawn',           type: 'rect',    color: 'neutral' },
+    { id: 'n4c', col: 7,  lane: 'warehouse', label: 'Route to cage\n& visual inspect',           type: 'rect',    color: 'amber' },
 
-    // Phase 5 (cols 12-15)
-    { id: 'n5a', col: 12, lane: 'warehouse', label: 'Damage\nfound?',                           type: 'diamond', color: 'red' },
-    { id: 'n5yes',col:13, lane: 'purchasing',label: 'Escalate to Lori\ncontact supplier',        type: 'rect',    color: 'red' },
-    { id: 'n5b', col: 14, lane: 'warehouse', label: 'Write SO#/unit#\non each decal',            type: 'rect',    color: 'amber' },
-    { id: 'n5c', col: 15, lane: 'warehouse', label: 'Tracker update\nStage → Checked In',       type: 'rect',    color: 'purple' },
+    // Phase 5 (cols 8-11)
+    { id: 'n5a', col: 8,  lane: 'warehouse', label: 'Damage\nfound?',                           type: 'diamond', color: 'red' },
+    { id: 'n5yes',col: 9, lane: 'purchasing',label: 'Escalate to Lori\ncontact supplier',        type: 'rect',    color: 'red' },
+    { id: 'n5b', col: 10, lane: 'warehouse', label: 'Write SO#/unit#\non each decal',            type: 'rect',    color: 'amber' },
+    { id: 'n5c', col: 11, lane: 'warehouse', label: 'First tracker entry\nStage → Checked In',   type: 'rect',    color: 'purple' },
 
-    // Phase 6 (cols 16-19)
-    { id: 'n6a', col: 16, lane: 'purchasing',label: 'Work w/ supplier\non resolution',           type: 'rect',    color: 'amber' },
-    { id: 'n6b', col: 17, lane: 'purchasing',label: 'Replace or\nrework?',                      type: 'diamond', color: 'amber' },
-    { id: 'n6rep',col:18, lane: 'warehouse', label: 'Replacement\nre-enters Phase 4',            type: 'rect',    color: 'teal' },
-    { id: 'n6rw', col:18, lane: 'purchasing',label: 'Rework on site\nre-inspect',                type: 'rect',    color: 'teal' },
-    { id: 'n6ex', col:19, lane: 'sales',     label: 'Unresolved — sales\ndecides case by case',  type: 'rect',    color: 'red' },
+    // Phase 6 (cols 12-15)
+    { id: 'n6a', col: 12, lane: 'purchasing',label: 'Work w/ supplier\non resolution',           type: 'rect',    color: 'amber' },
+    { id: 'n6b', col: 13, lane: 'purchasing',label: 'Replace or\nrework?',                      type: 'diamond', color: 'amber' },
+    { id: 'n6rep',col: 14, lane: 'warehouse', label: 'Replacement\nre-enters Phase 4',            type: 'rect',    color: 'teal' },
+    { id: 'n6rw', col: 14, lane: 'purchasing',label: 'Rework on site\nre-inspect',                type: 'rect',    color: 'teal' },
+    { id: 'n6ex', col: 15, lane: 'sales',     label: 'Unresolved — sales\ndecides case by case',  type: 'rect',    color: 'red' },
 
-    // Phase 7 (col 20)
-    { id: 'n7a', col: 20, lane: 'warehouse', label: 'Store in Customer\nDecal Cage by SO#',      type: 'rect',    color: 'neutral' },
+    // Phase 7 (col 16)
+    { id: 'n7a', col: 16, lane: 'warehouse', label: 'Store in Customer\nDecal Cage by SO#',      type: 'rect',    color: 'neutral' },
 
-    // Phase 8 (cols 21-23)
-    { id: 'n8a', col: 21, lane: 'warehouse', label: 'Truck nears RAF\nin production',             type: 'rect',    color: 'blue' },
-    { id: 'n8b', col: 22, lane: 'warehouse', label: 'Pull decals from\ncage for unit#',           type: 'rect',    color: 'amber' },
-    { id: 'n8c', col: 23, lane: 'warehouse', label: 'Tracker update\nStage → Staged',            type: 'rect',    color: 'purple' },
+    // Phase 8 (cols 17-19)
+    { id: 'n8a', col: 17, lane: 'warehouse', label: 'Truck nears RAF\nin production',             type: 'rect',    color: 'blue' },
+    { id: 'n8b', col: 18, lane: 'warehouse', label: 'Pull decals from\ncage for unit#',           type: 'rect',    color: 'amber' },
+    { id: 'n8c', col: 19, lane: 'warehouse', label: 'Tracker update\nStage → Staged',            type: 'rect',    color: 'purple' },
 
-    // Phase 9 (cols 24-27)
-    { id: 'n9a', col: 24, lane: 'warehouse', label: 'Install decals\non truck',                   type: 'rect',    color: 'teal' },
-    { id: 'n9d', col: 25, lane: 'warehouse', label: 'Decal\nmissing?',                            type: 'diamond', color: 'red' },
-    { id: 'n9miss',col:26, lane:'sales',     label: 'Escalate — contact\ncustomer for reship',    type: 'rect',    color: 'red' },
-    { id: 'n9b', col: 27, lane: 'warehouse', label: 'Tracker update\nStage → Installed',          type: 'rect',    color: 'purple' },
+    // Phase 9 (cols 20-23)
+    { id: 'n9a', col: 20, lane: 'warehouse', label: 'Install decals\non truck',                   type: 'rect',    color: 'teal' },
+    { id: 'n9d', col: 21, lane: 'warehouse', label: 'Decal\nmissing?',                            type: 'diamond', color: 'red' },
+    { id: 'n9miss',col: 22, lane:'sales',     label: 'Escalate — contact\ncustomer for reship',    type: 'rect',    color: 'red' },
+    { id: 'n9b', col: 23, lane: 'warehouse', label: 'Tracker update\nStage → Installed',          type: 'rect',    color: 'purple' },
 
-    // Phase 10 (cols 28-30)
-    { id: 'n11a', col: 28, lane: 'qc',       label: 'Verify decals\ninstalled per tracker',      type: 'rect',    color: 'teal' },
-    { id: 'n11b', col: 29, lane: 'qc',       label: 'QC sign-off\nin tracker',                   type: 'rect',    color: 'purple' },
-    { id: 'n11c', col: 30, lane: 'qc',       label: 'Truck RAFs',                                type: 'oval',    color: 'green' },
+    // Phase 10 (cols 24-26)
+    { id: 'n11a', col: 24, lane: 'qc',       label: 'Verify decals\ninstalled per tracker',      type: 'rect',    color: 'teal' },
+    { id: 'n11b', col: 25, lane: 'qc',       label: 'QC sign-off\nin tracker',                   type: 'rect',    color: 'purple' },
+    { id: 'n11c', col: 26, lane: 'qc',       label: 'Truck RAFs',                                type: 'oval',    color: 'green' },
   ];
 
   const arrows = [
     ['n1a', 'n1b'],
-    ['n1b', 'n1c'],
-    ['n1c', 'n2a'],
+    ['n1b', 'n2a'],
     ['n2a', 'n2b'],
-    ['n2b', 'n2c'],
-    ['n2c', 'n3a'],
+    ['n2b', 'n3a'],
     ['n3a', 'n3b'],
     ['n3b', 'n4a'],
-    ['n4a', 'n4b'],
-    ['n4b', 'n4no', { label: 'No', labelDx: -30, labelDy: -14 }],
-    ['n4b', 'n4c',  { label: 'Yes' }],
-    ['n4no','n4b',  { style: 'back', label: 'After SO created', labelDy: -30 }],
+    ['n4a', 'n4c'],
     ['n4c', 'n5a'],
     ['n5a', 'n5yes',{ label: 'Yes', labelDx: -20 }],
     ['n5a', 'n5b',  { label: 'No', labelDx: -20 }],
