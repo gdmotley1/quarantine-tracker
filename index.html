@@ -214,6 +214,9 @@ label{font-size:.72rem;font-weight:600;color:var(--text-muted);text-transform:up
 input,select,textarea{padding:.75rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-size:.88rem;font-family:inherit;color:var(--text);transition:all .3s var(--ease)}
 input:hover,select:hover,textarea:hover{border-color:var(--border-light)}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow),0 0 20px var(--primary-glow);background:var(--bg)}
+.field-invalid,.field-invalid:focus{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(239,68,68,.18)!important;animation:shake .35s var(--ease)}
+.custom-select.field-invalid .custom-select-trigger{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(239,68,68,.18)!important;animation:shake .35s var(--ease)}
+@keyframes shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-3px)}40%,60%{transform:translateX(3px)}}
 input::placeholder,textarea::placeholder{color:var(--text-muted);transition:opacity .3s}
 input:focus::placeholder,textarea:focus::placeholder{opacity:.5}
 select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23475569' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .85rem center}
@@ -625,7 +628,7 @@ body.readonly-mode .readonly-banner{display:flex}
   <div class="tab-content" id="tab-checkin">
     <div class="card">
       <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Check In Part to Quarantine</h2>
-      <form id="checkin-form">
+      <form id="checkin-form" novalidate>
         <div class="form-grid">
           <div class="form-group">
             <label for="ci-partnum">Part Number *</label>
@@ -689,7 +692,7 @@ body.readonly-mode .readonly-banner{display:flex}
   <div class="tab-content" id="tab-checkout">
     <div class="card">
       <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg> Check Out Part from Quarantine</h2>
-      <form id="checkout-form">
+      <form id="checkout-form" novalidate>
         <div class="form-grid">
           <div class="form-group full"><label for="co-part">Select Part *</label><select id="co-part" required><option value="">-- Select a part --</option></select></div>
           <div class="form-group"><label for="co-so">Sales Order # *</label><input type="text" id="co-so" required placeholder="e.g. SO-98765"></div>
@@ -1369,6 +1372,29 @@ function openShelfModal(shelfNum){
 }
 function closeShelfModal(){const o=document.getElementById('shelf-modal-overlay');o.classList.remove('show');setTimeout(()=>o.style.display='none',300);}
 
+// ---- FORM VALIDATION ----
+function markFieldInvalid(el){
+  if(!el)return;
+  el.classList.add('field-invalid');
+  const clear=()=>{el.classList.remove('field-invalid');el.removeEventListener('input',clear);el.removeEventListener('change',clear);el.removeEventListener('click',clear);};
+  el.addEventListener('input',clear);
+  el.addEventListener('change',clear);
+  el.addEventListener('click',clear);
+}
+function validateRequired(fields){
+  fields.forEach(f=>{const m=f.mark||f.el;if(m)m.classList.remove('field-invalid');});
+  const missing=[];
+  fields.forEach(f=>{
+    const v=(f.el&&f.el.value||'').trim();
+    if(!v){missing.push(f.label);markFieldInvalid(f.mark||f.el);}
+  });
+  return missing;
+}
+['checkin-form','checkout-form'].forEach(id=>{
+  const f=document.getElementById(id);
+  if(f)f.addEventListener('reset',()=>{f.querySelectorAll('.field-invalid').forEach(el=>el.classList.remove('field-invalid'));document.querySelectorAll('.custom-select.field-invalid').forEach(el=>el.classList.remove('field-invalid'));});
+});
+
 // ---- CHECK IN ----
 document.getElementById('ci-partnum').addEventListener('input',function(){
   const v=this.value.trim().toLowerCase(),parts=loadData(KEYS.parts);
@@ -1376,6 +1402,20 @@ document.getElementById('ci-partnum').addEventListener('input',function(){
 });
 document.getElementById('checkin-form').addEventListener('submit',async function(e){
   e.preventDefault();
+  const condition=document.getElementById('ci-condition').value;
+  const required=[
+    {el:document.getElementById('ci-partnum'),label:'Part Number'},
+    {el:document.getElementById('ci-unitnum'),label:'Unit #'},
+    {el:document.getElementById('ci-so'),label:'Sales Order #'},
+    {el:document.getElementById('ci-desc'),label:'Description'},
+    {el:document.getElementById('ci-from'),label:'Sent From'},
+    {el:document.getElementById('ci-by'),label:'Checked In By'},
+    {el:document.getElementById('ci-shelf'),label:'Zone Location',mark:document.getElementById('shelf-select')}
+  ];
+  if(condition!=='No damage')required.push({el:document.getElementById('ci-damage-notes'),label:'Damage Notes'});
+  const missing=validateRequired(required);
+  if(missing.length){showToast('Missing required: '+missing.join(', '),'warning');return;}
+
   const partNumber=document.getElementById('ci-partnum').value.trim();
   const unitNumber=document.getElementById('ci-unitnum').value.trim();
   const salesOrder=document.getElementById('ci-so').value.trim()||null;
@@ -1383,11 +1423,8 @@ document.getElementById('checkin-form').addEventListener('submit',async function
   const sentFrom=document.getElementById('ci-from').value.trim();
   const checkedInBy=document.getElementById('ci-by').value.trim();
   const shelf=document.getElementById('ci-shelf').value;
-  const condition=document.getElementById('ci-condition').value;
   const damageNotes=(condition!=='No damage')?document.getElementById('ci-damage-notes').value.trim():'';
   const notes=document.getElementById('ci-notes').value.trim();
-
-  if(condition!=='No damage'&&!damageNotes){showToast('Damage notes are required','warning');return;}
 
   const parts=loadData(KEYS.parts);
   if(parts.some(p=>p.partNumber.toLowerCase()===partNumber.toLowerCase())){
@@ -1403,6 +1440,12 @@ document.getElementById('checkin-form').addEventListener('submit',async function
 // ---- CHECK OUT ----
 document.getElementById('checkout-form').addEventListener('submit',async function(e){
   e.preventDefault();
+  const missing=validateRequired([
+    {el:document.getElementById('co-part'),label:'Part'},
+    {el:document.getElementById('co-so'),label:'Sales Order #'},
+    {el:document.getElementById('co-by'),label:'Checked Out By'}
+  ]);
+  if(missing.length){showToast('Missing required: '+missing.join(', '),'warning');return;}
   const partId=document.getElementById('co-part').value,salesOrder=document.getElementById('co-so').value.trim(),checkedOutBy=document.getElementById('co-by').value.trim(),notes=document.getElementById('co-notes').value.trim();
   const parts=loadData(KEYS.parts),idx=parts.findIndex(p=>p.id===partId);
   if(idx===-1){showToast('Part not found','error');return;}
