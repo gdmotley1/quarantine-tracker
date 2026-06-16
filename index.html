@@ -1271,7 +1271,7 @@ function renderLogTable(filter=''){
 function populateCheckoutDropdown(){
   const parts=loadData(KEYS.parts),sel=document.getElementById('co-part');
   sel.innerHTML='<option value="">-- Select a part --</option>';
-  parts.sort((a,b)=>a.partNumber.localeCompare(b.partNumber)).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.salesOrder?' (SO '+p.salesOrder+')':'')+' \u2014 '+p.description+' (Zone '+(p.shelf||'?')+', '+d+' days)';sel.appendChild(o);});
+  parts.sort((a,b)=>a.partNumber.localeCompare(b.partNumber)).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.salesOrder?' ('+p.salesOrder+')':'')+' \u2014 '+p.description+' (Zone '+(p.shelf||'?')+', '+d+' days)';sel.appendChild(o);});
 }
 
 // ---- NOTES THREAD (checkout page) ----
@@ -1343,7 +1343,7 @@ function openShelfModal(shelfNum){
   document.getElementById('shelf-modal-title').textContent='Zone '+shelfNum+' \u2014 '+parts.length+' Part'+(parts.length!==1?'s':'');
   document.getElementById('shelf-modal-list').innerHTML=parts.map(p=>{
     const d=daysBetween(p.checkinDate);const clr=d>=14?'var(--red)':'var(--text-dim)';
-    return'<li><div><span class="shelf-detail-part">'+esc(p.partNumber)+(p.salesOrder?' (SO '+esc(p.salesOrder)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description)+' \u2014 '+esc(p.sentFrom)+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
+    return'<li><div><span class="shelf-detail-part">'+esc(p.partNumber)+(p.salesOrder?' ('+esc(p.salesOrder)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description)+' \u2014 '+esc(p.sentFrom)+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
   }).join('');
   const o=document.getElementById('shelf-modal-overlay');o.style.display='flex';requestAnimationFrame(()=>o.classList.add('show'));
 }
