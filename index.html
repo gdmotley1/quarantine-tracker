@@ -46,17 +46,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 @keyframes ringPulse{0%,100%{opacity:1;filter:drop-shadow(0 0 4px var(--red))}50%{opacity:.6;filter:drop-shadow(0 0 12px var(--red))}}
 
 /* HEADER */
-header{background:#fff;padding:.8rem 1.75rem;display:flex;align-items:center;gap:1.1rem;border-bottom:1px solid var(--border);position:relative}
+header{background:#0f172a;padding:.8rem 1.75rem;display:flex;align-items:center;gap:1.1rem;border-bottom:2px solid var(--primary);box-shadow:0 1px 4px rgba(16,24,40,.2);position:relative;z-index:5}
 .logo{height:48px;width:auto;transition:transform .2s var(--ease)}
 .logo:hover{transform:translateY(-1px)}
 .brand{flex:1;min-width:0}
-.brand h1{font-size:1.35rem;font-weight:800;letter-spacing:-.2px;color:var(--text)}
-.brand h1 span{color:var(--primary);font-weight:800}
-.brand-sub{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:3px;font-weight:600;white-space:nowrap}
-.header-divider{width:1px;height:34px;background:var(--border);flex-shrink:0}
+.brand h1{font-size:1.35rem;font-weight:800;letter-spacing:-.2px;color:#fff}
+.brand h1 span{color:#f87171;font-weight:800}
+.brand-sub{font-size:.7rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.5px;margin-top:3px;font-weight:600;white-space:nowrap}
+.header-divider{width:1px;height:34px;background:rgba(255,255,255,.14);flex-shrink:0}
 .header-right{text-align:right}
-.header-clock{font-size:.78rem;color:var(--text-dim);font-variant-numeric:tabular-nums;font-weight:500}
+.header-clock{font-size:.78rem;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums;font-weight:500}
 .header-actions{display:flex;gap:.35rem;margin-top:.45rem;justify-content:flex-end;flex-wrap:wrap}
+header .btn-ghost{color:rgba(255,255,255,.72)}
+header .btn-ghost:hover{color:#fff;background:rgba(255,255,255,.1)}
 
 /* NAV */
 nav{background:#fff;display:flex;overflow-x:auto;border-bottom:1px solid var(--border);padding:0 1.25rem;position:relative}
