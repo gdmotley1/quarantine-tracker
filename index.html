@@ -584,7 +584,7 @@ body.readonly-mode .readonly-banner{display:flex}
         <div class="status-key"><span class="badge badge-green"><span class="badge-dot"></span>OK</span> 0–6 days <span class="badge badge-yellow"><span class="badge-dot"></span>Warning</span> 7–13 days <span class="badge badge-red"><span class="badge-dot"></span>Critical</span> 14+ days</div>
         <button class="btn btn-outline btn-sm" onclick="exportActiveCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
       </div>
-      <div class="table-wrap"><table id="active-table"><thead><tr><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="unitNumber">Unit #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="checkinDate">Check-In</th><th class="sortable desc" data-sort="days">Days</th><th class="sortable" data-sort="shelf">Zone</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="checkedInBy">By</th><th>Status</th><th class="sortable" data-sort="stage">Stage</th><th>Condition</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="active-table"><thead><tr><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="checkinDate">Check-In</th><th class="sortable desc" data-sort="days">Days</th><th class="sortable" data-sort="shelf">Zone</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="checkedInBy">By</th><th>Status</th><th class="sortable" data-sort="stage">Stage</th><th>Condition</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
       <div class="empty-state" id="active-empty" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><p>No parts in quarantine</p></div>
     </div>
   </div>
@@ -597,7 +597,7 @@ body.readonly-mode .readonly-banner{display:flex}
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="search-log" placeholder="Search log..."></div>
         <button class="btn btn-outline btn-sm" onclick="exportLogCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
       </div>
-      <div class="table-wrap"><table id="log-table"><thead><tr><th class="sortable" data-sort="logId">Log ID</th><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="unitNumber">Unit #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="action">Action</th><th class="sortable desc" data-sort="date">Date</th><th>Time</th><th class="sortable" data-sort="user">User</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="shelf">Zone</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="duration">Duration</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="log-table"><thead><tr><th class="sortable" data-sort="logId">Log ID</th><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="action">Action</th><th class="sortable desc" data-sort="date">Date</th><th>Time</th><th class="sortable" data-sort="user">User</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="shelf">Zone</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="duration">Duration</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
       <div class="empty-state" id="log-empty" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No movement records yet</p></div>
     </div>
   </div>
@@ -612,10 +612,6 @@ body.readonly-mode .readonly-banner{display:flex}
             <label for="ci-partnum">Part Number *</label>
             <input type="text" id="ci-partnum" required placeholder="e.g. PN-12345">
             <div class="dup-warning" id="dup-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> This part number is already in quarantine</div>
-          </div>
-          <div class="form-group">
-            <label for="ci-unitnum">Unit # *</label>
-            <input type="text" id="ci-unitnum" required placeholder="e.g. Unit-001">
           </div>
           <div class="form-group">
             <label for="ci-so">Sales Order # *</label>
@@ -1179,7 +1175,7 @@ function renderActiveTable(filter=''){
     if(f==='critical')return daysBetween(p.checkinDate)>=14;
     if(f==='warning')return daysBetween(p.checkinDate)>=7&&daysBetween(p.checkinDate)<14;
     if(f==='missing')return (p.stage||'Checked In')==='Missing';
-    return p.partNumber.toLowerCase().includes(f)||p.description.toLowerCase().includes(f)||p.sentFrom.toLowerCase().includes(f)||p.checkedInBy.toLowerCase().includes(f)||(p.shelf&&('zone '+p.shelf).includes(f))||(p.unitNumber||'').toLowerCase().includes(f)||(p.stage||'checked in').toLowerCase().includes(f)||(p.condition||'').toLowerCase().includes(f);
+    return p.partNumber.toLowerCase().includes(f)||p.description.toLowerCase().includes(f)||p.sentFrom.toLowerCase().includes(f)||p.checkedInBy.toLowerCase().includes(f)||(p.shelf&&('zone '+p.shelf).includes(f))||(p.salesOrder||'').toLowerCase().includes(f)||(p.stage||'checked in').toLowerCase().includes(f)||(p.condition||'').toLowerCase().includes(f);
   }),activeSort.col,activeSort.dir,'active');
   if(!filtered.length){tbody.innerHTML='';document.getElementById('active-table').style.display='none';empty.style.display='';}
   else{document.getElementById('active-table').style.display='';empty.style.display='none';
@@ -1188,7 +1184,7 @@ function renderActiveTable(filter=''){
       const noteCount=(p.notesThread||[]).length;
       const hasDamage=p.condition&&p.condition!=='No damage';
       const rowClass=hasDamage?'damage-highlight':'status-'+statusClass(d);
-      return'<tr class="'+rowClass+'" style="cursor:pointer" onclick="openNotesModal(\''+p.id+'\')"><td>'+esc(p.partNumber)+'</td><td>'+esc(p.unitNumber||'-')+'</td><td class="td-wrap">'+esc(p.description)+'</td><td>'+fmtDate(p.checkinDate)+'</td><td>'+d+'</td><td>'+shelfBadge(p.shelf)+'</td><td>'+esc(p.sentFrom)+'</td><td>'+esc(p.checkedInBy)+'</td><td>'+statusLabel(d)+'</td><td>'+stageBadgeHtml(p.stage||'Checked In',p.id)+'</td><td>'+conditionBadge(p.condition)+(hasDamage&&p.damageNotes?' <span style="font-size:.7rem;color:var(--text-dim)" title="'+esc(p.damageNotes)+'">&#9432;</span>':'')+'</td><td class="td-wrap">'+esc(p.notes)+(noteCount?' <span style="color:var(--accent);font-size:.7rem;font-weight:700">['+noteCount+' note'+(noteCount>1?'s':'')+']</span>':'')+'</td></tr>';
+      return'<tr class="'+rowClass+'" style="cursor:pointer" onclick="openNotesModal(\''+p.id+'\')"><td>'+esc(p.partNumber)+'</td><td>'+esc(p.salesOrder||'-')+'</td><td class="td-wrap">'+esc(p.description)+'</td><td>'+fmtDate(p.checkinDate)+'</td><td>'+d+'</td><td>'+shelfBadge(p.shelf)+'</td><td>'+esc(p.sentFrom)+'</td><td>'+esc(p.checkedInBy)+'</td><td>'+statusLabel(d)+'</td><td>'+stageBadgeHtml(p.stage||'Checked In',p.id)+'</td><td>'+conditionBadge(p.condition)+(hasDamage&&p.damageNotes?' <span style="font-size:.7rem;color:var(--text-dim)" title="'+esc(p.damageNotes)+'">&#9432;</span>':'')+'</td><td class="td-wrap">'+esc(p.notes)+(noteCount?' <span style="color:var(--accent);font-size:.7rem;font-weight:700">['+noteCount+' note'+(noteCount>1?'s':'')+']</span>':'')+'</td></tr>';
     }).join('');}
 }
 
@@ -1259,7 +1255,7 @@ async function changeStage(partId,newStage){
 function renderLogTable(filter=''){
   const log=loadData(KEYS.log),tbody=document.querySelector('#log-table tbody'),empty=document.getElementById('log-empty');
   const f=(filter||document.getElementById('search-log').value).toLowerCase();
-  const filtered=sortData(log.filter(l=>!f||l.partNumber.toLowerCase().includes(f)||l.description.toLowerCase().includes(f)||l.action.toLowerCase().includes(f)||l.user.toLowerCase().includes(f)||(l.salesOrder||'').toLowerCase().includes(f)||(l.unitNumber||'').toLowerCase().includes(f)),logSort.col,logSort.dir,'log');
+  const filtered=sortData(log.filter(l=>!f||l.partNumber.toLowerCase().includes(f)||l.description.toLowerCase().includes(f)||l.action.toLowerCase().includes(f)||l.user.toLowerCase().includes(f)||(l.salesOrder||'').toLowerCase().includes(f)),logSort.col,logSort.dir,'log');
   if(!filtered.length){tbody.innerHTML='';document.getElementById('log-table').style.display='none';empty.style.display='';}
   else{document.getElementById('log-table').style.display='';empty.style.display='none';
     tbody.innerHTML=filtered.map(l=>{
@@ -1267,7 +1263,7 @@ function renderLogTable(filter=''){
       if(l.action==='CHECK IN')ab='<span class="badge badge-checkin"><span class="badge-dot" style="background:var(--blue)"></span>CHECK IN</span>';
       else if(l.action==='CHECK OUT')ab='<span class="badge badge-checkout"><span class="badge-dot" style="background:var(--red)"></span>CHECK OUT</span>';
       else ab='<span class="badge" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)"><span class="badge-dot" style="background:var(--amber)"></span>'+esc(l.action)+'</span>';
-      return'<tr><td>'+l.logId+'</td><td>'+esc(l.partNumber)+'</td><td>'+esc(l.unitNumber||'-')+'</td><td class="td-wrap">'+esc(l.description)+'</td><td>'+ab+'</td><td>'+fmtDate(l.date)+'</td><td>'+fmtTime(l.date)+'</td><td>'+esc(l.user)+'</td><td>'+esc(l.sentFrom||'-')+'</td><td>'+shelfBadge(l.shelf)+'</td><td>'+esc(l.salesOrder||'-')+'</td><td>'+(l.duration!=null?l.duration+' day(s)':'-')+'</td><td class="td-wrap">'+esc(l.notes||'-')+'</td></tr>';
+      return'<tr><td>'+l.logId+'</td><td>'+esc(l.partNumber)+'</td><td class="td-wrap">'+esc(l.description)+'</td><td>'+ab+'</td><td>'+fmtDate(l.date)+'</td><td>'+fmtTime(l.date)+'</td><td>'+esc(l.user)+'</td><td>'+esc(l.sentFrom||'-')+'</td><td>'+shelfBadge(l.shelf)+'</td><td>'+esc(l.salesOrder||'-')+'</td><td>'+(l.duration!=null?l.duration+' day(s)':'-')+'</td><td class="td-wrap">'+esc(l.notes||'-')+'</td></tr>';
     }).join('');}
 }
 
@@ -1275,7 +1271,7 @@ function renderLogTable(filter=''){
 function populateCheckoutDropdown(){
   const parts=loadData(KEYS.parts),sel=document.getElementById('co-part');
   sel.innerHTML='<option value="">-- Select a part --</option>';
-  parts.sort((a,b)=>a.partNumber.localeCompare(b.partNumber)).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.unitNumber?' ('+p.unitNumber+')':'')+' \u2014 '+p.description+' (Zone '+(p.shelf||'?')+', '+d+' days)';sel.appendChild(o);});
+  parts.sort((a,b)=>a.partNumber.localeCompare(b.partNumber)).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.salesOrder?' (SO '+p.salesOrder+')':'')+' \u2014 '+p.description+' (Zone '+(p.shelf||'?')+', '+d+' days)';sel.appendChild(o);});
 }
 
 // ---- NOTES THREAD (checkout page) ----
@@ -1347,7 +1343,7 @@ function openShelfModal(shelfNum){
   document.getElementById('shelf-modal-title').textContent='Zone '+shelfNum+' \u2014 '+parts.length+' Part'+(parts.length!==1?'s':'');
   document.getElementById('shelf-modal-list').innerHTML=parts.map(p=>{
     const d=daysBetween(p.checkinDate);const clr=d>=14?'var(--red)':'var(--text-dim)';
-    return'<li><div><span class="shelf-detail-part">'+esc(p.partNumber)+(p.unitNumber?' ('+esc(p.unitNumber)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description)+' \u2014 '+esc(p.sentFrom)+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
+    return'<li><div><span class="shelf-detail-part">'+esc(p.partNumber)+(p.salesOrder?' (SO '+esc(p.salesOrder)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description)+' \u2014 '+esc(p.sentFrom)+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
   }).join('');
   const o=document.getElementById('shelf-modal-overlay');o.style.display='flex';requestAnimationFrame(()=>o.classList.add('show'));
 }
@@ -1386,7 +1382,6 @@ document.getElementById('checkin-form').addEventListener('submit',async function
   const condition=document.getElementById('ci-condition').value;
   const required=[
     {el:document.getElementById('ci-partnum'),label:'Part Number'},
-    {el:document.getElementById('ci-unitnum'),label:'Unit #'},
     {el:document.getElementById('ci-so'),label:'Sales Order #'},
     {el:document.getElementById('ci-desc'),label:'Description'},
     {el:document.getElementById('ci-from'),label:'Sent From'},
@@ -1398,7 +1393,6 @@ document.getElementById('checkin-form').addEventListener('submit',async function
   if(missing.length){showToast('Missing required: '+missing.join(', '),'warning');return;}
 
   const partNumber=document.getElementById('ci-partnum').value.trim();
-  const unitNumber=document.getElementById('ci-unitnum').value.trim();
   const salesOrder=document.getElementById('ci-so').value.trim()||null;
   const description=document.getElementById('ci-desc').value.trim();
   const sentFrom=document.getElementById('ci-from').value.trim();
@@ -1411,9 +1405,9 @@ document.getElementById('checkin-form').addEventListener('submit',async function
   if(parts.some(p=>p.partNumber.toLowerCase()===partNumber.toLowerCase())){
     const ok=await showModal('Duplicate Part Number','Part "'+partNumber+'" is already in quarantine. Check in another?');if(!ok)return;}
   const now=new Date().toISOString();
-  parts.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),partNumber,unitNumber,description,checkinDate:now,sentFrom,checkedInBy,shelf,notes,notesThread:[],salesOrder,stage:'Checked In',condition,damageNotes});
+  parts.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),partNumber,description,checkinDate:now,sentFrom,checkedInBy,shelf,notes,notesThread:[],salesOrder,stage:'Checked In',condition,damageNotes});
   saveData(KEYS.parts,parts);
-  appendLog({partNumber,unitNumber,description,action:'CHECK IN',date:now,user:checkedInBy,sentFrom,shelf,salesOrder,duration:null,notes});
+  appendLog({partNumber,description,action:'CHECK IN',date:now,user:checkedInBy,sentFrom,shelf,salesOrder,duration:null,notes});
   this.reset();document.getElementById('dup-warning').style.display='none';document.getElementById('ci-damage-notes-group').style.display='none';
   playSound('in');showToast('Part '+partNumber+' checked in to quarantine','success');refreshAll();
 });
@@ -1451,14 +1445,14 @@ setupSortHeaders('log-table',logSort,()=>renderLogTable());
 function dlCSV(fn,rows){const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');const b=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();URL.revokeObjectURL(a.href);}
 function exportActiveCSV(){
   const parts=loadData(KEYS.parts);if(!parts.length){showToast('No data','warning');return;}
-  const rows=[['Part Number','Unit Number','Description','Check-In Date','Time','Days','Zone','Sent From','Checked In By','Status','Stage','Condition','Damage Notes','Sales Order','Notes']];
-  parts.forEach(p=>{const d=daysBetween(p.checkinDate);rows.push([p.partNumber,p.unitNumber||'',p.description,fmtDate(p.checkinDate),fmtTime(p.checkinDate),d,'Zone '+(p.shelf||'?'),p.sentFrom,p.checkedInBy,d>=14?'Critical':d>=7?'Warning':'OK',p.stage||'Checked In',p.condition||'No damage',p.damageNotes||'',p.salesOrder||'',p.notes]);});
+  const rows=[['Part Number','Sales Order','Description','Check-In Date','Time','Days','Zone','Sent From','Checked In By','Status','Stage','Condition','Damage Notes','Notes']];
+  parts.forEach(p=>{const d=daysBetween(p.checkinDate);rows.push([p.partNumber,p.salesOrder||'',p.description,fmtDate(p.checkinDate),fmtTime(p.checkinDate),d,'Zone '+(p.shelf||'?'),p.sentFrom,p.checkedInBy,d>=14?'Critical':d>=7?'Warning':'OK',p.stage||'Checked In',p.condition||'No damage',p.damageNotes||'',p.notes]);});
   dlCSV('foutsbros-quarantine-active-'+new Date().toISOString().slice(0,10)+'.csv',rows);showToast('CSV exported','success');
 }
 function exportLogCSV(){
   const log=loadData(KEYS.log);if(!log.length){showToast('No data','warning');return;}
-  const rows=[['Log ID','Part Number','Unit Number','Description','Action','Date','Time','User','Sent From','Zone','Sales Order','Duration (days)','Notes','Hash']];
-  log.forEach(l=>{rows.push([l.logId,l.partNumber,l.unitNumber||'',l.description,l.action,fmtDate(l.date),fmtTime(l.date),l.user,l.sentFrom||'','Zone '+(l.shelf||'?'),l.salesOrder||'',l.duration!=null?l.duration:'',l.notes||'',l.hash||'']);});
+  const rows=[['Log ID','Part Number','Description','Action','Date','Time','User','Sent From','Zone','Sales Order','Duration (days)','Notes','Hash']];
+  log.forEach(l=>{rows.push([l.logId,l.partNumber,l.description,l.action,fmtDate(l.date),fmtTime(l.date),l.user,l.sentFrom||'','Zone '+(l.shelf||'?'),l.salesOrder||'',l.duration!=null?l.duration:'',l.notes||'',l.hash||'']);});
   dlCSV('foutsbros-quarantine-log-'+new Date().toISOString().slice(0,10)+'.csv',rows);showToast('CSV exported','success');
 }
 
