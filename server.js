@@ -20,7 +20,7 @@ const MIME = {
 };
 
 const server = http.createServer((req, res) => {
-  // Serve static files only — data is handled by Supabase
+  // Serve static files only — data is handled by Firebase Realtime Database
   const safePath = path.normalize(req.url.split('?')[0]).replace(/^(\.\.[\/\\])+/, '');
   let filePath = path.join(DIR, safePath === '/' || safePath === '\\' ? 'index.html' : safePath);
   const ext = path.extname(filePath).toLowerCase();
@@ -58,7 +58,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log('  ======================================');
   console.log('');
   console.log('  Local dev server running (static files only)');
-  console.log('  Data is stored in Supabase');
+  console.log('  Data is stored in Firebase Realtime Database');
   console.log('');
   console.log('  http://localhost:' + PORT);
   console.log('  http://' + localIP + ':' + PORT);
