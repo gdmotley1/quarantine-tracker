@@ -6,6 +6,7 @@
 <title>Fouts Bros Inc — Customer Part Tracker</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -784,7 +785,7 @@ function playSound(type){
 
 // ---- FIREBASE CONFIG ----
 const firebaseConfig = {
-  apiKey: "AIzaSyAeZjfLUTHITovNbKksV49yNUE_IY2cvHk",
+  apiKey: "AIzaSyAeZjflUTHITovNbKksV49yNUE_IY2cvHk",
   authDomain: "foutsbros-quarantine.firebaseapp.com",
   databaseURL: "https://foutsbros-quarantine-default-rtdb.firebaseio.com",
   projectId: "foutsbros-quarantine",
@@ -795,6 +796,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const fbDb = firebase.database();
 const fbRef = fbDb.ref('app_state');
+const fbAuth = firebase.auth();
 
 // ---- DATA LAYER (Firebase-backed) ----
 const KEYS={parts:'parts',log:'log',logId:'logId'};
@@ -1459,21 +1461,33 @@ function exportLogCSV(){
 // ---- REFRESH ALL ----
 function refreshAll(){renderDashboard();renderActiveTable(document.getElementById('search-active').value);renderLogTable(document.getElementById('search-log').value);populateCheckoutDropdown();}
 
-// ---- INIT (Firebase real-time) ----
+// ---- INIT (Firebase real-time + anonymous auth) ----
 (function(){
-  fbRef.on('value', snap => {
-    const data = snap.val();
-    if(data){
-      DB = data;
-      if(!DB.parts) DB.parts = [];
-      if(!DB.log) DB.log = [];
-      if(!DB.logId) DB.logId = 0;
-    }
-    if(!_fbReady){ _fbReady = true; }
-    refreshAll();
-  });
-  // Also refresh days every minute
-  setInterval(refreshAll, 60000);
+  let _started=false;
+  function startApp(){
+    if(_started) return; _started=true;
+    fbRef.on('value', snap => {
+      const data = snap.val();
+      if(data){
+        DB = data;
+        if(!DB.parts) DB.parts = [];
+        if(!DB.log) DB.log = [];
+        if(!DB.logId) DB.logId = 0;
+      }
+      if(!_fbReady){ _fbReady = true; }
+      refreshAll();
+    }, err => {
+      // Locked rules without a working auth session land here — make it visible, not a blank screen
+      showToast('Database read blocked: '+err.message+'. Check Auth/rules.','error');
+    });
+    // Also refresh days every minute
+    setInterval(refreshAll, 60000);
+  }
+  // Sign in anonymously so the DB can require auth. If the Anonymous provider
+  // isn't enabled yet (and rules are still open), fall back so the app keeps working.
+  fbAuth.signInAnonymously()
+    .then(startApp)
+    .catch(err => { console.warn('Anonymous auth unavailable:', err.code || err.message); startApp(); });
 })();
 </script>
 </body>
