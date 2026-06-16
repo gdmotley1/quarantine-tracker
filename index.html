@@ -1020,7 +1020,7 @@ updateClock();setInterval(updateClock,1000);
 document.getElementById('ci-condition').addEventListener('change',function(){
   const grp=document.getElementById('ci-damage-notes-group');
   const ta=document.getElementById('ci-damage-notes');
-  if(this.value!=='No damage'){grp.style.display='';ta.required=true;}
+  if(this.value!=='No damage'){grp.style.display='flex';ta.required=true;}
   else{grp.style.display='none';ta.required=false;ta.value='';}
 });
 
