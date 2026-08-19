@@ -347,12 +347,12 @@ th.sortable.desc::after{content:'\25BC ';opacity:.9;color:var(--primary)}
 .locked-wrap input{width:100%;padding-right:2.2rem;background:#f1f5f9;color:var(--text);font-weight:700;letter-spacing:.5px;cursor:not-allowed}
 .locked-wrap input:focus{box-shadow:none;border-color:var(--border)}
 .locked-wrap .lock-icon{position:absolute;right:.7rem;width:14px;height:14px;color:var(--text-muted);pointer-events:none}
-.detail-card{padding:0;overflow:hidden}
-.detail-toggle{width:100%;display:flex;align-items:center;gap:.55rem;background:none;border:none;padding:1.05rem 1.35rem;cursor:pointer;font:inherit;font-size:.78rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);transition:color .2s var(--ease)}
+.detail-section{margin-top:1.35rem;border-top:1px solid var(--border)}
+.detail-toggle{width:100%;display:flex;align-items:center;gap:.55rem;background:none;border:none;padding:.95rem 0 0;cursor:pointer;font:inherit;font-size:.78rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);transition:color .2s var(--ease)}
 .detail-toggle:hover{color:var(--primary)}
 .detail-toggle .chev{width:15px;height:15px;flex-shrink:0;transition:transform .25s var(--ease)}
 .detail-toggle[aria-expanded="true"] .chev{transform:rotate(90deg)}
-.detail-body{display:none;padding:0 1.35rem 1.35rem;border-top:1px solid var(--border)}
+.detail-body{display:none;padding-top:1.15rem}
 .detail-body.open{display:block;animation:slideDown .3s var(--ease-out)}
 .recent-activity{list-style:none}
 .recent-activity li{padding:.75rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.85rem;font-size:.82rem;color:var(--text-dim);transition:color .2s var(--ease)}
@@ -646,48 +646,47 @@ body.readonly-mode .readonly-banner{display:flex}
             </div>
           </div>
         </div>
+        <div class="detail-section">
+          <button type="button" class="detail-toggle" id="detail-toggle" aria-expanded="false" aria-controls="ci-detail">
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <span>Add more detail</span><span class="tag-opt">optional</span>
+          </button>
+          <div class="detail-body" id="ci-detail">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="ci-desc">Description</label>
+                <input type="text" id="ci-desc" placeholder="What is it?">
+              </div>
+              <div class="form-group">
+                <label for="ci-from">Sent From</label>
+                <input type="text" id="ci-from" placeholder="Vendor or customer name">
+              </div>
+              <div class="form-group">
+                <label for="ci-by">Checked In By</label>
+                <input type="text" id="ci-by" placeholder="Your name">
+              </div>
+              <div class="form-group">
+                <label for="ci-condition">Condition</label>
+                <select id="ci-condition">
+                  <option value="No damage">No damage</option>
+                  <option value="Minor damage">Minor damage</option>
+                  <option value="Significant damage">Significant damage</option>
+                </select>
+              </div>
+              <div class="form-group full" id="ci-damage-notes-group">
+                <label for="ci-damage-notes">Damage Notes</label>
+                <textarea id="ci-damage-notes" placeholder="Describe the damage..."></textarea>
+              </div>
+              <div class="form-group full">
+                <label for="ci-notes">Notes</label>
+                <textarea id="ci-notes" placeholder="Anything else worth recording..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
         <div style="margin-top:1.5rem;display:flex;gap:.5rem">
           <button type="submit" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Check In Part</button>
           <button type="reset" class="btn btn-secondary">Clear</button>
-        </div>
-      </div>
-
-      <div class="card detail-card">
-        <button type="button" class="detail-toggle" id="detail-toggle" aria-expanded="false" aria-controls="ci-detail">
-          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          <span>Add more detail</span><span class="tag-opt">optional</span>
-        </button>
-        <div class="detail-body" id="ci-detail">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="ci-desc">Description</label>
-              <input type="text" id="ci-desc" placeholder="What is it?">
-            </div>
-            <div class="form-group">
-              <label for="ci-from">Sent From</label>
-              <input type="text" id="ci-from" placeholder="Vendor or customer name">
-            </div>
-            <div class="form-group">
-              <label for="ci-by">Checked In By</label>
-              <input type="text" id="ci-by" placeholder="Your name">
-            </div>
-            <div class="form-group">
-              <label for="ci-condition">Condition</label>
-              <select id="ci-condition">
-                <option value="No damage">No damage</option>
-                <option value="Minor damage">Minor damage</option>
-                <option value="Significant damage">Significant damage</option>
-              </select>
-            </div>
-            <div class="form-group full" id="ci-damage-notes-group">
-              <label for="ci-damage-notes">Damage Notes</label>
-              <textarea id="ci-damage-notes" placeholder="Describe the damage..."></textarea>
-            </div>
-            <div class="form-group full">
-              <label for="ci-notes">Notes</label>
-              <textarea id="ci-notes" placeholder="Anything else worth recording..."></textarea>
-            </div>
-          </div>
         </div>
       </div>
 
