@@ -1,2 +1,14 @@
 # Local build artifacts
 node_modules/
+
+# Machine-local Claude config (never versioned)
+.claude/settings.local.json
+
+# Data snapshots. Kept local on purpose: this repo is PUBLIC, and once the
+# pilot runs these contain real customer part and sales-order data.
+backup-*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
