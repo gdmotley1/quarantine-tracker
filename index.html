@@ -340,6 +340,20 @@ th.sortable.desc::after{content:'\25BC ';opacity:.9;color:var(--primary)}
 /* MISC */
 .dup-warning{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:8px;padding:.8rem 1rem;margin-top:.5rem;font-size:.82rem;color:var(--yellow);display:none;align-items:center;gap:.5rem;animation:slideDown .3s var(--ease-out)}
 .dup-warning svg{flex-shrink:0;width:16px;height:16px}
+.form-hint-lead{font-size:.8rem;color:var(--text-dim);margin:-.35rem 0 1.1rem;line-height:1.5}
+.tag-opt,.tag-auto{font-size:.6rem;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--text-muted);background:#f1f5f9;border:1px solid var(--border);border-radius:99px;padding:.1rem .4rem;margin-left:.4rem;vertical-align:middle}
+.tag-auto{color:var(--primary);border-color:var(--primary)}
+.locked-wrap{position:relative;display:flex;align-items:center}
+.locked-wrap input{width:100%;padding-right:2.2rem;background:#f1f5f9;color:var(--text);font-weight:700;letter-spacing:.5px;cursor:not-allowed}
+.locked-wrap input:focus{box-shadow:none;border-color:var(--border)}
+.locked-wrap .lock-icon{position:absolute;right:.7rem;width:14px;height:14px;color:var(--text-muted);pointer-events:none}
+.detail-card{padding:0;overflow:hidden}
+.detail-toggle{width:100%;display:flex;align-items:center;gap:.55rem;background:none;border:none;padding:1.05rem 1.35rem;cursor:pointer;font:inherit;font-size:.78rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);transition:color .2s var(--ease)}
+.detail-toggle:hover{color:var(--primary)}
+.detail-toggle .chev{width:15px;height:15px;flex-shrink:0;transition:transform .25s var(--ease)}
+.detail-toggle[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.detail-body{display:none;padding:0 1.35rem 1.35rem;border-top:1px solid var(--border)}
+.detail-body.open{display:block;animation:slideDown .3s var(--ease-out)}
 .recent-activity{list-style:none}
 .recent-activity li{padding:.75rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.85rem;font-size:.82rem;color:var(--text-dim);transition:color .2s var(--ease)}
 .recent-activity li:hover{color:var(--text)}
@@ -605,62 +619,79 @@ body.readonly-mode .readonly-banner{display:flex}
 
   <!-- CHECK IN -->
   <div class="tab-content" id="tab-checkin">
-    <div class="card">
-      <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Check In Part to Quarantine</h2>
-      <form id="checkin-form" novalidate>
+    <form id="checkin-form" novalidate>
+
+      <div class="card">
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Check In Part to Quarantine</h2>
+        <p class="form-hint-lead">Pick a zone and hit Check In. The part number is assigned for you, and nothing here is required. Add more detail below only if you have it.</p>
         <div class="form-grid">
           <div class="form-group">
-            <label for="ci-partnum">Part Number *</label>
-            <input type="text" id="ci-partnum" required placeholder="e.g. PN-12345">
+            <label for="ci-partnum">Part Number <span class="tag-auto">auto</span></label>
+            <div class="locked-wrap">
+              <input type="text" id="ci-partnum" readonly tabindex="-1" title="Assigned automatically from the last part checked in">
+              <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </div>
             <div class="dup-warning" id="dup-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> This part number is already in quarantine</div>
           </div>
           <div class="form-group">
-            <label for="ci-so">Sales Order # *</label>
-            <input type="text" id="ci-so" required placeholder="e.g. SO-98765">
+            <label for="ci-so">Sales Order # <span class="tag-opt">optional</span></label>
+            <input type="text" id="ci-so" placeholder="e.g. SO-98765">
           </div>
-          <div class="form-group">
-            <label for="ci-desc">Description *</label>
-            <input type="text" id="ci-desc" required placeholder="Part description">
-          </div>
-          <div class="form-group">
-            <label for="ci-from">Sent From *</label>
-            <input type="text" id="ci-from" required placeholder="Vendor or customer name">
-          </div>
-          <div class="form-group">
-            <label for="ci-by">Checked In By *</label>
-            <input type="text" id="ci-by" required placeholder="Your name">
-          </div>
-          <div class="form-group">
-            <label>Zone Location *</label>
-            <input type="hidden" id="ci-shelf" required>
+          <div class="form-group full">
+            <label>Zone Location <span class="tag-opt">optional</span></label>
+            <input type="hidden" id="ci-shelf">
             <div class="custom-select" id="shelf-select">
               <div class="custom-select-trigger" tabindex="0"><span class="placeholder">-- Select zone --</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
               <div class="custom-select-options" id="shelf-options"></div>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="ci-condition">Condition *</label>
-            <select id="ci-condition" required>
-              <option value="No damage">No damage</option>
-              <option value="Minor damage">Minor damage</option>
-              <option value="Significant damage">Significant damage</option>
-            </select>
-          </div>
-          <div class="form-group full" id="ci-damage-notes-group">
-            <label for="ci-damage-notes">Damage Notes *</label>
-            <textarea id="ci-damage-notes" placeholder="Describe the damage..."></textarea>
-          </div>
-          <div class="form-group full">
-            <label for="ci-notes">Notes (optional)</label>
-            <textarea id="ci-notes" placeholder="Any additional notes..."></textarea>
           </div>
         </div>
         <div style="margin-top:1.5rem;display:flex;gap:.5rem">
           <button type="submit" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Check In Part</button>
           <button type="reset" class="btn btn-secondary">Clear</button>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <div class="card detail-card">
+        <button type="button" class="detail-toggle" id="detail-toggle" aria-expanded="false" aria-controls="ci-detail">
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <span>Add more detail</span><span class="tag-opt">optional</span>
+        </button>
+        <div class="detail-body" id="ci-detail">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="ci-desc">Description</label>
+              <input type="text" id="ci-desc" placeholder="What is it?">
+            </div>
+            <div class="form-group">
+              <label for="ci-from">Sent From</label>
+              <input type="text" id="ci-from" placeholder="Vendor or customer name">
+            </div>
+            <div class="form-group">
+              <label for="ci-by">Checked In By</label>
+              <input type="text" id="ci-by" placeholder="Your name">
+            </div>
+            <div class="form-group">
+              <label for="ci-condition">Condition</label>
+              <select id="ci-condition">
+                <option value="No damage">No damage</option>
+                <option value="Minor damage">Minor damage</option>
+                <option value="Significant damage">Significant damage</option>
+              </select>
+            </div>
+            <div class="form-group full" id="ci-damage-notes-group">
+              <label for="ci-damage-notes">Damage Notes</label>
+              <textarea id="ci-damage-notes" placeholder="Describe the damage..."></textarea>
+            </div>
+            <div class="form-group full">
+              <label for="ci-notes">Notes</label>
+              <textarea id="ci-notes" placeholder="Anything else worth recording..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
   </div>
 
   <!-- CHECK OUT -->
@@ -1020,8 +1051,8 @@ updateClock();setInterval(updateClock,1000);
 document.getElementById('ci-condition').addEventListener('change',function(){
   const grp=document.getElementById('ci-damage-notes-group');
   const ta=document.getElementById('ci-damage-notes');
-  if(this.value!=='No damage'){grp.style.display='flex';ta.required=true;}
-  else{grp.style.display='none';ta.required=false;ta.value='';}
+  if(this.value!=='No damage'){grp.style.display='flex';}
+  else{grp.style.display='none';ta.value='';}
 });
 
 // ---- ANIMATED COUNTER ----
@@ -1177,7 +1208,7 @@ function renderActiveTable(filter=''){
     if(f==='critical')return daysBetween(p.checkinDate)>=14;
     if(f==='warning')return daysBetween(p.checkinDate)>=7&&daysBetween(p.checkinDate)<14;
     if(f==='missing')return (p.stage||'Checked In')==='Missing';
-    return p.partNumber.toLowerCase().includes(f)||p.description.toLowerCase().includes(f)||p.sentFrom.toLowerCase().includes(f)||p.checkedInBy.toLowerCase().includes(f)||(p.shelf&&('zone '+p.shelf).includes(f))||(p.salesOrder||'').toLowerCase().includes(f)||(p.stage||'checked in').toLowerCase().includes(f)||(p.condition||'').toLowerCase().includes(f);
+    return (p.partNumber||'').toLowerCase().includes(f)||(p.description||'').toLowerCase().includes(f)||(p.sentFrom||'').toLowerCase().includes(f)||(p.checkedInBy||'').toLowerCase().includes(f)||(p.shelf&&('zone '+p.shelf).includes(f))||(p.salesOrder||'').toLowerCase().includes(f)||(p.stage||'checked in').toLowerCase().includes(f)||(p.condition||'').toLowerCase().includes(f);
   }),activeSort.col,activeSort.dir,'active');
   if(!filtered.length){tbody.innerHTML='';document.getElementById('active-table').style.display='none';empty.style.display='';}
   else{document.getElementById('active-table').style.display='';empty.style.display='none';
@@ -1186,7 +1217,7 @@ function renderActiveTable(filter=''){
       const noteCount=(p.notesThread||[]).length;
       const hasDamage=p.condition&&p.condition!=='No damage';
       const rowClass=hasDamage?'damage-highlight':'status-'+statusClass(d);
-      return'<tr class="'+rowClass+'" style="cursor:pointer" onclick="openNotesModal(\''+p.id+'\')"><td>'+esc(p.partNumber)+'</td><td>'+esc(p.salesOrder||'-')+'</td><td class="td-wrap">'+esc(p.description)+'</td><td>'+fmtDate(p.checkinDate)+'</td><td>'+d+'</td><td>'+shelfBadge(p.shelf)+'</td><td>'+esc(p.sentFrom)+'</td><td>'+esc(p.checkedInBy)+'</td><td>'+statusLabel(d)+'</td><td>'+stageBadgeHtml(p.stage||'Checked In',p.id)+'</td><td>'+conditionBadge(p.condition)+(hasDamage&&p.damageNotes?' <span style="font-size:.7rem;color:var(--text-dim)" title="'+esc(p.damageNotes)+'">&#9432;</span>':'')+'</td><td class="td-wrap">'+esc(p.notes)+(noteCount?' <span style="color:var(--accent);font-size:.7rem;font-weight:700">['+noteCount+' note'+(noteCount>1?'s':'')+']</span>':'')+'</td></tr>';
+      return'<tr class="'+rowClass+'" style="cursor:pointer" onclick="openNotesModal(\''+p.id+'\')"><td>'+esc(p.partNumber)+'</td><td>'+esc(p.salesOrder||'-')+'</td><td class="td-wrap">'+esc(p.description||'-')+'</td><td>'+fmtDate(p.checkinDate)+'</td><td>'+d+'</td><td>'+shelfBadge(p.shelf)+'</td><td>'+esc(p.sentFrom||'-')+'</td><td>'+esc(p.checkedInBy||'-')+'</td><td>'+statusLabel(d)+'</td><td>'+stageBadgeHtml(p.stage||'Checked In',p.id)+'</td><td>'+conditionBadge(p.condition)+(hasDamage&&p.damageNotes?' <span style="font-size:.7rem;color:var(--text-dim)" title="'+esc(p.damageNotes)+'">&#9432;</span>':'')+'</td><td class="td-wrap">'+esc(p.notes)+(noteCount?' <span style="color:var(--accent);font-size:.7rem;font-weight:700">['+noteCount+' note'+(noteCount>1?'s':'')+']</span>':'')+'</td></tr>';
     }).join('');}
 }
 
@@ -1257,7 +1288,7 @@ async function changeStage(partId,newStage){
 function renderLogTable(filter=''){
   const log=loadData(KEYS.log),tbody=document.querySelector('#log-table tbody'),empty=document.getElementById('log-empty');
   const f=(filter||document.getElementById('search-log').value).toLowerCase();
-  const filtered=sortData(log.filter(l=>!f||l.partNumber.toLowerCase().includes(f)||l.description.toLowerCase().includes(f)||l.action.toLowerCase().includes(f)||l.user.toLowerCase().includes(f)||(l.salesOrder||'').toLowerCase().includes(f)),logSort.col,logSort.dir,'log');
+  const filtered=sortData(log.filter(l=>!f||(l.partNumber||'').toLowerCase().includes(f)||(l.description||'').toLowerCase().includes(f)||(l.action||'').toLowerCase().includes(f)||(l.user||'').toLowerCase().includes(f)||(l.salesOrder||'').toLowerCase().includes(f)),logSort.col,logSort.dir,'log');
   if(!filtered.length){tbody.innerHTML='';document.getElementById('log-table').style.display='none';empty.style.display='';}
   else{document.getElementById('log-table').style.display='';empty.style.display='none';
     tbody.innerHTML=filtered.map(l=>{
@@ -1265,7 +1296,7 @@ function renderLogTable(filter=''){
       if(l.action==='CHECK IN')ab='<span class="badge badge-checkin"><span class="badge-dot" style="background:var(--blue)"></span>CHECK IN</span>';
       else if(l.action==='CHECK OUT')ab='<span class="badge badge-checkout"><span class="badge-dot" style="background:var(--red)"></span>CHECK OUT</span>';
       else ab='<span class="badge" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)"><span class="badge-dot" style="background:var(--amber)"></span>'+esc(l.action)+'</span>';
-      return'<tr><td>'+l.logId+'</td><td>'+esc(l.partNumber)+'</td><td class="td-wrap">'+esc(l.description)+'</td><td>'+ab+'</td><td>'+fmtDate(l.date)+'</td><td>'+fmtTime(l.date)+'</td><td>'+esc(l.user)+'</td><td>'+esc(l.sentFrom||'-')+'</td><td>'+shelfBadge(l.shelf)+'</td><td>'+esc(l.salesOrder||'-')+'</td><td>'+(l.duration!=null?l.duration+' day(s)':'-')+'</td><td class="td-wrap">'+esc(l.notes||'-')+'</td></tr>';
+      return'<tr><td>'+l.logId+'</td><td>'+esc(l.partNumber)+'</td><td class="td-wrap">'+esc(l.description||'-')+'</td><td>'+ab+'</td><td>'+fmtDate(l.date)+'</td><td>'+fmtTime(l.date)+'</td><td>'+esc(l.user||'-')+'</td><td>'+esc(l.sentFrom||'-')+'</td><td>'+shelfBadge(l.shelf)+'</td><td>'+esc(l.salesOrder||'-')+'</td><td>'+(l.duration!=null?l.duration+' day(s)':'-')+'</td><td class="td-wrap">'+esc(l.notes||'-')+'</td></tr>';
     }).join('');}
 }
 
@@ -1273,7 +1304,7 @@ function renderLogTable(filter=''){
 function populateCheckoutDropdown(){
   const parts=loadData(KEYS.parts),sel=document.getElementById('co-part');
   sel.innerHTML='<option value="">-- Select a part --</option>';
-  parts.sort((a,b)=>a.partNumber.localeCompare(b.partNumber)).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.salesOrder?' ('+p.salesOrder+')':'')+' \u2014 '+p.description+' (Zone '+(p.shelf||'?')+', '+d+' days)';sel.appendChild(o);});
+  parts.sort((a,b)=>(a.partNumber||'').localeCompare(b.partNumber||'')).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.salesOrder?' ('+p.salesOrder+')':'')+' \u2014 '+(p.description||'no description')+' (Zone '+(p.shelf||'?')+', '+d+' days)';sel.appendChild(o);});
 }
 
 // ---- NOTES THREAD (checkout page) ----
@@ -1345,7 +1376,7 @@ function openShelfModal(shelfNum){
   document.getElementById('shelf-modal-title').textContent='Zone '+shelfNum+' \u2014 '+parts.length+' Part'+(parts.length!==1?'s':'');
   document.getElementById('shelf-modal-list').innerHTML=parts.map(p=>{
     const d=daysBetween(p.checkinDate);const clr=d>=14?'var(--red)':'var(--text-dim)';
-    return'<li><div><span class="shelf-detail-part">'+esc(p.partNumber)+(p.salesOrder?' ('+esc(p.salesOrder)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description)+' \u2014 '+esc(p.sentFrom)+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
+    return'<li><div><span class="shelf-detail-part">'+esc(p.partNumber)+(p.salesOrder?' ('+esc(p.salesOrder)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description||'no description')+(p.sentFrom?' \u2014 '+esc(p.sentFrom):'')+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
   }).join('');
   const o=document.getElementById('shelf-modal-overlay');o.style.display='flex';requestAnimationFrame(()=>o.classList.add('show'));
 }
@@ -1374,27 +1405,60 @@ function validateRequired(fields){
   if(f)f.addEventListener('reset',()=>{f.querySelectorAll('.field-invalid').forEach(el=>el.classList.remove('field-invalid'));document.querySelectorAll('.custom-select.field-invalid').forEach(el=>el.classList.remove('field-invalid'));});
 });
 
+// ---- AUTO PART NUMBER ----
+// Part numbers are assigned, not typed. Take the last part CHECKED IN, keep its prefix
+// and zero-padding, and step the trailing number up by one. Only check-ins count: a
+// check-out or stage change is not "the last part in", so it must not set the prefix.
+const DEFAULT_PART_PREFIX='CSP-';
+function parsePartNumber(v){
+  const m=/^(.*?)(\d+)\s*$/.exec(String(v||'').trim());
+  return m?{prefix:m[1],num:parseInt(m[2],10),pad:m[2].length}:null;
+}
+function nextPartNumber(){
+  const checkins=[],everSeen=[];
+  loadData(KEYS.parts).forEach(p=>{checkins.push({v:p.partNumber,t:p.checkinDate});everSeen.push(p.partNumber);});
+  loadData(KEYS.log).forEach(l=>{
+    everSeen.push(l.partNumber);
+    if(l.action==='CHECK IN')checkins.push({v:l.partNumber,t:l.date});
+  });
+  checkins.sort((a,b)=>new Date(b.t||0)-new Date(a.t||0));
+  let last=null;
+  for(const x of checkins){const q=parsePartNumber(x.v);if(q){last=q;break;}}
+  if(!last)return DEFAULT_PART_PREFIX+'001';
+  // never reuse a number: scan every part number ever recorded under that prefix,
+  // including checked-out ones, not just the newest
+  let max=last.num;
+  everSeen.forEach(v=>{const q=parsePartNumber(v);if(q&&q.prefix===last.prefix&&q.num>max)max=q.num;});
+  return last.prefix+String(max+1).padStart(Math.max(last.pad,3),'0');
+}
+function fillNextPartNumber(){
+  const el=document.getElementById('ci-partnum');
+  if(!el)return;
+  el.value=nextPartNumber();
+  const dup=document.getElementById('dup-warning');
+  if(dup){
+    const v=el.value.toLowerCase();
+    dup.style.display=loadData(KEYS.parts).some(p=>(p.partNumber||'').toLowerCase()===v)?'flex':'none';
+  }
+}
+
+// ---- MORE DETAIL PANEL ----
+(function(){
+  const btn=document.getElementById('detail-toggle'),body=document.getElementById('ci-detail');
+  if(!btn||!body)return;
+  function setOpen(open){btn.setAttribute('aria-expanded',open?'true':'false');body.classList.toggle('open',open);}
+  btn.addEventListener('click',()=>setOpen(btn.getAttribute('aria-expanded')!=='true'));
+  const f=document.getElementById('checkin-form');
+  if(f)f.addEventListener('reset',()=>setOpen(false));
+})();
+
 // ---- CHECK IN ----
-document.getElementById('ci-partnum').addEventListener('input',function(){
-  const v=this.value.trim().toLowerCase(),parts=loadData(KEYS.parts);
-  document.getElementById('dup-warning').style.display=parts.some(p=>p.partNumber.toLowerCase()===v)?'flex':'none';
-});
 document.getElementById('checkin-form').addEventListener('submit',async function(e){
   e.preventDefault();
+  // Nothing on this form is required. A part number is always assigned, and every other
+  // field is stored as an empty string when left blank so readers never see undefined.
+  const partNumber=document.getElementById('ci-partnum').value.trim()||nextPartNumber();
   const condition=document.getElementById('ci-condition').value;
-  const required=[
-    {el:document.getElementById('ci-partnum'),label:'Part Number'},
-    {el:document.getElementById('ci-so'),label:'Sales Order #'},
-    {el:document.getElementById('ci-desc'),label:'Description'},
-    {el:document.getElementById('ci-from'),label:'Sent From'},
-    {el:document.getElementById('ci-by'),label:'Checked In By'},
-    {el:document.getElementById('ci-shelf'),label:'Zone Location',mark:document.getElementById('shelf-select')}
-  ];
-  if(condition!=='No damage')required.push({el:document.getElementById('ci-damage-notes'),label:'Damage Notes'});
-  const missing=validateRequired(required);
-  if(missing.length){showToast('Missing required: '+missing.join(', '),'warning');return;}
-
-  const partNumber=document.getElementById('ci-partnum').value.trim();
   const salesOrder=document.getElementById('ci-so').value.trim()||null;
   const description=document.getElementById('ci-desc').value.trim();
   const sentFrom=document.getElementById('ci-from').value.trim();
@@ -1404,7 +1468,7 @@ document.getElementById('checkin-form').addEventListener('submit',async function
   const notes=document.getElementById('ci-notes').value.trim();
 
   const parts=loadData(KEYS.parts);
-  if(parts.some(p=>p.partNumber.toLowerCase()===partNumber.toLowerCase())){
+  if(parts.some(p=>(p.partNumber||'').toLowerCase()===partNumber.toLowerCase())){
     const ok=await showModal('Duplicate Part Number','Part "'+partNumber+'" is already in quarantine. Check in another?');if(!ok)return;}
   const now=new Date().toISOString();
   parts.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),partNumber,description,checkinDate:now,sentFrom,checkedInBy,shelf,notes,notesThread:[],salesOrder,stage:'Checked In',condition,damageNotes});
@@ -1459,7 +1523,7 @@ function exportLogCSV(){
 }
 
 // ---- REFRESH ALL ----
-function refreshAll(){renderDashboard();renderActiveTable(document.getElementById('search-active').value);renderLogTable(document.getElementById('search-log').value);populateCheckoutDropdown();}
+function refreshAll(){renderDashboard();renderActiveTable(document.getElementById('search-active').value);renderLogTable(document.getElementById('search-log').value);populateCheckoutDropdown();fillNextPartNumber();}
 
 // ---- INIT (Firebase real-time + anonymous auth) ----
 (function(){
