@@ -146,3 +146,41 @@ def _function_body(html, name):
             if depth == 0:
                 return html[start:j + 1]
     raise AssertionError(f"could not parse body of {name}")
+
+
+# ------------------------------------------------- save failures stay visible
+
+
+def test_no_swallowed_save(html):
+    '''A rejected write was discarded, so a check-in could look saved and never persist.'''
+    assert "fbRef.set(DB).catch(()=>{})" not in html
+
+
+def test_save_surfaces_rejections(html):
+    body = _function_body(html, "saveToServer")
+    assert ".catch(" in body
+    assert "showSaveAlert(" in body
+    assert "showToast(" in body
+
+
+def test_save_watchdog_covers_a_stalled_write(html):
+    '''A promise that never settles is as invisible as one that rejects.'''
+    body = _function_body(html, "saveToServer")
+    assert "_saveWatchdog" in body
+
+
+def test_save_alert_banner_is_present(html):
+    assert 'id="save-alert"' in html
+    assert 'role="alert"' in html
+    for fn in ("showSaveAlert", "clearSaveAlert", "retrySave"):
+        assert f"function {fn}(" in html
+
+
+def test_restore_uses_the_guarded_save(html):
+    body = _function_body(html, "restoreData")
+    assert "saveToServer()" in body
+    assert "fbRef.set(" not in body
+
+
+def test_save_alert_is_hidden_when_printing(html):
+    assert ".save-alert{display:none!important}" in html

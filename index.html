@@ -414,9 +414,17 @@ body.kiosk-mode .kpi{padding:1.5rem 1.4rem}
 #ci-damage-notes-group{display:none}
 
 /* PRINT */
+.save-alert{position:sticky;top:0;z-index:900;display:none;align-items:center;gap:.7rem;padding:.7rem 1.75rem;background:var(--red-bg);border-bottom:2px solid var(--red);color:#7f1d1d;font-size:.85rem}
+.save-alert.show{display:flex}
+.save-alert.warn{background:var(--amber-bg);border-bottom-color:var(--amber);color:#78350f}
+.save-alert svg{flex-shrink:0}
+.save-alert .sa-msg{flex:1;min-width:0;font-weight:700}
+.save-alert .sa-detail{font-weight:500;opacity:.75}
+.save-alert button{flex-shrink:0;background:#fff;border:1px solid currentColor;color:inherit;font:inherit;font-weight:700;padding:.35rem .8rem;border-radius:6px;cursor:pointer}
+.save-alert button:hover{background:rgba(255,255,255,.65)}
 @media print{
   body{background:#fff!important;color:#000!important}
-  header,nav,.actions-bar,.btn,.header-actions,.toast,.modal-overlay,.stage-dd-menu{display:none!important}
+  header,nav,.actions-bar,.btn,.header-actions,.toast,.modal-overlay,.stage-dd-menu,.save-alert{display:none!important}
   .container{max-width:100%;padding:0}
   .card{border:1px solid #ddd!important;box-shadow:none!important;background:#fff!important;break-inside:avoid;animation:none!important}
   .card h2{color:#333!important}
@@ -481,6 +489,12 @@ body.readonly-mode .readonly-banner{display:flex}
 </style>
 </head>
 <body>
+
+<div class="save-alert" id="save-alert" role="alert" aria-live="assertive">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+  <span class="sa-msg"></span>
+  <button type="button" onclick="retrySave()">Retry now</button>
+</div>
 
 <header>
   <img src="FBI_Logo.FlameONLY.png" alt="Fouts Bros" class="logo">
@@ -837,12 +851,34 @@ function loadData(k){return DB[k]||[];}
 function saveData(k,d){DB[k]=d;debouncedSave();}
 function getNextLogId(){DB.logId=(DB.logId||0)+1;return DB.logId;}
 
-let _saveTimer=null;
+let _saveTimer=null,_savePending=0,_saveWatchdog=null;
 function debouncedSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(saveToServer,50);}
 function saveToServer(){
   clearTimeout(_saveTimer);
-  fbRef.set(DB).catch(()=>{});
+  // A write that never settles is as silent as one that fails, so watch for both.
+  _savePending++;
+  clearTimeout(_saveWatchdog);
+  _saveWatchdog=setTimeout(()=>{if(_savePending)showSaveAlert('warn','Still trying to save. Leave this page open.','');},8000);
+  return fbRef.set(DB).then(()=>{
+    _savePending--;
+    if(!_savePending){clearTimeout(_saveWatchdog);clearSaveAlert();}
+  }).catch(err=>{
+    _savePending--;
+    clearTimeout(_saveWatchdog);
+    const code=(err&&(err.code||err.message))||'unknown error';
+    showSaveAlert('error','This change did NOT save. What is on screen is ahead of the database.',code);
+    showToast('Save failed: '+code,'error');
+    console.error('[quarantine] save rejected:',err);
+  });
 }
+function retrySave(){showSaveAlert('warn','Retrying...','');saveToServer();}
+function showSaveAlert(kind,msg,detail){
+  const el=document.getElementById('save-alert');if(!el)return;
+  el.className='save-alert show'+(kind==='warn'?' warn':'');
+  const m=el.querySelector('.sa-msg');m.textContent=msg;
+  if(detail){const d=document.createElement('span');d.className='sa-detail';d.textContent=' ('+detail+')';m.appendChild(d);}
+}
+function clearSaveAlert(){const el=document.getElementById('save-alert');if(el)el.className='save-alert';}
 
 // ---- AUDIT LOG (append-only) ----
 function appendLog(entry){
@@ -871,7 +907,7 @@ async function restoreData(e){
     const ok=await showModal('Restore Backup','This will replace ALL current data with the backup from '+(data.exportedAt?new Date(data.exportedAt).toLocaleString():'unknown date')+'. This includes '+data.parts.length+' active part(s) and '+data.log.length+' log record(s). Continue?');
     if(!ok){e.target.value='';return;}
     DB.parts=data.parts;DB.log=data.log;DB.logId=parseInt(data.logId)||0;
-    fbRef.set(DB).catch(()=>{});
+    saveToServer();
     refreshAll();showToast('Restored '+data.parts.length+' parts and '+data.log.length+' log records','success');
   }catch(err){showToast('Invalid backup file: '+err.message,'error');}
   e.target.value='';
