@@ -330,3 +330,29 @@ def test_header_only_offers_print_and_kiosk(html):
 
 def test_export_csv_is_still_offered(html):
     assert html.count("Export CSV") >= 2, "both tables should still export CSV"
+
+
+def test_tab_change_clears_the_search_boxes(html):
+    """Clicking Critical on the dashboard left "critical" in the Active search.
+
+    Coming back to that tab later showed a filtered table with no sign why, which
+    reads as an empty quarantine.
+    """
+    body = _function_body(html, "switchTab")
+    assert "search-active" in body and "search-log" in body, (
+        "switchTab must clear both search boxes"
+    )
+    assert "tabName!==_currentTab" in body.replace(" ", ""), (
+        "clear on a real tab change only, so clicking the current tab keeps what was typed"
+    )
+
+
+def test_kpi_tiles_preset_the_filter_after_switching(html):
+    """The tiles rely on switchTab running first; reversing the order would self-clear."""
+    for word in ("critical", "missing"):
+        tile = re.search(r'onclick="switchTab\(\'active\'\);[^"]*' + word + r'[^"]*"', html)
+        assert tile, f"the {word} tile no longer switches tabs before presetting the search"
+        call = tile.group(0)
+        assert call.index("switchTab") < call.index("search-active"), (
+            f"the {word} tile presets the search before switching tabs; the switch would wipe it"
+        )

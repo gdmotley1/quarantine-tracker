@@ -981,7 +981,21 @@ function showStageModal(title,body,fieldsHtml){
 function closeStageModal(){const o=document.getElementById('stage-modal-overlay');o.classList.remove('show');setTimeout(()=>o.style.display='none',300);}
 
 // ---- TABS ----
+// The app opens on the dashboard, and the nav marks it active in the markup.
+let _currentTab='dashboard';
 function switchTab(tabName){
+  // A filter left in a search box makes the next visit look empty with no sign why:
+  // the Critical tile drops "critical" into the Active search, and it used to stay
+  // there until someone cleared it by hand. Clear on a real tab change only, so
+  // clicking the tab you are already on does not wipe what you just typed. The
+  // Critical and Missing tiles call switchTab BEFORE presetting the box, so they
+  // still filter correctly.
+  if(tabName!==_currentTab){
+    ['search-active','search-log'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    renderActiveTable('');
+    renderLogTable('');
+  }
+  _currentTab=tabName;
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   const btn=document.querySelector('nav button[data-tab="'+tabName+'"]');
