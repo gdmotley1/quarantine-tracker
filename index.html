@@ -51,9 +51,10 @@ header{background:#0f172a;padding:.8rem 1.75rem;display:flex;align-items:center;
 .logo{height:48px;width:auto;transition:transform .2s var(--ease)}
 .logo:hover{transform:translateY(-1px)}
 .brand{flex:1;min-width:0}
-.brand h1{font-size:1.35rem;font-weight:800;letter-spacing:-.2px;color:#fff}
-.brand h1 span{color:#f87171;font-weight:800}
-.brand-sub{font-size:.7rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.5px;margin-top:3px;font-weight:600;white-space:nowrap}
+.brand-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.62);white-space:nowrap}
+.brand-eyebrow span{color:#f87171}
+.brand h1{font-size:1.5rem;font-weight:800;letter-spacing:-.3px;color:#fff;margin-top:2px;line-height:1.15}
+@media(max-width:900px){.brand h1{font-size:1.15rem}}
 .header-divider{width:1px;height:34px;background:rgba(255,255,255,.14);flex-shrink:0}
 .header-right{text-align:right}
 .header-clock{font-size:.78rem;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums;font-weight:500}
@@ -495,8 +496,8 @@ body.readonly-mode .readonly-banner{display:flex}
   <img src="FBI_Logo.FlameONLY.png" alt="Fouts Bros" class="logo">
   <div class="header-divider"></div>
   <div class="brand">
-    <h1>FOUTS BROS <span>INC</span></h1>
-    <div class="brand-sub">Customer Part Quarantine Tracker</div>
+    <div class="brand-eyebrow">FOUTS BROS <span>INC</span></div>
+    <h1>Customer Part Quarantine Tracker</h1>
   </div>
   <div class="header-right">
     <div class="header-clock" id="clock"></div>
