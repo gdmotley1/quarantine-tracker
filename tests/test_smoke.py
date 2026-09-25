@@ -270,3 +270,63 @@ def test_sample_data_fills_the_required_fields():
         assert empty not in script, (
             f"a sample part leaves {empty} blank; check-in has required it since 2026-09-25"
         )
+
+
+def test_stages_are_only_the_three_that_exist(html):
+    """Staged and Installed were removed; Check Out is terminal.
+
+    The 'Mark as Installed' branch survived that removal for months, complete with
+    a QC sign-off and truck ID prompt, unreachable because changeStage is only
+    called from a dropdown built off STAGES.
+    """
+    assert "const STAGES=['Checked In','Escalated','Missing'];" in html, (
+        "STAGES is the single source of truth for stages"
+    )
+    for dead in ("Installed", "Staged", "qcSignOff", "truckId"):
+        assert dead not in html, f"dead stage machinery is back: {dead}"
+
+
+def test_no_dead_unit_number_field(html):
+    """Unit # became Sales Order # in Rev L; the log kept stamping an empty unitNumber."""
+    assert "unitNumber" not in html, "the dead unitNumber field is back in the audit log"
+
+
+# --------------------------------------------------------------- header + menus
+
+
+def test_stage_menu_escapes_the_scrolling_table(html):
+    """.table-wrap sets overflow-x, which clipped the menu at the section's bottom edge.
+
+    An absolutely positioned menu is cut off by that wrapper; a fixed one is not.
+    """
+    assert ".stage-dd-menu{position:fixed" in html, (
+        "the stage menu is positioned inside the scrolling wrapper again; it will be clipped"
+    )
+    body = _function_body(html, "toggleStageDropdown")
+    assert "getBoundingClientRect" in body, "a fixed menu has to be placed against the badge"
+    assert "innerHeight" in body, "the menu must flip above the badge near the bottom of the window"
+
+
+def test_stage_menu_closes_on_scroll(html):
+    """A fixed menu does not travel with the scrolling ancestor it was placed against."""
+    assert "window.addEventListener('scroll',closeAllStageDropdowns,true)" in html, (
+        "the stage menu must close on scroll, or it detaches from its row"
+    )
+
+
+def test_header_only_offers_print_and_kiosk(html):
+    """Grant, 2026-09-25: the floor gets Print and Export CSV, nothing else.
+
+    backupData and restoreData stay in the file on purpose, reachable from the
+    console, because they are the only way to pull a full JSON copy of the log.
+    """
+    header = html[html.index('<div class="header-actions">'):html.index('</header>')]
+    assert "backupData()" not in header, "Backup is back in the header"
+    assert "restore-input').click()" not in header, "Restore is back in the header"
+    assert "printView()" in header, "Print is missing from the header"
+    for fn in ("function backupData", "async function restoreData"):
+        assert fn in html, f"{fn} was deleted; it is the console-only escape hatch"
+
+
+def test_export_csv_is_still_offered(html):
+    assert html.count("Export CSV") >= 2, "both tables should still export CSV"

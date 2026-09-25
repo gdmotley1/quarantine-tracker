@@ -258,8 +258,6 @@ td.td-wrap{white-space:normal;min-width:140px;max-width:240px}
 .badge-stage{padding:.25rem .6rem;border-radius:6px;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:inline-flex;align-items:center;gap:.3rem;cursor:pointer;transition:filter .15s var(--ease)}
 .badge-stage:hover{filter:brightness(.97)}
 .badge-stage-checkedin{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
-.badge-stage-staged{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
-.badge-stage-installed{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
 .badge-stage-missing{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
 .badge-stage-escalated{background:var(--purple-bg);color:var(--purple);border:1px solid #e9d5ff}
 
@@ -271,7 +269,7 @@ td.td-wrap{white-space:normal;min-width:140px;max-width:240px}
 
 /* INLINE STAGE DROPDOWN */
 .stage-dd-wrap{position:relative;display:inline-block}
-.stage-dd-menu{position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid var(--border);border-radius:8px;padding:.25rem 0;min-width:160px;z-index:60;box-shadow:var(--shadow-lg);display:none;animation:slideDown .2s var(--ease-out)}
+.stage-dd-menu{position:fixed;background:#fff;border:1px solid var(--border);border-radius:8px;padding:.25rem 0;min-width:160px;z-index:60;box-shadow:var(--shadow-lg);display:none;animation:slideDown .2s var(--ease-out)}
 .stage-dd-menu.open{display:block}
 .stage-dd-menu button{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;background:none;border:none;color:var(--text-dim);padding:.5rem .75rem;font-size:.78rem;cursor:pointer;transition:all .15s var(--ease)}
 .stage-dd-menu button:hover{background:#f1f5f9;color:var(--text)}
@@ -503,14 +501,6 @@ body.readonly-mode .readonly-banner{display:flex}
   <div class="header-right">
     <div class="header-clock" id="clock"></div>
     <div class="header-actions">
-      <button class="btn btn-ghost" onclick="backupData()" title="Backup data">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Backup
-      </button>
-      <button class="btn btn-ghost" onclick="document.getElementById('restore-input').click()" title="Restore data">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.64-11.36L1 10"/></svg>
-        Restore
-      </button>
       <button class="btn btn-ghost" onclick="printView()" title="Print current view">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
         Print
@@ -789,7 +779,6 @@ body.readonly-mode .readonly-banner{display:flex}
 const READONLY = new URLSearchParams(window.location.search).get('view') === 'readonly';
 if (READONLY) {
   document.querySelectorAll('nav button[data-tab="checkin"],nav button[data-tab="checkout"]').forEach(b => b.style.display = 'none');
-  document.querySelectorAll('.header-actions .btn-ghost').forEach(b => { if(!b.textContent.includes('Kiosk') && !b.textContent.includes('Print')) b.style.display = 'none'; });
   document.body.classList.add('readonly-mode');
 }
 
@@ -887,6 +876,11 @@ function appendLog(entry){
 function simpleHash(str){let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}return h.toString(36);}
 
 // ---- BACKUP / RESTORE ----
+// Deliberately not in the header (Grant, 2026-09-25): the floor only needs Print
+// and Export CSV. Both stay callable from the browser console, which is the only
+// way to pull a full JSON copy of the audit log or load one back in:
+//   backupData()
+//   document.getElementById('restore-input').click()
 function backupData(){
   const backup={version:3,exportedAt:new Date().toISOString(),parts:DB.parts,log:DB.log,logId:DB.logId};
   const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
@@ -926,8 +920,6 @@ function esc(s){const d=document.createElement('div');d.textContent=s||'';return
 const STAGES=['Checked In','Escalated','Missing'];
 function stageBadgeClass(stage){
   switch(stage){
-    case 'Staged':return 'badge-stage-staged';
-    case 'Installed':return 'badge-stage-installed';
     case 'Escalated':return 'badge-stage-escalated';
     case 'Missing':return 'badge-stage-missing';
     default:return 'badge-stage-checkedin';
@@ -1260,9 +1252,26 @@ function toggleStageDropdown(partId){
   if(!menu)return;
   const wasOpen=menu.classList.contains('open');
   closeAllStageDropdowns();
-  if(!wasOpen)menu.classList.add('open');
+  if(wasOpen)return;
+  // The table wrapper scrolls sideways, so it clips anything positioned inside it.
+  // The menu is fixed and placed against the badge, flipping above it near the
+  // bottom of the window and pulling back in at the right edge.
+  const badge=menu.parentElement.querySelector('.badge-stage');
+  menu.classList.add('open');
+  if(!badge)return;
+  const r=badge.getBoundingClientRect(),mh=menu.offsetHeight,mw=menu.offsetWidth;
+  const roomBelow=window.innerHeight-r.bottom;
+  const top=(roomBelow<mh+8&&r.top>mh+8)?(r.top-mh-4):(r.bottom+4);
+  let left=r.left;
+  if(left+mw>window.innerWidth-8)left=window.innerWidth-mw-8;
+  if(left<8)left=8;
+  menu.style.top=top+'px';
+  menu.style.left=left+'px';
 }
 document.addEventListener('click',()=>closeAllStageDropdowns());
+// A fixed menu does not travel with a scrolling ancestor, so close it instead.
+// Capture catches the table wrapper's own scrolling, not just the window's.
+window.addEventListener('scroll',closeAllStageDropdowns,true);
 
 async function changeStage(partId,newStage){
   closeAllStageDropdowns();
@@ -1273,19 +1282,7 @@ async function changeStage(partId,newStage){
   const oldStage=part.stage||'Checked In';
   if(oldStage===newStage)return;
 
-  if(newStage==='Installed'){
-    // Prompt for QC sign-off and truck ID
-    const fieldsHtml='<div class="form-grid" style="gap:.75rem"><div class="form-group"><label for="sm-qc">QC Sign-Off Name *</label><input type="text" id="sm-qc" placeholder="QC inspector name" style="width:100%"></div><div class="form-group"><label for="sm-truck">Truck ID *</label><input type="text" id="sm-truck" placeholder="e.g. TRK-001" style="width:100%"></div></div>';
-    const ok=await showStageModal('Mark as Installed','Part '+part.partNumber+' will be marked as Installed.',fieldsHtml);
-    if(!ok)return;
-    const qcName=document.getElementById('sm-qc').value.trim();
-    const truckId=document.getElementById('sm-truck').value.trim();
-    if(!qcName||!truckId){showToast('QC name and Truck ID are required','warning');return;}
-    part.stage=newStage;part.qcSignOff=qcName;part.truckId=truckId;
-    saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,unitNumber:part.unitNumber||'',description:part.description,action:'STAGE: Installed',date:new Date().toISOString(),user:qcName,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:'QC: '+qcName+', Truck: '+truckId});
-    showToast(part.partNumber+' marked as Installed','success');
-  } else if(newStage==='Missing'){
+  if(newStage==='Missing'){
     // Prompt for a note
     const fieldsHtml='<div class="form-group"><label for="sm-note">Note *</label><textarea id="sm-note" placeholder="Describe the situation..." style="width:100%;min-height:60px"></textarea></div>';
     const ok=await showStageModal('Mark as Missing','Part '+part.partNumber+' will be marked as Missing.',fieldsHtml);
@@ -1294,7 +1291,7 @@ async function changeStage(partId,newStage){
     if(!note){showToast('A note is required','warning');return;}
     part.stage=newStage;
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,unitNumber:part.unitNumber||'',description:part.description,action:'STAGE: Missing',date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:note});
+    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: Missing',date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:note});
     showToast(part.partNumber+' marked as Missing','warning');
   } else if(newStage==='Escalated'){
     const fieldsHtml='<div class="form-grid" style="gap:.75rem"><div class="form-group"><label for="sm-owner">Escalated To *</label><input type="text" id="sm-owner" placeholder="e.g. Lori / supplier contact" style="width:100%"></div><div class="form-group"><label for="sm-note">Reason *</label><textarea id="sm-note" placeholder="What is being escalated and why..." style="width:100%;min-height:60px"></textarea></div></div>';
@@ -1305,12 +1302,12 @@ async function changeStage(partId,newStage){
     if(!owner||!note){showToast('Escalation owner and reason are required','warning');return;}
     part.stage=newStage;part.escalatedTo=owner;
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,unitNumber:part.unitNumber||'',description:part.description,action:'STAGE: Escalated',date:new Date().toISOString(),user:owner,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:'Escalated to '+owner+': '+note});
+    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: Escalated',date:new Date().toISOString(),user:owner,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:'Escalated to '+owner+': '+note});
     showToast(part.partNumber+' marked as Escalated','warning');
   } else {
     part.stage=newStage;
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,unitNumber:part.unitNumber||'',description:part.description,action:'STAGE: '+newStage,date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:'Stage changed from '+oldStage+' to '+newStage});
+    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: '+newStage,date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:'Stage changed from '+oldStage+' to '+newStage});
     showToast(part.partNumber+' moved to '+newStage,'success');
   }
   refreshAll();
@@ -1524,7 +1521,7 @@ document.getElementById('checkout-form').addEventListener('submit',async functio
   const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'" ('+days+' day(s), '+(part.shelf||'no location')+') to SO '+salesOrder+'?');
   if(!ok)return;
   parts.splice(idx,1);saveData(KEYS.parts,parts);
-  appendLog({partNumber:part.partNumber,unitNumber:part.unitNumber||'',description:part.description,action:'CHECK OUT',date:new Date().toISOString(),user:checkedOutBy,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder,duration:days,notes});
+  appendLog({partNumber:part.partNumber,description:part.description,action:'CHECK OUT',date:new Date().toISOString(),user:checkedOutBy,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder,duration:days,notes});
   this.reset();document.getElementById('checkout-notes-card').style.display='none';
   playSound('out');showToast('Part '+part.partNumber+' checked out (SO: '+salesOrder+')','success');refreshAll();
 });
