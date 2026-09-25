@@ -12,3 +12,6 @@ backup-*.json
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Generated sample/demo data. Regenerate with scripts/make_sample_data.py
+outputs/
