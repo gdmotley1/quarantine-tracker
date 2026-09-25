@@ -244,3 +244,29 @@ def test_heatmap_is_built_from_locations(html):
     assert "heatEl.children.length!==LOCATIONS.length" in html, (
         "the heatmap still assumes a fixed cell count"
     )
+
+
+def test_sample_data_uses_the_real_locations():
+    """The generator drifted once: it still wrote zones 1-4 after the rename.
+
+    A restored part whose location is not in LOCATIONS shows a raw value in the
+    table and is counted by neither heatmap cell, so tie the two together.
+    """
+    script = (ROOT / "scripts" / "make_sample_data.py").read_text(encoding="utf-8")
+    declared = re.search(r"const LOCATIONS=\[([^\]]*)\];", INDEX.read_text(encoding="utf-8"))
+    assert declared, "LOCATIONS is missing from index.html"
+    locations = set(re.findall(r"'([^']+)'", declared.group(1)))
+    used = set(re.findall(r'loc="([^"]*)"', script))
+    used |= set(re.findall(r'"(Cage|Warehouse)"', script))
+    stray = used - locations
+    assert not stray, f"sample data writes locations the app does not know: {sorted(stray)}"
+    assert used, "sample data sets no location at all"
+
+
+def test_sample_data_fills_the_required_fields():
+    """Every sample part should look like one check-in would actually produce."""
+    script = (ROOT / "scripts" / "make_sample_data.py").read_text(encoding="utf-8")
+    for empty in ('desc=""', 'frm=""', 'by=""'):
+        assert empty not in script, (
+            f"a sample part leaves {empty} blank; check-in has required it since 2026-09-25"
+        )

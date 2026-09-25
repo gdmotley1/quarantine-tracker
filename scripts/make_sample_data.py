@@ -58,24 +58,28 @@ def stringify(obj):
 
 
 # Part numbers stay on the default CSP- prefix. Which prefix the pilot should really
-# use is still an open question in memory/decisions.md, so sample data must not
-# quietly answer it by seeding customer-coded numbers.
+# use is still an open question, so sample data must not quietly answer it by
+# seeding customer-coded numbers.
+#
+# Locations are Cage and Warehouse (Grant, 2026-09-25). They must match LOCATIONS
+# in index.html, or a restored part shows a location the heatmap cannot count.
 
 # Parts that came and went. These sit in the log only, and their numbers are lower
 # than every active part so auto-numbering still lands on the next free CSP number.
 COMPLETED = [
-    # part#, description, sent from, by, zone, SO, days-ago in, days-ago out
-    ("CSP-001", "Ryder Cab Door Decal Set", "Ryder", "Sarah L", "1", "SO-10344", 40, 33),
-    ("CSP-002", "Enterprise Fleet Logo Panel Wrap", "Enterprise", "Grant Motley", "3", "SO-10351", 35, 28),
-    ("CSP-003", "Hertz Rear Roll-Up Door Graphic", "Hertz", "Dave R", "4", "SO-10358", 30, 12),
-    ("CSP-004", "U-Haul Box Side Mural Panel", "U-Haul", "Mike T", "2", "SO-10362", 26, 20),
+    # part#, description, sent from, by, location, SO, days-ago in, days-ago out
+    ("CSP-001", "Ryder Cab Door Decal Set", "Ryder", "Sarah L", "Cage", "SO-10344", 40, 33),
+    ("CSP-002", "Enterprise Fleet Logo Panel Wrap", "Enterprise", "Grant Motley", "Warehouse", "SO-10351", 35, 28),
+    ("CSP-003", "Hertz Rear Roll-Up Door Graphic", "Hertz", "Dave R", "Warehouse", "SO-10358", 30, 12),
+    ("CSP-004", "U-Haul Box Side Mural Panel", "U-Haul", "Mike T", "Cage", "SO-10362", 26, 20),
 ]
 
 # Parts still in quarantine. Days-ago values are chosen to spread across the three
-# status bands and to exercise every stage and condition badge.
+# status bands and to exercise every stage and condition badge, across both
+# locations.
 ACTIVE = [
     dict(num="CSP-005", desc="Ryder Reflective Tape Kit", frm="Ryder", by="Sarah L",
-         zone="1", so="SO-10377", days=21, stage="Escalated",
+         loc="Cage", so="SO-10377", days=21, stage="Escalated",
          condition="Significant damage",
          damage="Two rolls arrived with the adhesive backing torn",
          notes="Replacement requested from Ryder",
@@ -83,42 +87,47 @@ ACTIVE = [
          thread=[("Sarah L", 19, "Adhesive backing torn on two rolls. Cannot install."),
                  ("Lori", 16, "Opened a claim with Ryder. Replacement ships this week.")]),
     dict(num="CSP-006", desc="Ryder DOT Number Decal", frm="Ryder", by="Sarah L",
-         zone="1", so="SO-10377", days=19, stage="Checked In",
+         loc="Cage", so="SO-10377", days=19, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-007", desc="Penske Rear Chevron Reflective Strip", frm="Penske", by="Mike T",
-         zone="2", so="SO-10381", days=16, stage="Missing",
+         loc="Cage", so="SO-10381", days=16, stage="Missing",
          condition="No damage", damage="",
-         notes="Not on the zone shelf at the Monday count",
-         thread=[("Mike T", 3, "Walked zones 1 through 4, no sign of it. Flagged as missing.")]),
+         notes="Not in the cage at the Monday count",
+         thread=[("Mike T", 3, "Checked the cage and the warehouse floor, no sign of it. Flagged as missing.")]),
     dict(num="CSP-008", desc="Penske Fleet Number Decal", frm="Penske", by="Mike T",
-         zone="2", so="SO-10381", days=12, stage="Checked In",
+         loc="Cage", so="SO-10381", days=12, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-009", desc="Enterprise Fleet Logo Panel Wrap", frm="Enterprise", by="Grant Motley",
-         zone="3", so="SO-10391", days=10, stage="Checked In",
+         loc="Warehouse", so="SO-10391", days=10, stage="Checked In",
          condition="Minor damage", damage="Corner of the wrap creased in shipping",
          notes="", thread=[]),
     dict(num="CSP-010", desc="Enterprise DOT Number Decal", frm="Enterprise", by="Grant Motley",
-         zone="3", so="SO-10391", days=9, stage="Checked In",
+         loc="Warehouse", so="SO-10391", days=9, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-011", desc="U-Haul Box Side Mural Panel", frm="U-Haul", by="Dave R",
-         zone="4", so="SO-10398", days=8, stage="Checked In",
+         loc="Warehouse", so="SO-10398", days=8, stage="Checked In",
          condition="Minor damage", damage="Small scuff along the bottom edge",
          notes="Scuff is below the body line, Dawn okayed installing it",
          thread=[("Dave R", 8, "Scuffed on arrival. Photographed before it went on the shelf.")]),
     dict(num="CSP-012", desc="Hertz Gold Stripe Accent Kit", frm="Hertz", by="Dave R",
-         zone="1", so="SO-10402", days=5, stage="Checked In",
+         loc="Cage", so="SO-10402", days=5, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-013", desc="Hertz Rear Roll-Up Door Graphic", frm="Hertz", by="Dave R",
-         zone="4", so="SO-10402", days=4, stage="Checked In",
+         loc="Warehouse", so="SO-10402", days=4, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-014", desc="Budget Cab Door Number Decal", frm="Budget", by="Sarah L",
-         zone="2", so="SO-10406", days=3, stage="Checked In",
+         loc="Cage", so="SO-10406", days=3, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
-    # The whole point of Rev P: a part logged with nothing but a zone is still a win.
-    dict(num="CSP-015", desc="", frm="", by="", zone="3", so="", days=1,
+    # Check-in has required Description, Sent From and Checked In By since
+    # 2026-09-25, so every record here carries them. Old backups still hold
+    # records with those fields blank, from the period when nothing was
+    # required; the app has to keep rendering those without throwing, which is
+    # why the blank fields are empty strings rather than nulls everywhere.
+    dict(num="CSP-015", desc="Budget Rear Door Number Decal", frm="Budget", by="Mike T",
+         loc="Warehouse", so="SO-10409", days=1,
          stage="Checked In", condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-016", desc="Penske Mudflap Logo Pair", frm="Penske", by="Mike T",
-         zone="4", so="SO-10411", days=0, stage="Checked In",
+         loc="Warehouse", so="SO-10411", days=0, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
 ]
 
@@ -126,18 +135,18 @@ ACTIVE = [
 def main():
     events = []  # (date, entry without the chain fields)
 
-    for num, desc, frm, by, zone, so, d_in, d_out in COMPLETED:
+    for num, desc, frm, by, loc, so, d_in, d_out in COMPLETED:
         in_date = iso(d_in, hour=9, minute=15)
         out_date = iso(d_out, hour=14, minute=30)
         events.append((in_date, {
             "partNumber": num, "description": desc, "action": "CHECK IN",
-            "date": in_date, "user": by, "sentFrom": frm, "shelf": zone,
+            "date": in_date, "user": by, "sentFrom": frm, "shelf": loc,
             "salesOrder": so, "duration": None, "notes": "",
         }))
         events.append((out_date, {
             "partNumber": num, "unitNumber": "", "description": desc,
             "action": "CHECK OUT", "date": out_date, "user": by, "sentFrom": frm,
-            "shelf": zone, "salesOrder": so, "duration": d_in - d_out, "notes": "",
+            "shelf": loc, "salesOrder": so, "duration": d_in - d_out, "notes": "",
         }))
 
     parts = []
@@ -150,7 +159,7 @@ def main():
             "checkinDate": in_date,
             "sentFrom": p["frm"],
             "checkedInBy": p["by"],
-            "shelf": p["zone"],
+            "shelf": p["loc"],
             "notes": p["notes"],
             "notesThread": [
                 {"author": a, "text": t, "date": iso(days, hour=10, minute=45)}
@@ -166,7 +175,7 @@ def main():
         parts.append(part)
         events.append((in_date, {
             "partNumber": p["num"], "description": p["desc"], "action": "CHECK IN",
-            "date": in_date, "user": p["by"], "sentFrom": p["frm"], "shelf": p["zone"],
+            "date": in_date, "user": p["by"], "sentFrom": p["frm"], "shelf": p["loc"],
             "salesOrder": p["so"], "duration": None, "notes": p["notes"],
         }))
 
