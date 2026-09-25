@@ -58,14 +58,40 @@ def test_inline_javascript_parses():
 
 
 # ------------------------------------------------------- check-in behaviour
-# Rev P: Grant's call. Check-in must stay dead simple. Nothing is required, the
-# part number is assigned rather than typed, and the extra fields stay tucked away.
+# Grant, 2026-09-25: this reverses Rev P's "nothing is required". Description,
+# Sent From and Checked In By are now mandatory, the detail panel is always open
+# rather than collapsed, and the part number is still assigned rather than typed.
 
 
-def test_checkin_requires_nothing(checkin_block):
-    assert "required" not in _strip_prose(checkin_block), (
-        "a required field crept back into check-in; it must stay optional"
-    )
+REQUIRED_CHECKIN_FIELDS = (
+    ("ci-desc", "Description"),
+    ("ci-from", "Sent From"),
+    ("ci-by", "Checked In By"),
+)
+
+
+def test_required_checkin_fields_are_marked(checkin_block):
+    """Each mandatory field carries the asterisk the rest of the app uses."""
+    for field_id, label in REQUIRED_CHECKIN_FIELDS:
+        assert f'<label for="{field_id}">{label} *</label>' in checkin_block, (
+            f"{label} lost its required marker"
+        )
+
+
+def test_required_checkin_fields_are_enforced(html):
+    """A marker with no validation behind it is worse than no marker."""
+    assert _function_body(html, "validateRequired"), "validateRequired is gone"
+    submit = html[html.index("// ---- CHECK IN ----"):html.index("// ---- CHECK OUT ----")]
+    assert "validateRequired([" in submit, "check-in submit no longer validates"
+    for field_id, label in REQUIRED_CHECKIN_FIELDS:
+        assert f"getElementById('{field_id}')" in submit, f"{label} is not validated"
+
+
+def test_detail_panel_is_not_collapsed(html, checkin_block):
+    """Grant asked for the extra fields to be visible, not behind a toggle."""
+    assert "detail-toggle" not in html, "the collapse toggle came back"
+    assert "detail-heading" in checkin_block, "the detail section lost its heading"
+    assert ".detail-body{display:block" in html, "the detail panel is hidden again"
 
 
 def test_part_number_is_assigned_not_typed(checkin_block):
@@ -184,3 +210,37 @@ def test_restore_uses_the_guarded_save(html):
 
 def test_save_alert_is_hidden_when_printing(html):
     assert ".save-alert{display:none!important}" in html
+
+
+# ------------------------------------------------- locations (Cage / Warehouse)
+# Grant, 2026-09-25: the four numbered zones became two named locations. The
+# underlying field is still `shelf`, so existing backups keep restoring.
+
+
+def test_locations_are_cage_and_warehouse(html):
+    assert "const LOCATIONS=['Cage','Warehouse'];" in html, (
+        "LOCATIONS is the single source of truth for the two locations"
+    )
+
+
+def test_no_numbered_zones_remain(html):
+    assert "Zone" not in html, "a 'Zone' label survived the rename"
+    assert "i<=4" not in html, "a hardcoded 1-4 zone loop survived"
+
+
+def test_location_sort_is_textual(html):
+    '''Sorting parsed shelf as an int, which collapses both names to 0.'''
+    assert "parseInt(a.shelf)" not in html, "location sort is still numeric"
+
+
+def test_location_search_matches_the_name(html):
+    assert "('zone '+p.shelf)" not in html, "search still looks for the word zone"
+    assert "(p.shelf||'').toLowerCase().includes(f)" in html, (
+        "search must match the location name"
+    )
+
+
+def test_heatmap_is_built_from_locations(html):
+    assert "heatEl.children.length!==LOCATIONS.length" in html, (
+        "the heatmap still assumes a fixed cell count"
+    )

@@ -2,7 +2,7 @@
 
 Internal web app for tracking customer-supplied parts at the Fouts Bros plant. A part
 arrives from Ryder, Penske, Enterprise, U-Haul, Hertz or Budget, sits in a taped-off
-zone until its truck is ready, then gets pulled for production. This app is the
+location until its truck is ready, then gets pulled for production. This app is the
 traceability record for that gap.
 
 **Audience:** Dawn and the warehouse floor, on a station in the shop. Not office staff,
@@ -10,12 +10,16 @@ not a reporting tool. Assume the person using it has gloves on and is in a hurry
 
 ## The rule that outranks everything
 
-**Check-in stays dead simple, and nothing on it is required.** That is Grant's explicit
-call. The part number is assigned automatically and locked; SO# and Zone are optional;
-everything else lives in the collapsed "Add more detail" panel. A part that gets logged
-with only a zone is a win, because the alternative on a busy floor is not logging it at
-all. Do not add a required field to check-in without asking Grant first. The gate
-enforces this.
+**Check-in captures who, what and where. Grant set this on 2026-09-25, reversing the
+earlier "nothing is required" rule.** Description, Sent From and Checked In By are
+required. The part number is still assigned automatically and locked, and SO# and
+Location stay optional. The extra fields are visible by default, not collapsed behind a
+toggle. Do not make one of those fields optional again, or re-hide the detail panel,
+without asking Grant first. The gate enforces both.
+
+The history matters if you are tempted to "simplify" this back: Rev P deliberately made
+check-in require nothing, on the theory that a part logged with only a zone beats a part
+not logged at all. Grant reversed it. Do not re-litigate it from the old comments.
 
 Check-OUT is the opposite and still requires SO# and a name. Pulling a part is the
 moment traceability actually matters.
@@ -46,8 +50,14 @@ months and the two drifted. It was deleted 2026-08-19. Never add a second host.
 value is null, so a null field comes back as `undefined` and any `.toLowerCase()` on it
 throws. The search filters do exactly that. The gate guards the known ones.
 
-**"Zone" is stored in a field named `shelf`.** Renaming it would mean migrating live
-records. The UI says Zone, the data says shelf. Leave it.
+**"Location" is stored in a field named `shelf`.** Renaming it would break every
+existing backup file on restore. The UI says Location, the data says shelf. Leave it.
+
+**The two locations are Cage and Warehouse** (Grant, 2026-09-25, replacing zones 1-4).
+`LOCATIONS` near the top of the script is the single source of truth: the check-in
+dropdown and the dashboard heatmap both build from it, so adding a third location is a
+one-line change. Backups taken before this date hold `shelf` values of "1" to "4";
+they still restore and simply display whatever string they carry.
 
 **Testing against the live app writes to production Firebase.** There is one database
 and no staging. Stub the write first (`fbRef.set = () => Promise.resolve()`) before
