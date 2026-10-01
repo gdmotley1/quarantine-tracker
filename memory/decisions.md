@@ -6,21 +6,24 @@ Each entry states the decision, **Why**, and **How to apply**.
 Write one the first time a real call is made. A decision that lives only in a chat
 transcript is a decision that gets quietly re-made, differently, three weeks later.
 
-## Check-in requires nothing (2026-08-19, Rev P)
+## Check-in captures who, what and where (2026-09-25, reverses Rev P)
 
-Every field on the check-in form is optional. The part number is auto-assigned and
-locked; SO# and Zone sit in the main box; Description, Sent From, Checked In By,
-Condition, Damage Notes and Notes live in a collapsed "Add more detail" panel inside
-the same card.
+Description, Sent From and Checked In By are required on check-in. The part number is
+still auto-assigned and locked. SO# and Location stay optional. Condition, Damage Notes
+and Notes are optional and sit in an "Additional Detail" section that is always open,
+inside the main check-in card, not collapsed behind a toggle.
 
-**Why:** Grant's call, for the floor. A required field on a warehouse station is not a
-data-quality control, it is a reason to skip logging the part entirely. A record with
-only a zone still tells you where the part is, which is the whole point of the app.
-Check-out is deliberately the opposite and still requires SO# and a name, because
-pulling a part is when traceability actually matters.
+**Why:** Grant's call. Rev P (2026-08-19) made every check-in field optional on the
+theory that a part logged with only a zone beats a part not logged at all. Grant
+reversed it: a record with no description, sender or name does not trace anything.
+Check-out still requires SO# and a name, because pulling a part is when traceability
+matters most.
 
-**How to apply:** never add `required` to a check-in field without asking Grant.
-`tests/test_smoke.py::test_checkin_requires_nothing` fails if one appears.
+**How to apply:** do not make Description, Sent From or Checked In By optional again,
+and do not re-collapse the detail section, without asking Grant first. Do not
+re-litigate this from Rev P's old comments or commit messages.
+`test_required_checkin_fields_are_marked`, `test_required_checkin_fields_are_enforced`
+and `test_detail_panel_is_not_collapsed` guard it.
 
 ## Blank fields are stored as empty strings, never null (2026-08-19)
 
@@ -30,7 +33,9 @@ as null comes back `undefined` on the next load, and the active/log search filte
 while making check-in optional, before it reached the floor.
 
 **How to apply:** when adding a field, write `''` for blank, and guard every reader as
-`(x||'')`. The gate asserts the known readers stay guarded.
+`(x||'')`. The gate asserts the known readers stay guarded, and
+`test_blank_sales_order_is_an_empty_string` covers Sales Order #, which was still
+written as null until 2026-10-01.
 
 ## Part numbers are assigned from the last CHECK IN only (2026-08-19)
 

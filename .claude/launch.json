@@ -4,7 +4,7 @@
     {
       "name": "quarantine-tracker",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["C:/Users/motle/quarantine-tracker/server.js"],
+      "runtimeArgs": ["C:/Users/motle/claude-code/quarantine-tracker/server.js"],
       "port": 3000
     }
   ]

@@ -2,8 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Fouts Bros Inc — Customer Part Tracker</title>
+
+<!-- Browser tab. The .ico carries 16/32/48 for older Chrome and pinned tabs. -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+
+<!-- iPad / iPhone home screen. iOS rounds the corners and composites on black,
+     so these are deliberately opaque rather than transparent. iOS ignores the
+     manifest icons, which is why apple-touch-icon is declared separately. -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- The home screen label truncates around 12 characters. -->
+<meta name="apple-mobile-web-app-title" content="Quarantine">
+
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f172a">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -29,6 +50,12 @@
 }
 html{scroll-behavior:smooth}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
+/* Saved to an iPad/iPhone home screen, viewport-fit=cover plus the black-translucent
+   status bar draws the page underneath the status bar and around the notch. Pad the
+   page by the safe-area insets, and fill the status-bar strip with the header colour
+   so its white text stays readable. Every inset is 0 in a normal browser tab. */
+body{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#0f172a;z-index:1001;pointer-events:none}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px;border:2px solid var(--bg)}
@@ -303,7 +330,7 @@ th.sortable.desc::after{content:'\25BC ';opacity:.9;color:var(--primary)}
 .empty-state p{font-size:.88rem}
 
 /* TOAST */
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#fff;color:var(--text);padding:.9rem 1.4rem;border-radius:10px;font-size:.85rem;font-weight:500;z-index:1000;box-shadow:var(--shadow-lg);border:1px solid var(--border);display:flex;align-items:center;gap:.6rem;pointer-events:none;transform:translateX(120%);opacity:0}
+.toast{position:fixed;bottom:calc(1.5rem + env(safe-area-inset-bottom,0px));right:calc(1.5rem + env(safe-area-inset-right,0px));background:#fff;color:var(--text);padding:.9rem 1.4rem;border-radius:10px;font-size:.85rem;font-weight:500;z-index:1000;box-shadow:var(--shadow-lg);border:1px solid var(--border);display:flex;align-items:center;gap:.6rem;pointer-events:none;transform:translateX(120%);opacity:0}
 .toast.show{animation:toastIn .4s var(--ease-spring) forwards}
 .toast.hide{animation:toastOut .35s var(--ease) forwards}
 .toast.success{border-color:var(--green-border)}
@@ -410,7 +437,7 @@ body.kiosk-mode .kpi{padding:1.5rem 1.4rem}
 #ci-damage-notes-group{display:none}
 
 /* PRINT */
-.save-alert{position:sticky;top:0;z-index:900;display:none;align-items:center;gap:.7rem;padding:.7rem 1.75rem;background:var(--red-bg);border-bottom:2px solid var(--red);color:#7f1d1d;font-size:.85rem}
+.save-alert{position:sticky;top:env(safe-area-inset-top,0px);z-index:900;display:none;align-items:center;gap:.7rem;padding:.7rem 1.75rem;background:var(--red-bg);border-bottom:2px solid var(--red);color:#7f1d1d;font-size:.85rem}
 .save-alert.show{display:flex}
 .save-alert.warn{background:var(--amber-bg);border-bottom-color:var(--amber);color:#78350f}
 .save-alert svg{flex-shrink:0}
@@ -419,7 +446,8 @@ body.kiosk-mode .kpi{padding:1.5rem 1.4rem}
 .save-alert button{flex-shrink:0;background:#fff;border:1px solid currentColor;color:inherit;font:inherit;font-weight:700;padding:.35rem .8rem;border-radius:6px;cursor:pointer}
 .save-alert button:hover{background:rgba(255,255,255,.65)}
 @media print{
-  body{background:#fff!important;color:#000!important}
+  body{background:#fff!important;color:#000!important;padding:0!important}
+  body::before{display:none!important}
   header,nav,.actions-bar,.btn,.header-actions,.toast,.modal-overlay,.stage-dd-menu,.save-alert{display:none!important}
   .container{max-width:100%;padding:0}
   .card{border:1px solid #ddd!important;box-shadow:none!important;background:#fff!important;break-inside:avoid;animation:none!important}
@@ -1306,7 +1334,7 @@ async function changeStage(partId,newStage){
     if(!note){showToast('A note is required','warning');return;}
     part.stage=newStage;
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: Missing',date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:note});
+    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: Missing',date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||'',duration:null,notes:note});
     showToast(part.partNumber+' marked as Missing','warning');
   } else if(newStage==='Escalated'){
     const fieldsHtml='<div class="form-grid" style="gap:.75rem"><div class="form-group"><label for="sm-owner">Escalated To *</label><input type="text" id="sm-owner" placeholder="e.g. Lori / supplier contact" style="width:100%"></div><div class="form-group"><label for="sm-note">Reason *</label><textarea id="sm-note" placeholder="What is being escalated and why..." style="width:100%;min-height:60px"></textarea></div></div>';
@@ -1317,12 +1345,12 @@ async function changeStage(partId,newStage){
     if(!owner||!note){showToast('Escalation owner and reason are required','warning');return;}
     part.stage=newStage;part.escalatedTo=owner;
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: Escalated',date:new Date().toISOString(),user:owner,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:'Escalated to '+owner+': '+note});
+    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: Escalated',date:new Date().toISOString(),user:owner,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||'',duration:null,notes:'Escalated to '+owner+': '+note});
     showToast(part.partNumber+' marked as Escalated','warning');
   } else {
     part.stage=newStage;
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: '+newStage,date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||null,duration:null,notes:'Stage changed from '+oldStage+' to '+newStage});
+    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: '+newStage,date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||'',duration:null,notes:'Stage changed from '+oldStage+' to '+newStage});
     showToast(part.partNumber+' moved to '+newStage,'success');
   }
   refreshAll();
@@ -1501,7 +1529,7 @@ document.getElementById('checkin-form').addEventListener('submit',async function
   if(missing.length){showToast('Missing required: '+missing.join(', '),'warning');return;}
   const partNumber=document.getElementById('ci-partnum').value.trim()||nextPartNumber();
   const condition=document.getElementById('ci-condition').value;
-  const salesOrder=document.getElementById('ci-so').value.trim()||null;
+  const salesOrder=document.getElementById('ci-so').value.trim();
   const description=document.getElementById('ci-desc').value.trim();
   const sentFrom=document.getElementById('ci-from').value.trim();
   const checkedInBy=document.getElementById('ci-by').value.trim();

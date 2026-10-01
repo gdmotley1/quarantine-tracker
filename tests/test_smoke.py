@@ -138,6 +138,14 @@ def test_no_unguarded_string_calls(html, expr):
     assert expr not in html, f"unguarded {expr} will throw on a blank field; wrap it in (x||'')"
 
 
+def test_blank_sales_order_is_an_empty_string(html):
+    """SO# is optional on check-in, and a blank one was still written as null."""
+    assert "getElementById('ci-so').value.trim()||null" not in html, (
+        "a blank check-in SO# is written as null; Firebase drops the key"
+    )
+    assert "salesOrder||null" not in html, "a stage change writes a null salesOrder to the log"
+
+
 # ------------------------------------------------------------------ hosting
 # GitHub Pages is the only host. The Netlify site was deleted 2026-08-19 after the
 # two copies drifted; nothing should point at it again.
@@ -289,6 +297,29 @@ def test_stages_are_only_the_three_that_exist(html):
 def test_no_dead_unit_number_field(html):
     """Unit # became Sales Order # in Rev L; the log kept stamping an empty unitNumber."""
     assert "unitNumber" not in html, "the dead unitNumber field is back in the audit log"
+
+
+# ------------------------------------------------------- home screen + icons
+
+
+def test_every_declared_icon_exists(html):
+    """A missing icon file is a silent 404 that leaves a blank home-screen tile."""
+    head = html[:html.index("</head>")]
+    refs = re.findall(r'<link rel="(?:icon|apple-touch-icon|manifest)"[^>]*href="([^"]+)"', head)
+    assert refs, "no icons are declared"
+    manifest = ROOT / "site.webmanifest"
+    refs += re.findall(r'"src":\s*"([^"]+)"', manifest.read_text(encoding="utf-8"))
+    missing = [r for r in refs if not (ROOT / r).exists()]
+    assert not missing, f"declared but not in the repo: {missing}"
+
+
+def test_status_bar_does_not_cover_the_page(html):
+    """viewport-fit=cover with a translucent status bar draws the page under it on iOS."""
+    if "viewport-fit=cover" not in html:
+        return
+    assert "env(safe-area-inset-top" in html, (
+        "viewport-fit=cover without safe-area padding puts the header under the status bar"
+    )
 
 
 # --------------------------------------------------------------- header + menus
