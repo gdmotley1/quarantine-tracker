@@ -25,6 +25,21 @@ re-litigate this from Rev P's old comments or commit messages.
 `test_required_checkin_fields_are_marked`, `test_required_checkin_fields_are_enforced`
 and `test_detail_panel_is_not_collapsed` guard it.
 
+## Check-out records where the part went (2026-10-01)
+
+Check-out requires Sales Order #, Checked Out By, Delivered To (free text, a person) and
+Business Unit (dropdown: FIRE, VAN, STC, FCV, from `BUSINESS_UNITS`). Serial # is
+optional. All of them are stored on the CHECK OUT log row, because the part record is
+deleted on check-out.
+
+**Why:** Grant's call. Check-out is when traceability matters, and "who pulled it" did
+not say who received it or which part of the business it went to. Business Unit is a
+fixed list, not free text, so the log stays consistent enough to filter and count.
+
+**How to apply:** add or rename a unit in `BUSINESS_UNITS` only, never in the markup.
+Ask Grant before making Delivered To or Business Unit optional. The `test_checkout_*`
+tests guard all of it.
+
 ## Blank fields are stored as empty strings, never null (2026-08-19)
 
 **Why:** Firebase Realtime Database drops any key whose value is null. A field written

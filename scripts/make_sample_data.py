@@ -67,12 +67,17 @@ def stringify(obj):
 # Parts that came and went. These sit in the log only, and their numbers are lower
 # than every active part so auto-numbering still lands on the next free CSP number.
 COMPLETED = [
-    # part#, description, sent from, by, location, SO, days-ago in, days-ago out, serial #
+    # part#, description, sent from, by, location, SO, days-ago in, days-ago out, serial #,
+    # delivered to, business unit
     # Serial # is optional on check-out, so two of these leave it blank.
-    ("CSP-001", "Ryder Cab Door Decal Set", "Ryder", "Sarah L", "Cage", "SO-10344", 40, 33, "RY-55120-0417"),
-    ("CSP-002", "Enterprise Fleet Logo Panel Wrap", "Enterprise", "Grant Motley", "Warehouse", "SO-10351", 35, 28, ""),
-    ("CSP-003", "Hertz Rear Roll-Up Door Graphic", "Hertz", "Dave R", "Warehouse", "SO-10358", 30, 12, "HZ-2209-8813"),
-    ("CSP-004", "U-Haul Box Side Mural Panel", "U-Haul", "Mike T", "Cage", "SO-10362", 26, 20, ""),
+    ("CSP-001", "Ryder Cab Door Decal Set", "Ryder", "Sarah L", "Cage", "SO-10344", 40, 33, "RY-55120-0417",
+     "Marcus J", "VAN"),
+    ("CSP-002", "Enterprise Fleet Logo Panel Wrap", "Enterprise", "Grant Motley", "Warehouse", "SO-10351", 35, 28, "",
+     "Tasha W", "STC"),
+    ("CSP-003", "Hertz Rear Roll-Up Door Graphic", "Hertz", "Dave R", "Warehouse", "SO-10358", 30, 12, "HZ-2209-8813",
+     "Marcus J", "FCV"),
+    ("CSP-004", "U-Haul Box Side Mural Panel", "U-Haul", "Mike T", "Cage", "SO-10362", 26, 20, "",
+     "Luis P", "FIRE"),
 ]
 
 # Parts still in quarantine. Days-ago values are chosen to spread across the three
@@ -136,7 +141,7 @@ ACTIVE = [
 def main():
     events = []  # (date, entry without the chain fields)
 
-    for num, desc, frm, by, loc, so, d_in, d_out, serial in COMPLETED:
+    for num, desc, frm, by, loc, so, d_in, d_out, serial, to, bu in COMPLETED:
         in_date = iso(d_in, hour=9, minute=15)
         out_date = iso(d_out, hour=14, minute=30)
         events.append((in_date, {
@@ -148,6 +153,7 @@ def main():
             "partNumber": num, "description": desc,
             "action": "CHECK OUT", "date": out_date, "user": by, "sentFrom": frm,
             "shelf": loc, "salesOrder": so, "serialNumber": serial,
+            "deliveredTo": to, "businessUnit": bu,
             "duration": d_in - d_out, "notes": "",
         }))
 

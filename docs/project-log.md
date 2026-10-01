@@ -63,3 +63,15 @@ Testing note: detaching the live listener with `fbRef.off()` right after a reloa
 enough. Anonymous sign-in finishes later and attaches a fresh listener, which pulled
 production rows into the in-memory test copy. Writes were stubbed throughout and the
 live database was confirmed untouched, but stub after the app has loaded, not before.
+
+## 2026-10-01: Delivered To and Business Unit on check-out
+
+Grant asked for two more mandatory check-out fields: who the part is Delivered To (free
+text) and the Business Unit (dropdown). He chose a fixed list over free text, and gave the
+units as FIRE, VAN, STC, FCV in caps. The Fouts_AOP cover schema lists Fire, Tow, Service
+and Aftermarket, which is a different (planning) taxonomy; do not merge the two. Both
+fields ride on the CHECK OUT log row next to Serial #, and show in the confirm dialog, two
+new Movement Log columns, the log search and the log CSV. Recorded in decisions.md.
+
+Tested on sample data with the safer order: wait for `_fbReady`, then `fbRef.off()` and
+stub `fbRef.set`. Production was re-read afterwards and was untouched.

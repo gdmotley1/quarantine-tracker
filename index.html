@@ -642,7 +642,7 @@ body.readonly-mode .readonly-banner{display:flex}
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="search-log" placeholder="Search log..."></div>
         <button class="btn btn-outline btn-sm" onclick="exportLogCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
       </div>
-      <div class="table-wrap"><table id="log-table"><thead><tr><th class="sortable" data-sort="logId">Log ID</th><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="action">Action</th><th class="sortable desc" data-sort="date">Date</th><th>Time</th><th class="sortable" data-sort="user">User</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="shelf">Location</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="serialNumber">Serial #</th><th class="sortable" data-sort="duration">Duration</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="log-table"><thead><tr><th class="sortable" data-sort="logId">Log ID</th><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="action">Action</th><th class="sortable desc" data-sort="date">Date</th><th>Time</th><th class="sortable" data-sort="user">User</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="shelf">Location</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="serialNumber">Serial #</th><th class="sortable" data-sort="deliveredTo">Delivered To</th><th class="sortable" data-sort="businessUnit">Business Unit</th><th class="sortable" data-sort="duration">Duration</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
       <div class="empty-state" id="log-empty" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No movement records yet</p></div>
     </div>
   </div>
@@ -729,6 +729,8 @@ body.readonly-mode .readonly-banner{display:flex}
           <div class="form-group full"><label for="co-part">Select Part *</label><select id="co-part" required><option value="">-- Select a part --</option></select></div>
           <div class="form-group"><label for="co-so">Sales Order # *</label><input type="text" id="co-so" required placeholder="e.g. SO-98765"></div>
           <div class="form-group"><label for="co-by">Checked Out By *</label><input type="text" id="co-by" required placeholder="Your name"></div>
+          <div class="form-group"><label for="co-to">Delivered To *</label><input type="text" id="co-to" required placeholder="Who is receiving the part"></div>
+          <div class="form-group"><label for="co-bu">Business Unit *</label><select id="co-bu" required><option value="">-- Select business unit --</option></select></div>
           <div class="form-group"><label for="co-serial">Serial # <span class="tag-opt">optional</span></label><input type="text" id="co-serial" placeholder="Serial number on the part"></div>
           <div class="form-group full"><label for="co-notes">Notes (optional)</label><textarea id="co-notes" placeholder="Any additional notes..."></textarea></div>
         </div>
@@ -860,6 +862,8 @@ const KEYS={parts:'parts',log:'log',logId:'logId'};
 let DB={parts:[],log:[],logId:0};
 // The two places a part can physically sit. Stored on the legacy `shelf` field.
 const LOCATIONS=['Cage','Warehouse'];
+// Where a pulled part is going (Grant, 2026-10-01). Builds the check-out dropdown.
+const BUSINESS_UNITS=['FIRE','VAN','STC','FCV'];
 let _fbReady=false;
 
 function loadData(k){return DB[k]||[];}
@@ -1361,7 +1365,7 @@ async function changeStage(partId,newStage){
 function renderLogTable(filter=''){
   const log=loadData(KEYS.log),tbody=document.querySelector('#log-table tbody'),empty=document.getElementById('log-empty');
   const f=(filter||document.getElementById('search-log').value).toLowerCase();
-  const filtered=sortData(log.filter(l=>!f||(l.partNumber||'').toLowerCase().includes(f)||(l.description||'').toLowerCase().includes(f)||(l.action||'').toLowerCase().includes(f)||(l.user||'').toLowerCase().includes(f)||(l.salesOrder||'').toLowerCase().includes(f)||(l.serialNumber||'').toLowerCase().includes(f)),logSort.col,logSort.dir,'log');
+  const filtered=sortData(log.filter(l=>!f||(l.partNumber||'').toLowerCase().includes(f)||(l.description||'').toLowerCase().includes(f)||(l.action||'').toLowerCase().includes(f)||(l.user||'').toLowerCase().includes(f)||(l.salesOrder||'').toLowerCase().includes(f)||(l.serialNumber||'').toLowerCase().includes(f)||(l.deliveredTo||'').toLowerCase().includes(f)||(l.businessUnit||'').toLowerCase().includes(f)),logSort.col,logSort.dir,'log');
   if(!filtered.length){tbody.innerHTML='';document.getElementById('log-table').style.display='none';empty.style.display='';}
   else{document.getElementById('log-table').style.display='';empty.style.display='none';
     tbody.innerHTML=filtered.map(l=>{
@@ -1369,7 +1373,7 @@ function renderLogTable(filter=''){
       if(l.action==='CHECK IN')ab='<span class="badge badge-checkin"><span class="badge-dot" style="background:var(--blue)"></span>CHECK IN</span>';
       else if(l.action==='CHECK OUT')ab='<span class="badge badge-checkout"><span class="badge-dot" style="background:var(--red)"></span>CHECK OUT</span>';
       else ab='<span class="badge" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)"><span class="badge-dot" style="background:var(--amber)"></span>'+esc(l.action)+'</span>';
-      return'<tr><td>'+l.logId+'</td><td>'+esc(l.partNumber)+'</td><td class="td-wrap">'+esc(l.description||'-')+'</td><td>'+ab+'</td><td>'+fmtDate(l.date)+'</td><td>'+fmtTime(l.date)+'</td><td>'+esc(l.user||'-')+'</td><td>'+esc(l.sentFrom||'-')+'</td><td>'+shelfBadge(l.shelf)+'</td><td>'+esc(l.salesOrder||'-')+'</td><td>'+esc(l.serialNumber||'-')+'</td><td>'+(l.duration!=null?l.duration+' day(s)':'-')+'</td><td class="td-wrap">'+esc(l.notes||'-')+'</td></tr>';
+      return'<tr><td>'+l.logId+'</td><td>'+esc(l.partNumber)+'</td><td class="td-wrap">'+esc(l.description||'-')+'</td><td>'+ab+'</td><td>'+fmtDate(l.date)+'</td><td>'+fmtTime(l.date)+'</td><td>'+esc(l.user||'-')+'</td><td>'+esc(l.sentFrom||'-')+'</td><td>'+shelfBadge(l.shelf)+'</td><td>'+esc(l.salesOrder||'-')+'</td><td>'+esc(l.serialNumber||'-')+'</td><td>'+esc(l.deliveredTo||'-')+'</td><td>'+esc(l.businessUnit||'-')+'</td><td>'+(l.duration!=null?l.duration+' day(s)':'-')+'</td><td class="td-wrap">'+esc(l.notes||'-')+'</td></tr>';
     }).join('');}
 }
 
@@ -1550,25 +1554,32 @@ document.getElementById('checkin-form').addEventListener('submit',async function
 });
 
 // ---- CHECK OUT ----
+(function(){
+  const sel=document.getElementById('co-bu');
+  BUSINESS_UNITS.forEach(u=>{const o=document.createElement('option');o.value=u;o.textContent=u;sel.appendChild(o);});
+})();
 document.getElementById('checkout-form').addEventListener('submit',async function(e){
   e.preventDefault();
   const missing=validateRequired([
     {el:document.getElementById('co-part'),label:'Part'},
     {el:document.getElementById('co-so'),label:'Sales Order #'},
-    {el:document.getElementById('co-by'),label:'Checked Out By'}
+    {el:document.getElementById('co-by'),label:'Checked Out By'},
+    {el:document.getElementById('co-to'),label:'Delivered To'},
+    {el:document.getElementById('co-bu'),label:'Business Unit'}
   ]);
   if(missing.length){showToast('Missing required: '+missing.join(', '),'warning');return;}
   const partId=document.getElementById('co-part').value,salesOrder=document.getElementById('co-so').value.trim(),checkedOutBy=document.getElementById('co-by').value.trim(),notes=document.getElementById('co-notes').value.trim();
   // Serial # is optional. The part record is deleted on check-out, so the serial lives
   // only on the CHECK OUT log row; blank is stored as '' like every other blank field.
   const serialNumber=document.getElementById('co-serial').value.trim();
+  const deliveredTo=document.getElementById('co-to').value.trim(),businessUnit=document.getElementById('co-bu').value;
   const parts=loadData(KEYS.parts),idx=parts.findIndex(p=>p.id===partId);
   if(idx===-1){showToast('Part not found','error');return;}
   const part=parts[idx],days=daysBetween(part.checkinDate);
-  const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'" ('+days+' day(s), '+(part.shelf||'no location')+')'+(serialNumber?', serial '+serialNumber:'')+' to SO '+salesOrder+'?');
+  const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'" ('+days+' day(s), '+(part.shelf||'no location')+')'+(serialNumber?', serial '+serialNumber:'')+' to SO '+salesOrder+', delivered to '+deliveredTo+' ('+businessUnit+')?');
   if(!ok)return;
   parts.splice(idx,1);saveData(KEYS.parts,parts);
-  appendLog({partNumber:part.partNumber,description:part.description,action:'CHECK OUT',date:new Date().toISOString(),user:checkedOutBy,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder,serialNumber,duration:days,notes});
+  appendLog({partNumber:part.partNumber,description:part.description,action:'CHECK OUT',date:new Date().toISOString(),user:checkedOutBy,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder,serialNumber,deliveredTo,businessUnit,duration:days,notes});
   this.reset();document.getElementById('checkout-notes-card').style.display='none';
   playSound('out');showToast('Part '+part.partNumber+' checked out (SO: '+salesOrder+')','success');refreshAll();
 });
@@ -1591,8 +1602,8 @@ function exportActiveCSV(){
 }
 function exportLogCSV(){
   const log=loadData(KEYS.log);if(!log.length){showToast('No data','warning');return;}
-  const rows=[['Log ID','Part Number','Description','Action','Date','Time','User','Sent From','Location','Sales Order','Serial Number','Duration (days)','Notes','Hash']];
-  log.forEach(l=>{rows.push([l.logId,l.partNumber,l.description,l.action,fmtDate(l.date),fmtTime(l.date),l.user,l.sentFrom||'',(l.shelf||''),l.salesOrder||'',l.serialNumber||'',l.duration!=null?l.duration:'',l.notes||'',l.hash||'']);});
+  const rows=[['Log ID','Part Number','Description','Action','Date','Time','User','Sent From','Location','Sales Order','Serial Number','Delivered To','Business Unit','Duration (days)','Notes','Hash']];
+  log.forEach(l=>{rows.push([l.logId,l.partNumber,l.description,l.action,fmtDate(l.date),fmtTime(l.date),l.user,l.sentFrom||'',(l.shelf||''),l.salesOrder||'',l.serialNumber||'',l.deliveredTo||'',l.businessUnit||'',l.duration!=null?l.duration:'',l.notes||'',l.hash||'']);});
   dlCSV('foutsbros-quarantine-log-'+new Date().toISOString().slice(0,10)+'.csv',rows);showToast('CSV exported','success');
 }
 

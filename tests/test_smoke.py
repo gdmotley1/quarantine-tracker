@@ -153,6 +153,56 @@ def test_checkout_serial_is_shown_searched_and_exported(html):
     assert "'Serial Number'" in html and "l.serialNumber||''" in html, "the log CSV dropped the serial"
 
 
+REQUIRED_CHECKOUT_FIELDS = (
+    ("co-so", "Sales Order #"),
+    ("co-by", "Checked Out By"),
+    ("co-to", "Delivered To"),
+    ("co-bu", "Business Unit"),
+)
+
+
+def test_required_checkout_fields_are_marked_and_enforced(html, checkout_block):
+    """Grant, 2026-10-01: Delivered To and Business Unit joined SO# and name."""
+    submit = html[html.index("// ---- CHECK OUT ----"):html.index("// ---- SEARCH ----")]
+    for field_id, label in REQUIRED_CHECKOUT_FIELDS:
+        assert f'<label for="{field_id}">{label} *</label>' in checkout_block, (
+            f"{label} lost its required marker"
+        )
+        assert f"{{el:document.getElementById('{field_id}'),label:'{label}'}}" in submit, (
+            f"{label} is marked required but not validated"
+        )
+
+
+def test_business_units_are_the_single_source(html, checkout_block):
+    assert "const BUSINESS_UNITS=['FIRE','VAN','STC','FCV'];" in html, (
+        "BUSINESS_UNITS is the single source of truth for the check-out dropdown"
+    )
+    select = re.search(r'<select id="co-bu"[^>]*>(.*?)</select>', checkout_block, re.S)
+    assert select, "the Business Unit dropdown is missing"
+    assert select.group(1).count("<option") == 1, (
+        "business units are hardcoded in the markup; add them to BUSINESS_UNITS instead"
+    )
+    assert "BUSINESS_UNITS.forEach" in html, "nothing builds the dropdown from BUSINESS_UNITS"
+
+
+def test_delivery_fields_reach_the_log(html):
+    submit = html[html.index("// ---- CHECK OUT ----"):html.index("// ---- SEARCH ----")]
+    assert "deliveredTo,businessUnit," in submit, "the CHECK OUT row no longer records the delivery"
+    for key in ("deliveredTo", "businessUnit"):
+        assert f"esc(l.{key}||'-')" in html, f"the log table does not show {key}"
+        assert f"(l.{key}||'').toLowerCase().includes(f)" in html, f"log search ignores {key}"
+        assert f"l.{key}||''," in html, f"the log CSV dropped {key}"
+
+
+def test_sample_data_uses_the_real_business_units():
+    script = (ROOT / "scripts" / "make_sample_data.py").read_text(encoding="utf-8")
+    declared = re.search(r"const BUSINESS_UNITS=\[([^\]]*)\];", INDEX.read_text(encoding="utf-8"))
+    units = set(re.findall(r"'([^']+)'", declared.group(1)))
+    used = set(re.findall(r'"([A-Z]{3,4})"\),', script))
+    assert used, "sample check-outs set no business unit"
+    assert used <= units, f"sample data uses units the app does not know: {sorted(used - units)}"
+
+
 def test_log_table_header_and_row_agree(html):
     """A column added to the header but not the row shifts every cell after it."""
     head = html[html.index('<table id="log-table">'):html.index("</thead>", html.index('<table id="log-table">'))]

@@ -21,8 +21,10 @@ The history matters if you are tempted to "simplify" this back: Rev P deliberate
 check-in require nothing, on the theory that a part logged with only a zone beats a part
 not logged at all. Grant reversed it. Do not re-litigate it from the old comments.
 
-Check-OUT is the opposite and still requires SO# and a name. Pulling a part is the
-moment traceability actually matters.
+Check-OUT requires SO#, the name of who pulled it, who it is Delivered To, and the
+Business Unit (Grant, 2026-10-01). Pulling a part is the moment traceability actually
+matters. Serial # is optional. `BUSINESS_UNITS` (FIRE, VAN, STC, FCV) near the top of
+the script builds the dropdown, the same way `LOCATIONS` does.
 
 ## Key commands
 
