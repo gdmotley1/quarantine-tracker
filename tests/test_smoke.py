@@ -120,6 +120,51 @@ def test_detail_panel_lives_in_the_main_card(checkin_block):
     )
 
 
+# ------------------------------------------------------ check-out serial number
+# Grant, 2026-10-01: check-out takes an optional Serial #. The part record is deleted
+# on check-out, so the serial is stored only on the CHECK OUT log row.
+
+
+@pytest.fixture(scope="module")
+def checkout_block(html):
+    start = html.index('id="tab-checkout"')
+    return html[start:html.index("<!-- NOTES THREAD FOR SELECTED PART -->", start)]
+
+
+def test_checkout_serial_is_optional(checkout_block):
+    field = re.search(r'<input[^>]*id="co-serial"[^>]*>', checkout_block)
+    assert field, "the Serial # field is missing from check-out"
+    assert "required" not in field.group(0), "Serial # is optional on check-out"
+    assert '<label for="co-serial">Serial # *' not in checkout_block, "Serial # lost its optional tag"
+
+
+def test_checkout_serial_reaches_the_log(html):
+    submit = html[html.index("// ---- CHECK OUT ----"):html.index("// ---- SEARCH ----")]
+    assert "getElementById('co-serial').value.trim();" in submit, (
+        "a blank serial must be stored as '', never null"
+    )
+    assert "serialNumber," in submit, "the CHECK OUT log row no longer records the serial"
+
+
+def test_checkout_serial_is_shown_searched_and_exported(html):
+    assert 'data-sort="serialNumber">Serial #</th>' in html, "the log table lost its Serial # column"
+    assert "esc(l.serialNumber||'-')" in html, "the log table cell must guard a missing serial"
+    assert "(l.serialNumber||'').toLowerCase().includes(f)" in html, "log search ignores the serial"
+    assert "'Serial Number'" in html and "l.serialNumber||''" in html, "the log CSV dropped the serial"
+
+
+def test_log_table_header_and_row_agree(html):
+    """A column added to the header but not the row shifts every cell after it."""
+    head = html[html.index('<table id="log-table">'):html.index("</thead>", html.index('<table id="log-table">'))]
+    body = _function_body(html, "renderLogTable")
+    row = body[body.index("return'<tr>"):]
+    row = row[:row.index("</tr>")]
+    headers = len(re.findall(r"<th[\s>]", head))  # not <thead>
+    assert headers == len(re.findall(r"<td[\s>]", row)), (
+        "log table header and row have different column counts"
+    )
+
+
 # ------------------------------------------------------------- null safety
 # Blank check-in fields are stored as empty strings, but Firebase drops keys whose
 # value is null, so these readers must never call a string method on a bare field.

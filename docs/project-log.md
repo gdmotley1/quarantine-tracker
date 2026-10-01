@@ -49,3 +49,17 @@ was not available. All insets are 0 in an ordinary browser tab, so desktop is un
 **Sales Order # was still written as null** on check-in (when blank) and on stage-change
 log rows, against the empty-string rule. Every reader was guarded, so nothing crashed,
 but the key silently vanished from Firebase. Now `''`, with a gate test.
+
+## 2026-10-01: Serial # on check-out
+
+Grant asked for an optional Serial # text field on check-out. The part record is deleted
+when it is checked out, so the serial is stored only on the CHECK OUT log row
+(`serialNumber`, `''` when blank). It shows in the confirm dialog, a new Serial # column in
+the Movement Log, the log search and the log CSV. Check-in rows and stage rows carry no
+serial, so their cell reads "-". The sample-data generator wrote the dead `unitNumber`
+field on its check-out rows; that became `serialNumber`, with two of four left blank.
+
+Testing note: detaching the live listener with `fbRef.off()` right after a reload is not
+enough. Anonymous sign-in finishes later and attaches a fresh listener, which pulled
+production rows into the in-memory test copy. Writes were stubbed throughout and the
+live database was confirmed untouched, but stub after the app has loaded, not before.
