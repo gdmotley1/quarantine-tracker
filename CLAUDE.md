@@ -61,9 +61,16 @@ dropdown and the dashboard heatmap both build from it, so adding a third locatio
 one-line change. Backups taken before this date hold `shelf` values of "1" to "4";
 they still restore and simply display whatever string they carry.
 
+**A box of identical parts is many records shown as one line** (Grant, 2026-10-02).
+Check-in Quantity creates one part per copy, tagged with `batchId`. List screens go
+through `groupByBox()`, and notes and stage changes through `partAndBoxmates()`, or a
+box shows 50 rows or changes only one copy. See decisions.md.
+
 **Testing against the live app writes to production Firebase.** There is one database
 and no staging. Stub the write first (`fbRef.set = () => Promise.resolve()`) before
-exercising check-in, or you will put junk in front of the warehouse.
+exercising check-in, or you will put junk in front of the warehouse. Wait for `_fbReady`
+before `fbRef.off()`: anonymous sign-in attaches the live listener late, and detaching
+before it lands lets production rows leak into your test copy.
 
 ## Layout
 

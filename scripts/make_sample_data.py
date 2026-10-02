@@ -138,6 +138,18 @@ ACTIVE = [
 ]
 
 
+# One box of identical parts (Quantity on check-in, 2026-10-02). Numbered after the
+# single parts so auto-numbering still lands on the next free CSP number.
+BOX = dict(
+    first=17, qty=6, desc="Geotab GO9 Telematics Device", frm="Ryder", by="Mike T",
+    loc="Warehouse", so="SO-10415", days=6,
+    pulled={
+        "CSP-017": dict(days=4, by="Mike T", serial="G9-7Q2K-31880", to="Luis P", bu="VAN"),
+        "CSP-018": dict(days=2, by="Sarah L", serial="G9-7Q2K-31902", to="Luis P", bu="VAN"),
+    },
+)
+
+
 def main():
     events = []  # (date, entry without the chain fields)
 
@@ -186,6 +198,40 @@ def main():
             "date": in_date, "user": p["by"], "sentFrom": p["frm"], "shelf": p["loc"],
             "salesOrder": p["so"], "duration": None, "notes": p["notes"],
         }))
+
+    # A box of identical parts, checked in once with Quantity 6. Each copy is its own
+    # part with a consecutive number, tagged with the box (batchId = the first
+    # number). Two have already been pulled and installed, so the app should show
+    # one box line reading "4 of 6".
+    b = BOX
+    box_in = iso(b["days"], hour=7, minute=40)
+    numbers = ["CSP-%03d" % n for n in range(b["first"], b["first"] + b["qty"])]
+    batch_id = numbers[0]
+    for seq, num in enumerate(numbers, start=1):
+        events.append((box_in, {
+            "partNumber": num, "description": b["desc"], "action": "CHECK IN",
+            "date": box_in, "user": b["by"], "sentFrom": b["frm"], "shelf": b["loc"],
+            "salesOrder": b["so"], "duration": None, "notes": "", "batchId": batch_id,
+        }))
+        pulled = b["pulled"].get(num)
+        if pulled:
+            out_date = iso(pulled["days"], hour=11, minute=5 + seq)
+            events.append((out_date, {
+                "partNumber": num, "description": b["desc"], "action": "CHECK OUT",
+                "date": out_date, "user": pulled["by"], "sentFrom": b["frm"],
+                "shelf": b["loc"], "salesOrder": b["so"], "serialNumber": pulled["serial"],
+                "deliveredTo": pulled["to"], "businessUnit": pulled["bu"],
+                "duration": b["days"] - pulled["days"], "notes": "", "batchId": batch_id,
+            }))
+            continue
+        parts.append({
+            "id": "sample" + num.lower().replace("-", ""),
+            "partNumber": num, "description": b["desc"], "checkinDate": box_in,
+            "sentFrom": b["frm"], "checkedInBy": b["by"], "shelf": b["loc"],
+            "notes": "", "notesThread": [], "salesOrder": b["so"],
+            "stage": "Checked In", "condition": "No damage", "damageNotes": "",
+            "batchId": batch_id, "batchSeq": seq, "batchSize": b["qty"],
+        })
 
     # The audit log is append-only and hash chained, so it has to be built in the
     # order the events actually happened.

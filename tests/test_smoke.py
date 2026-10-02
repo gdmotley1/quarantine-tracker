@@ -209,10 +209,18 @@ def test_movement_log_fits_without_side_scrolling(html):
     Measured on sample data: all 14 columns fit at 1280px wide only with the log tab
     at full width, wrapping headers, and the time stacked under the date.
     """
-    assert ".container:has(#tab-log.active){max-width:none}" in html, (
+    wide = re.search(r"([^{}]*)\{max-width:none\}", html)
+    assert wide and ".container:has(#tab-log.active)" in wide.group(1), (
         "the Movement Log is back inside the 1320px page width"
     )
-    assert "#log-table th{white-space:normal" in html, "log headers no longer wrap"
+    # Boxes (2026-10-02) added a Qty column to Active Quarantine; same treatment.
+    assert ".container:has(#tab-active.active)" in wide.group(1), (
+        "Active Quarantine is back inside the 1320px page width"
+    )
+    for table in ("#log-table", "#active-table"):
+        assert f"{table} th" in html and "white-space:normal;vertical-align:bottom" in html, (
+            f"{table} headers no longer wrap"
+        )
     assert "<th>Time</th>" not in html, "Time is its own column again; it belongs under the date"
     assert 'class="log-time"' in html, "the log row lost the time under the date"
 
@@ -227,6 +235,105 @@ def test_log_table_header_and_row_agree(html):
     assert headers == len(re.findall(r"<td[\s>]", row)), (
         "log table header and row have different column counts"
     )
+
+
+# ----------------------------------------------------- boxes of identical parts
+# Grant, 2026-10-02: a box of identical parts (decals, Geotabs) is checked in once
+# with a Quantity. Each copy becomes its own part with a consecutive number, so it can
+# be checked out on its own; the screens show one line per box.
+
+
+def test_quantity_field_is_optional_and_bounded(html, checkin_block):
+    field = re.search(r'<input[^>]*id="ci-qty"[^>]*>', checkin_block)
+    assert field, "the Quantity field is missing from check-in"
+    tag = field.group(0)
+    assert 'value="1"' in tag, "Quantity must default to 1 so a single part needs no extra step"
+    assert "required" not in tag, "Quantity is not a required field; it defaults to 1"
+    cap = re.search(r"const MAX_BOX_QTY=(\d+);", html)
+    assert cap and f'max="{cap.group(1)}"' in tag, "the field's max must match MAX_BOX_QTY"
+
+
+def test_box_checkin_creates_one_record_per_copy(html):
+    submit = html[html.index("// ---- CHECK IN ----"):html.index("// ---- CHECK OUT ----")]
+    assert "partNumberSeries(nextPartNumber(),qty)" in submit, (
+        "box numbers must come from a fresh nextPartNumber, not the display box"
+    )
+    assert "numbers.forEach((num,i)=>" in submit, "each copy must be its own part record"
+    assert "numbers.forEach(num=>appendLog(" in submit, "each copy must get its own CHECK IN row"
+    assert "Check In a Box of" in submit, "a box over 1 must be confirmed before it is created"
+
+
+def test_boxes_show_as_one_line(html):
+    for fn in ("renderActiveTable", "populateCheckoutDropdown", "openShelfModal"):
+        assert "groupByBox(" in _function_body(html, fn), f"{fn} lists every copy of a box"
+
+
+def test_box_actions_cover_every_copy(html):
+    assert "partAndBoxmates(part)" in _function_body(html, "changeStage"), (
+        "a stage change on a box must move every copy"
+    )
+    assert html.count("notesThread.push(") == 1, (
+        "notes must go through addNoteToPart so a box note lands on every copy"
+    )
+    submit = html[html.index("// ---- CHECK OUT ----"):html.index("// ---- SEARCH ----")]
+    assert "resolveCheckoutPart(partId)" in submit, "check-out must resolve a box to one copy"
+    assert "batchId:part.batchId||''" in submit, "a check-out row must never write a null batchId"
+
+
+def test_box_logic_runs_correctly():
+    """Run the real box functions in node against a fake database."""
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node not available")
+    html = INDEX.read_text(encoding="utf-8")
+    fns = "\n".join(
+        "function " + n + "(" + html[html.index(f"function {n}(") + len(f"function {n}("):
+                                     html.index("{", html.index(f"function {n}("))]
+        + _function_body(html, n)
+        for n in ("parsePartNumber", "nextPartNumber", "partNumberSeries", "boxRange",
+                  "boxCopies", "groupByBox", "partAndBoxmates", "partLabel",
+                  "resolveCheckoutPart")
+    )
+    harness = r"""
+const KEYS={parts:'parts',log:'log'};
+const DEFAULT_PART_PREFIX='CSP-';
+function loadData(k){return DB[k]||[];}
+const box=(n,seq)=>({id:'b'+seq,partNumber:'CSP-0'+n,batchId:'CSP-012',batchSeq:seq,batchSize:10,checkinDate:'2026-10-01T10:00:00Z'});
+let DB={parts:[
+  {id:'s1',partNumber:'CSP-011',batchId:'',checkinDate:'2026-09-30T10:00:00Z'},
+  {id:'s0',partNumber:'CSP-005',checkinDate:'2026-09-20T10:00:00Z'},
+  box(16,5), box(14,3), box(21,10)
+],log:[{action:'CHECK IN',partNumber:'CSP-021',date:'2026-10-01T10:00:00Z'}]};
+""" + fns + r"""
+const out={};
+out.series=partNumberSeries('CSP-012',3);
+out.seriesPad=partNumberSeries('CSP-998',3);
+out.range=boxRange(DB.parts[2]);
+out.next=nextPartNumber();
+const g=groupByBox(DB.parts);
+out.groups=g.map(x=>[partLabel(x.lead),x.copies.length]);
+out.lead=resolveCheckoutPart('box:CSP-012').partNumber;
+out.single=resolveCheckoutPart('s1').partNumber;
+out.legacy=partAndBoxmates(DB.parts[1]).length;
+out.mates=partAndBoxmates(DB.parts[3]).length;
+console.log(JSON.stringify(out));
+"""
+    with tempfile.TemporaryDirectory() as td:
+        js = Path(td) / "box.js"
+        js.write_text(harness, encoding="utf-8")
+        r = subprocess.run([node, str(js)], capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 0, r.stderr
+    import json
+    out = json.loads(r.stdout)
+    assert out["series"] == ["CSP-012", "CSP-013", "CSP-014"]
+    assert out["seriesPad"] == ["CSP-998", "CSP-999", "CSP-1000"]
+    assert out["range"] == "CSP-012 – CSP-021", "a box shows its full number range"
+    assert out["next"] == "CSP-022", "the next part must land after the whole box"
+    assert out["groups"] == [["CSP-011", 1], ["CSP-005", 1], ["CSP-012 – CSP-021", 3]]
+    assert out["lead"] == "CSP-014", "checking out a box pulls its lowest-numbered remaining copy"
+    assert out["single"] == "CSP-011"
+    assert out["legacy"] == 1, "a record with no batchId is not part of any box"
+    assert out["mates"] == 3, "a note or stage change on a box reaches every remaining copy"
 
 
 # ------------------------------------------------------------- null safety

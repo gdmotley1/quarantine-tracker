@@ -40,6 +40,28 @@ fixed list, not free text, so the log stays consistent enough to filter and coun
 Ask Grant before making Delivered To or Business Unit optional. The `test_checkout_*`
 tests guard all of it.
 
+## A box of identical parts is N parts that display as one (2026-10-02)
+
+Check-in has a Quantity field (default 1, max `MAX_BOX_QTY` = 200). A quantity over 1
+creates that many part records with consecutive numbers (CSP-012 to CSP-021), each
+tagged `batchId` (the first number), `batchSeq` and `batchSize`, plus one CHECK IN log
+row per copy. Active Quarantine, the check-out dropdown and the location popup show one
+line per box ("4 of 6"). Checking out a box pulls its lowest-numbered remaining copy,
+and the serial is recorded against that copy. Notes and stage changes on a box apply to
+every remaining copy.
+
+**Why:** Grant's call. Boxes of decals or Geotabs are interchangeable: at install time
+the floor grabs any one and records its serial. Checking in 50 by hand is not going to
+happen, and one record with a quantity would leave check-out pulling the whole box.
+Grant picked consecutive numbers over suffixes (CSP-012-01) because the auto-numbering
+already handles them, and one line per box over 50 identical rows.
+
+**How to apply:** KPIs, the heatmap and the volume chart count copies, not boxes, so a
+box of 50 is 50 parts in Total Active. Any new screen that lists parts should go through
+`groupByBox()`, and any action that changes a part should go through
+`partAndBoxmates()`. Records without a `batchId` (everything before this date) are
+single parts. `test_box_logic_runs_correctly` runs the real functions in node.
+
 ## Blank fields are stored as empty strings, never null (2026-08-19)
 
 **Why:** Firebase Realtime Database drops any key whose value is null. A field written

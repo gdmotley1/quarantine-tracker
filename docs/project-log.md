@@ -85,3 +85,21 @@ its headers wrap, padding is a little tighter, Description and Notes can shrink 
 and the time sits under the date instead of in its own column. Measured on sample data:
 fits at 1920, 1366 and 1280. Below about 1280 it scrolls again; the other tabs keep the
 1320px width. The CSV still exports Date and Time as separate columns.
+
+## 2026-10-02: Boxes of identical parts
+
+Grant: shipments of commodities (a box of decals, Geotabs) are interchangeable, and at
+install the floor grabs any one and records its serial. Checking in 50 by hand would not
+happen. He asked for a quantity on check-in that makes N copies with unique numbers, so
+check-out still pulls one at a time. He chose consecutive numbers over a box-plus-suffix
+scheme, and one line per box over a row per copy. Design recorded in decisions.md.
+
+Verified on sample data (which now includes a box of 6 Geotabs, 2 already installed):
+box check-in of 3 (confirm dialog, 3 records CSP-023 to CSP-025, 3 log rows, folded into
+one Recent Activity line, form back to Qty 1), quantity 0 / 201 / 2.5 refused, box
+check-out pulled the lowest copy and logged the serial against it, a box note landed on
+every copy, and escalating the box moved every copy with one log row each.
+
+The Qty column and box ranges pushed Active Quarantine to 1373px at a 1366 screen, so it
+got the Movement Log's full-width treatment, and a box's number range wraps onto two
+lines. Both tables now fit at 1280, 1366 and 1920.

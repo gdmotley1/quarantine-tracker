@@ -271,10 +271,12 @@ td.td-wrap{white-space:normal;min-width:140px;max-width:240px}
 /* The Movement Log has 14 columns. Give that tab the whole window instead of the
    1320px reading width, let two-word headers wrap, and stack the time under the date,
    so the full row fits on a station screen without scrolling sideways. */
-.container:has(#tab-log.active){max-width:none}
-#log-table th{white-space:normal;vertical-align:bottom;line-height:1.3}
-#log-table th,#log-table td{padding:.5rem .45rem}
-#log-table td.td-wrap{min-width:110px}
+/* Active Quarantine gets the same treatment since boxes added a Qty column. */
+.container:has(#tab-log.active),.container:has(#tab-active.active){max-width:none}
+#log-table th,#active-table th{white-space:normal;vertical-align:bottom;line-height:1.3}
+#log-table th,#log-table td,#active-table th,#active-table td{padding:.5rem .45rem}
+#log-table td.td-wrap,#active-table td.td-wrap{min-width:110px}
+#active-table td.td-range{white-space:normal;min-width:5.5em}
 .log-time{display:block;font-size:.7rem;color:var(--text-muted)}
 
 /* BADGES */
@@ -377,6 +379,8 @@ th.sortable.desc::after{content:'\25BC ';opacity:.9;color:var(--primary)}
 .form-hint-lead{font-size:.8rem;color:var(--text-dim);margin:-.35rem 0 1.1rem;line-height:1.5}
 .tag-opt,.tag-auto{font-size:.6rem;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--text-muted);background:#f1f5f9;border:1px solid var(--border);border-radius:99px;padding:.1rem .4rem;margin-left:.4rem;vertical-align:middle}
 .tag-auto{color:var(--primary);border-color:var(--primary)}
+.field-hint{font-size:.72rem;color:var(--text-muted);line-height:1.4}
+.box-qty{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
 .locked-wrap{position:relative;display:flex;align-items:center}
 .locked-wrap input{width:100%;padding-right:2.2rem;background:#f1f5f9;color:var(--text);font-weight:700;letter-spacing:.5px;cursor:not-allowed}
 .locked-wrap input:focus{box-shadow:none;border-color:var(--border)}
@@ -637,7 +641,7 @@ body.readonly-mode .readonly-banner{display:flex}
         <div class="status-key"><span class="badge badge-green"><span class="badge-dot"></span>OK</span> 0–6 days <span class="badge badge-yellow"><span class="badge-dot"></span>Warning</span> 7–13 days <span class="badge badge-red"><span class="badge-dot"></span>Critical</span> 14+ days</div>
         <button class="btn btn-outline btn-sm" onclick="exportActiveCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
       </div>
-      <div class="table-wrap"><table id="active-table"><thead><tr><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="description">Description</th><th class="sortable" data-sort="checkinDate">Check-In</th><th class="sortable desc" data-sort="days">Days</th><th class="sortable" data-sort="shelf">Location</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="checkedInBy">By</th><th>Status</th><th class="sortable" data-sort="stage">Stage</th><th>Condition</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table id="active-table"><thead><tr><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="description">Description</th><th>Qty</th><th class="sortable" data-sort="checkinDate">Check-In</th><th class="sortable desc" data-sort="days">Days</th><th class="sortable" data-sort="shelf">Location</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="checkedInBy">By</th><th>Status</th><th class="sortable" data-sort="stage">Stage</th><th>Condition</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
       <div class="empty-state" id="active-empty" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><p>No parts in quarantine</p></div>
     </div>
   </div>
@@ -675,13 +679,18 @@ body.readonly-mode .readonly-banner{display:flex}
             <label for="ci-so">Sales Order # <span class="tag-opt">optional</span></label>
             <input type="text" id="ci-so" placeholder="e.g. SO-98765">
           </div>
-          <div class="form-group full">
+          <div class="form-group">
             <label>Location <span class="tag-opt">optional</span></label>
             <input type="hidden" id="ci-shelf">
             <div class="custom-select" id="shelf-select">
               <div class="custom-select-trigger" tabindex="0"><span class="placeholder">-- Select location --</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
               <div class="custom-select-options" id="shelf-options"></div>
             </div>
+          </div>
+          <div class="form-group">
+            <label for="ci-qty">Quantity</label>
+            <input type="number" id="ci-qty" value="1" min="1" max="200" step="1" inputmode="numeric">
+            <div class="field-hint">For a box of identical parts. Each one gets its own number.</div>
           </div>
         </div>
         <div class="detail-section">
@@ -1135,6 +1144,11 @@ document.getElementById('ci-condition').addEventListener('change',function(){
   else{grp.style.display='none';ta.value='';}
 });
 
+// ---- QUANTITY: keep the part-number box showing the range a box will take ----
+document.getElementById('ci-qty').addEventListener('input',()=>fillNextPartNumber());
+// A form reset fires before the fields go back to their defaults, so refill after.
+document.getElementById('checkin-form').addEventListener('reset',()=>setTimeout(fillNextPartNumber,0));
+
 // ---- ANIMATED COUNTER ----
 function animateValue(id,nv){
   const el=document.getElementById(id);if(!el)return;
@@ -1231,14 +1245,23 @@ function renderDashboard(){
 
   // Recent activity
   const actList=document.getElementById('recent-activity'),actEmpty=document.getElementById('activity-empty');
-  const recent=log.slice(-10).reverse();
+  // A box writes one log row per copy, so fold back-to-back rows for the same box,
+  // action and person into one line; otherwise a box of 50 would fill the list.
+  const recent=[];
+  log.slice(-500).reverse().forEach(l=>{
+    const prev=recent[recent.length-1];
+    if(prev&&l.batchId&&prev.l.batchId===l.batchId&&prev.l.action===l.action&&prev.l.user===l.user&&Math.abs(new Date(prev.l.date)-new Date(l.date))<60000){prev.first=l.partNumber;prev.n++;return;}
+    recent.push({l,first:l.partNumber,n:1});
+  });
+  recent.length=Math.min(recent.length,10);
   if(!recent.length){actList.innerHTML='';actEmpty.style.display='';}
   else{actEmpty.style.display='none';
-    actList.innerHTML=recent.map(l=>{
+    actList.innerHTML=recent.map(({l,first,n})=>{
       const isIn=l.action==='CHECK IN';
       const isStage=l.action&&l.action.startsWith('STAGE:');
       const dotClass=isIn?'dot-in':isStage?'dot-stage':'dot-out';
-      return'<li><span class="activity-dot '+dotClass+'"></span><strong>'+esc(l.partNumber)+'</strong> \u2014 '+l.action+' by '+esc(l.user)+' on '+fmtDate(l.date)+' at '+fmtTime(l.date)+(l.salesOrder?' (SO: '+esc(l.salesOrder)+')':'')+'</li>';
+      const who=n>1?esc(first)+' – '+esc(l.partNumber)+'</strong> ('+n+' parts)<strong>':esc(l.partNumber);
+      return'<li><span class="activity-dot '+dotClass+'"></span><strong>'+who+'</strong> \u2014 '+l.action+' by '+esc(l.user)+' on '+fmtDate(l.date)+' at '+fmtTime(l.date)+(l.salesOrder?' (SO: '+esc(l.salesOrder)+')':'')+'</li>';
     }).join('');}
 }
 
@@ -1292,12 +1315,14 @@ function renderActiveTable(filter=''){
   }),activeSort.col,activeSort.dir,'active');
   if(!filtered.length){tbody.innerHTML='';document.getElementById('active-table').style.display='none';empty.style.display='';}
   else{document.getElementById('active-table').style.display='';empty.style.display='none';
-    tbody.innerHTML=filtered.map(p=>{
+    // One row per box. Its copies are identical, so the lead copy speaks for the box.
+    tbody.innerHTML=groupByBox(filtered).map(({lead:p,copies})=>{
       const d=daysBetween(p.checkinDate);
       const noteCount=(p.notesThread||[]).length;
       const hasDamage=p.condition&&p.condition!=='No damage';
       const rowClass=hasDamage?'damage-highlight':'status-'+statusClass(d);
-      return'<tr class="'+rowClass+'" style="cursor:pointer" onclick="openNotesModal(\''+p.id+'\')"><td>'+esc(p.partNumber)+'</td><td>'+esc(p.salesOrder||'-')+'</td><td class="td-wrap">'+esc(p.description||'-')+'</td><td>'+fmtDate(p.checkinDate)+'</td><td>'+d+'</td><td>'+shelfBadge(p.shelf)+'</td><td>'+esc(p.sentFrom||'-')+'</td><td>'+esc(p.checkedInBy||'-')+'</td><td>'+statusLabel(d)+'</td><td>'+stageBadgeHtml(p.stage||'Checked In',p.id)+'</td><td>'+conditionBadge(p.condition)+(hasDamage&&p.damageNotes?' <span style="font-size:.7rem;color:var(--text-dim)" title="'+esc(p.damageNotes)+'">&#9432;</span>':'')+'</td><td class="td-wrap">'+esc(p.notes)+(noteCount?' <span style="color:var(--accent);font-size:.7rem;font-weight:700">['+noteCount+' note'+(noteCount>1?'s':'')+']</span>':'')+'</td></tr>';
+      const qtyCell=p.batchId?'<span class="box-qty">'+copies.length+'</span> of '+(p.batchSize||copies.length):'1';
+      return'<tr class="'+rowClass+'" style="cursor:pointer" onclick="openNotesModal(\''+p.id+'\')"><td'+(p.batchId?' class="td-range"':'')+'>'+esc(partLabel(p))+'</td><td>'+esc(p.salesOrder||'-')+'</td><td class="td-wrap">'+esc(p.description||'-')+'</td><td>'+qtyCell+'</td><td>'+fmtDate(p.checkinDate)+'</td><td>'+d+'</td><td>'+shelfBadge(p.shelf)+'</td><td>'+esc(p.sentFrom||'-')+'</td><td>'+esc(p.checkedInBy||'-')+'</td><td>'+statusLabel(d)+'</td><td>'+stageBadgeHtml(p.stage||'Checked In',p.id)+'</td><td>'+conditionBadge(p.condition)+(hasDamage&&p.damageNotes?' <span style="font-size:.7rem;color:var(--text-dim)" title="'+esc(p.damageNotes)+'">&#9432;</span>':'')+'</td><td class="td-wrap">'+esc(p.notes)+(noteCount?' <span style="color:var(--accent);font-size:.7rem;font-weight:700">['+noteCount+' note'+(noteCount>1?'s':'')+']</span>':'')+'</td></tr>';
     }).join('');}
 }
 
@@ -1337,34 +1362,40 @@ async function changeStage(partId,newStage){
   const part=parts[idx];
   const oldStage=part.stage||'Checked In';
   if(oldStage===newStage)return;
+  // A box changes stage as one: every copy still in quarantine moves together, and
+  // each gets its own log row so every part number keeps a complete history.
+  const targets=partAndBoxmates(part);
+  const who=part.batchId?'Box '+boxRange(part)+' ('+targets.length+' parts)':'Part '+part.partNumber;
+  const label=partLabel(part);
+  const logStage=(user,notes)=>targets.forEach(t=>appendLog({partNumber:t.partNumber,description:t.description,action:'STAGE: '+newStage,date:new Date().toISOString(),user,sentFrom:t.sentFrom,shelf:t.shelf,salesOrder:t.salesOrder||'',duration:null,notes,batchId:t.batchId||''}));
 
   if(newStage==='Missing'){
     // Prompt for a note
     const fieldsHtml='<div class="form-group"><label for="sm-note">Note *</label><textarea id="sm-note" placeholder="Describe the situation..." style="width:100%;min-height:60px"></textarea></div>';
-    const ok=await showStageModal('Mark as Missing','Part '+part.partNumber+' will be marked as Missing.',fieldsHtml);
+    const ok=await showStageModal('Mark as Missing',who+' will be marked as Missing.',fieldsHtml);
     if(!ok)return;
     const note=document.getElementById('sm-note').value.trim();
     if(!note){showToast('A note is required','warning');return;}
-    part.stage=newStage;
+    targets.forEach(t=>{t.stage=newStage;});
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: Missing',date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||'',duration:null,notes:note});
-    showToast(part.partNumber+' marked as Missing','warning');
+    logStage('System',note);
+    showToast(label+' marked as Missing','warning');
   } else if(newStage==='Escalated'){
     const fieldsHtml='<div class="form-grid" style="gap:.75rem"><div class="form-group"><label for="sm-owner">Escalated To *</label><input type="text" id="sm-owner" placeholder="e.g. Lori / supplier contact" style="width:100%"></div><div class="form-group"><label for="sm-note">Reason *</label><textarea id="sm-note" placeholder="What is being escalated and why..." style="width:100%;min-height:60px"></textarea></div></div>';
-    const ok=await showStageModal('Mark as Escalated','Part '+part.partNumber+' will be marked as Escalated.',fieldsHtml);
+    const ok=await showStageModal('Mark as Escalated',who+' will be marked as Escalated.',fieldsHtml);
     if(!ok)return;
     const owner=document.getElementById('sm-owner').value.trim();
     const note=document.getElementById('sm-note').value.trim();
     if(!owner||!note){showToast('Escalation owner and reason are required','warning');return;}
-    part.stage=newStage;part.escalatedTo=owner;
+    targets.forEach(t=>{t.stage=newStage;t.escalatedTo=owner;});
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: Escalated',date:new Date().toISOString(),user:owner,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||'',duration:null,notes:'Escalated to '+owner+': '+note});
-    showToast(part.partNumber+' marked as Escalated','warning');
+    logStage(owner,'Escalated to '+owner+': '+note);
+    showToast(label+' marked as Escalated','warning');
   } else {
-    part.stage=newStage;
+    targets.forEach(t=>{t.stage=newStage;});
     saveData(KEYS.parts,parts);
-    appendLog({partNumber:part.partNumber,description:part.description,action:'STAGE: '+newStage,date:new Date().toISOString(),user:'System',sentFrom:part.sentFrom,shelf:part.shelf,salesOrder:part.salesOrder||'',duration:null,notes:'Stage changed from '+oldStage+' to '+newStage});
-    showToast(part.partNumber+' moved to '+newStage,'success');
+    logStage('System','Stage changed from '+oldStage+' to '+newStage);
+    showToast(label+' moved to '+newStage,'success');
   }
   refreshAll();
 }
@@ -1389,17 +1420,31 @@ function renderLogTable(filter=''){
 function populateCheckoutDropdown(){
   const parts=loadData(KEYS.parts),sel=document.getElementById('co-part');
   sel.innerHTML='<option value="">-- Select a part --</option>';
-  parts.sort((a,b)=>(a.partNumber||'').localeCompare(b.partNumber||'')).forEach(p=>{const d=daysBetween(p.checkinDate);const o=document.createElement('option');o.value=p.id;o.textContent=p.partNumber+(p.salesOrder?' ('+p.salesOrder+')':'')+' \u2014 '+(p.description||'no description')+' ('+(p.shelf||'no location')+', '+d+' days)';sel.appendChild(o);});
+  // A box is one entry; picking it checks out its lowest-numbered remaining copy.
+  groupByBox(parts.slice().sort((a,b)=>(a.partNumber||'').localeCompare(b.partNumber||''))).forEach(({lead:p,copies})=>{
+    const d=daysBetween(p.checkinDate);const o=document.createElement('option');
+    o.value=p.batchId?'box:'+p.batchId:p.id;
+    const where=(p.batchId?copies.length+' left, ':'')+(p.shelf||'no location')+', '+d+' days';
+    o.textContent=partLabel(p)+(p.salesOrder?' ('+p.salesOrder+')':'')+' \u2014 '+(p.description||'no description')+' ('+where+')';
+    sel.appendChild(o);
+  });
+}
+// The check-out dropdown holds a part id, or 'box:<batchId>' for a box.
+function resolveCheckoutPart(value){
+  if(!value)return null;
+  if(value.startsWith('box:'))return boxCopies(value.slice(4))[0]||null;
+  return loadData(KEYS.parts).find(p=>p.id===value)||null;
 }
 
 // ---- NOTES THREAD (checkout page) ----
 document.getElementById('co-part').addEventListener('change',function(){
   const card=document.getElementById('checkout-notes-card');
   if(!this.value){card.style.display='none';return;}
+  const p=resolveCheckoutPart(this.value);
+  if(!p){card.style.display='none';return;}
   card.style.display='';
-  renderCheckoutNotes(this.value);
+  renderCheckoutNotes(p.id);
   // Pre-populate SO# from part record if available
-  const parts=loadData(KEYS.parts),p=parts.find(x=>x.id===this.value);
   if(p&&p.salesOrder){
     const soField=document.getElementById('co-so');
     if(!soField.value)soField.value=p.salesOrder;
@@ -1408,7 +1453,7 @@ document.getElementById('co-part').addEventListener('change',function(){
 function renderCheckoutNotes(partId){
   const parts=loadData(KEYS.parts),p=parts.find(x=>x.id===partId);
   if(!p)return;
-  document.getElementById('notes-part-label').textContent=p.partNumber;
+  document.getElementById('notes-part-label').textContent=partLabel(p);
   const thread=document.getElementById('notes-thread');
   const notes=p.notesThread||[];
   thread.innerHTML=notes.length?notes.map(n=>'<div class="note-item"><div class="note-meta">'+esc(n.author)+' \u2022 '+fmtDate(n.date)+' '+fmtTime(n.date)+'</div><div class="note-text">'+esc(n.text)+'</div></div>').join(''):'<div style="color:var(--text-muted);font-size:.82rem;padding:.5rem 0">No notes yet</div>';
@@ -1419,12 +1464,16 @@ function addNote(){
   if(!author||!text){showToast('Enter your name and note','warning');return;}
   const parts=loadData(KEYS.parts),idx=parts.findIndex(p=>p.id===window._notesPartId);
   if(idx===-1)return;
-  if(!parts[idx].notesThread)parts[idx].notesThread=[];
-  parts[idx].notesThread.push({author,text,date:new Date().toISOString()});
+  addNoteToPart(parts[idx],{author,text,date:new Date().toISOString()});
   saveData(KEYS.parts,parts);
   document.getElementById('note-text').value='';
   renderCheckoutNotes(window._notesPartId);
   playSound('in');
+}
+
+// A note on a box goes on every copy, so it is still there after any one is pulled.
+function addNoteToPart(part,note){
+  partAndBoxmates(part).forEach(t=>{if(!t.notesThread)t.notesThread=[];t.notesThread.push(Object.assign({},note));});
 }
 
 // ---- NOTES MODAL (from active table) ----
@@ -1432,7 +1481,7 @@ let _notesModalPartId=null;
 function openNotesModal(partId){
   _notesModalPartId=partId;
   const parts=loadData(KEYS.parts),p=parts.find(x=>x.id===partId);if(!p)return;
-  document.getElementById('notes-modal-title').textContent='Notes: '+p.partNumber+' \u2014 '+p.description;
+  document.getElementById('notes-modal-title').textContent='Notes: '+partLabel(p)+' \u2014 '+(p.description||'');
   renderNotesModalThread(p);
   const o=document.getElementById('notes-modal-overlay');o.style.display='flex';requestAnimationFrame(()=>o.classList.add('show'));
 }
@@ -1445,8 +1494,7 @@ function addNoteModal(){
   const author=document.getElementById('notes-modal-author').value.trim(),text=document.getElementById('notes-modal-text').value.trim();
   if(!author||!text){showToast('Enter your name and note','warning');return;}
   const parts=loadData(KEYS.parts),idx=parts.findIndex(p=>p.id===_notesModalPartId);if(idx===-1)return;
-  if(!parts[idx].notesThread)parts[idx].notesThread=[];
-  parts[idx].notesThread.push({author,text,date:new Date().toISOString()});
+  addNoteToPart(parts[idx],{author,text,date:new Date().toISOString()});
   saveData(KEYS.parts,parts);
   document.getElementById('notes-modal-text').value='';
   renderNotesModalThread(parts[idx]);
@@ -1459,9 +1507,9 @@ function closeNotesModal(){const o=document.getElementById('notes-modal-overlay'
 function openShelfModal(loc){
   const parts=loadData(KEYS.parts).filter(p=>p.shelf===loc).sort((a,b)=>daysBetween(b.checkinDate)-daysBetween(a.checkinDate));
   document.getElementById('shelf-modal-title').textContent=loc+' \u2014 '+parts.length+' Part'+(parts.length!==1?'s':'');
-  document.getElementById('shelf-modal-list').innerHTML=parts.map(p=>{
+  document.getElementById('shelf-modal-list').innerHTML=groupByBox(parts).map(({lead:p,copies})=>{
     const d=daysBetween(p.checkinDate);const clr=d>=14?'var(--red)':'var(--text-dim)';
-    return'<li><div><span class="shelf-detail-part">'+esc(p.partNumber)+(p.salesOrder?' ('+esc(p.salesOrder)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description||'no description')+(p.sentFrom?' \u2014 '+esc(p.sentFrom):'')+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
+    return'<li><div><span class="shelf-detail-part">'+esc(partLabel(p))+(p.batchId?' ×'+copies.length:'')+(p.salesOrder?' ('+esc(p.salesOrder)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description||'no description')+(p.sentFrom?' \u2014 '+esc(p.sentFrom):'')+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
   }).join('');
   const o=document.getElementById('shelf-modal-overlay');o.style.display='flex';requestAnimationFrame(()=>o.classList.add('show'));
 }
@@ -1516,10 +1564,55 @@ function nextPartNumber(){
   everSeen.forEach(v=>{const q=parsePartNumber(v);if(q&&q.prefix===last.prefix&&q.num>max)max=q.num;});
   return last.prefix+String(max+1).padStart(Math.max(last.pad,3),'0');
 }
+// ---- BOXES OF IDENTICAL PARTS ----
+// A box of N identical parts (decals, Geotabs) is checked in once and becomes N part
+// records with consecutive numbers, each tagged batchId (the first number), batchSeq
+// (1..N) and batchSize (N). Each copy is checked out on its own. The screens show one
+// line per box, and checking out a box pulls its lowest-numbered remaining copy.
+// Single parts carry batchId '' (and older records have no batchId at all).
+const MAX_BOX_QTY=200;
+function partNumberSeries(first,n){
+  const q=parsePartNumber(first);
+  if(!q)return [first];
+  const out=[];
+  for(let i=0;i<n;i++)out.push(q.prefix+String(q.num+i).padStart(Math.max(q.pad,3),'0'));
+  return out;
+}
+function boxRange(p){
+  const s=partNumberSeries(p.batchId,p.batchSize||1);
+  return s[0]+' – '+s[s.length-1];
+}
+// Every copy still in quarantine for a box, lowest number first.
+function boxCopies(batchId){
+  return loadData(KEYS.parts).filter(p=>(p.batchId||'')===batchId).sort((a,b)=>(a.batchSeq||0)-(b.batchSeq||0));
+}
+// Collapse a list of parts to one entry per box, keeping the list's order. Each entry
+// is {lead, copies}: lead is the box's lowest-numbered remaining copy, and copies is
+// every remaining copy in the box, not just the ones that matched a search.
+function groupByBox(list){
+  const out=[],seen={};
+  list.forEach(p=>{
+    const b=p.batchId||'';
+    if(!b){out.push({lead:p,copies:[p]});return;}
+    if(seen[b])return;
+    const copies=boxCopies(b);
+    seen[b]=true;out.push({lead:copies[0]||p,copies:copies.length?copies:[p]});
+  });
+  return out;
+}
+// The parts a note or stage change on this part applies to: the whole box, or itself.
+function partAndBoxmates(part){
+  return part.batchId?loadData(KEYS.parts).filter(p=>p.batchId===part.batchId):[part];
+}
+function partLabel(p){return p.batchId?boxRange(p):p.partNumber;}
+
 function fillNextPartNumber(){
   const el=document.getElementById('ci-partnum');
   if(!el)return;
-  el.value=nextPartNumber();
+  const first=nextPartNumber(),qty=parseInt((document.getElementById('ci-qty')||{}).value,10);
+  // Show the whole range a box will take, so nobody is surprised by the numbers.
+  if(qty>1&&qty<=MAX_BOX_QTY){const s=partNumberSeries(first,qty);el.value=s[0]+' to '+s[s.length-1];}
+  else el.value=first;
   const dup=document.getElementById('dup-warning');
   if(dup){
     const v=el.value.toLowerCase();
@@ -1540,7 +1633,14 @@ document.getElementById('checkin-form').addEventListener('submit',async function
     {el:document.getElementById('ci-by'),label:'Checked In By'}
   ]);
   if(missing.length){showToast('Missing required: '+missing.join(', '),'warning');return;}
-  const partNumber=document.getElementById('ci-partnum').value.trim()||nextPartNumber();
+  const qtyEl=document.getElementById('ci-qty'),qtyRaw=qtyEl.value.trim()||'1',qty=Number(qtyRaw);
+  if(!Number.isInteger(qty)||qty<1||qty>MAX_BOX_QTY){
+    markFieldInvalid(qtyEl);showToast('Quantity must be a whole number from 1 to '+MAX_BOX_QTY,'warning');return;
+  }
+  // Recomputed here rather than read from the box, so a part another station just
+  // checked in cannot be handed out twice.
+  const numbers=partNumberSeries(nextPartNumber(),qty);
+  const partNumber=numbers[0];
   const condition=document.getElementById('ci-condition').value;
   const salesOrder=document.getElementById('ci-so').value.trim();
   const description=document.getElementById('ci-desc').value.trim();
@@ -1551,14 +1651,23 @@ document.getElementById('checkin-form').addEventListener('submit',async function
   const notes=document.getElementById('ci-notes').value.trim();
 
   const parts=loadData(KEYS.parts);
-  if(parts.some(p=>(p.partNumber||'').toLowerCase()===partNumber.toLowerCase())){
+  if(qty>1){
+    const ok=await showModal('Check In a Box of '+qty,'This checks in '+qty+' of "'+description+'" as '+numbers[0]+' to '+numbers[qty-1]+'. Each one gets its own part number and is checked out one at a time. Continue?');
+    if(!ok)return;
+  }else if(parts.some(p=>(p.partNumber||'').toLowerCase()===partNumber.toLowerCase())){
     const ok=await showModal('Duplicate Part Number','Part "'+partNumber+'" is already in quarantine. Check in another?');if(!ok)return;}
-  const now=new Date().toISOString();
-  parts.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),partNumber,description,checkinDate:now,sentFrom,checkedInBy,shelf,notes,notesThread:[],salesOrder,stage:'Checked In',condition,damageNotes});
+  const now=new Date().toISOString(),batchId=qty>1?partNumber:'';
+  numbers.forEach((num,i)=>{
+    const rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i,partNumber:num,description,checkinDate:now,sentFrom,checkedInBy,shelf,notes,notesThread:[],salesOrder,stage:'Checked In',condition,damageNotes,batchId};
+    if(batchId){rec.batchSeq=i+1;rec.batchSize=qty;}
+    parts.push(rec);
+  });
   saveData(KEYS.parts,parts);
-  appendLog({partNumber,description,action:'CHECK IN',date:now,user:checkedInBy,sentFrom,shelf,salesOrder,duration:null,notes});
+  numbers.forEach(num=>appendLog({partNumber:num,description,action:'CHECK IN',date:now,user:checkedInBy,sentFrom,shelf,salesOrder,duration:null,notes,batchId}));
   this.reset();document.getElementById('dup-warning').style.display='none';document.getElementById('ci-damage-notes-group').style.display='none';
-  playSound('in');showToast('Part '+partNumber+' checked in to quarantine','success');refreshAll();
+  playSound('in');
+  showToast(qty>1?qty+' parts checked in: '+numbers[0]+' to '+numbers[qty-1]:'Part '+partNumber+' checked in to quarantine','success');
+  refreshAll();
 });
 
 // ---- CHECK OUT ----
@@ -1581,15 +1690,19 @@ document.getElementById('checkout-form').addEventListener('submit',async functio
   // only on the CHECK OUT log row; blank is stored as '' like every other blank field.
   const serialNumber=document.getElementById('co-serial').value.trim();
   const deliveredTo=document.getElementById('co-to').value.trim(),businessUnit=document.getElementById('co-bu').value;
-  const parts=loadData(KEYS.parts),idx=parts.findIndex(p=>p.id===partId);
-  if(idx===-1){showToast('Part not found','error');return;}
+  // A box resolves to its lowest-numbered remaining copy; only that one is pulled.
+  const picked=resolveCheckoutPart(partId);
+  const parts=loadData(KEYS.parts),idx=picked?parts.findIndex(p=>p.id===picked.id):-1;
+  if(idx===-1){showToast('Part not found. It may have just been checked out at another station.','error');return;}
   const part=parts[idx],days=daysBetween(part.checkinDate);
-  const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'" ('+days+' day(s), '+(part.shelf||'no location')+')'+(serialNumber?', serial '+serialNumber:'')+' to SO '+salesOrder+', delivered to '+deliveredTo+' ('+businessUnit+')?');
+  const left=part.batchId?boxCopies(part.batchId).length:0;
+  const fromBox=part.batchId?' from the box ('+left+' left, '+(left-1)+' after this)':'';
+  const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'"'+fromBox+' ('+days+' day(s), '+(part.shelf||'no location')+')'+(serialNumber?', serial '+serialNumber:'')+' to SO '+salesOrder+', delivered to '+deliveredTo+' ('+businessUnit+')?');
   if(!ok)return;
   parts.splice(idx,1);saveData(KEYS.parts,parts);
-  appendLog({partNumber:part.partNumber,description:part.description,action:'CHECK OUT',date:new Date().toISOString(),user:checkedOutBy,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder,serialNumber,deliveredTo,businessUnit,duration:days,notes});
+  appendLog({partNumber:part.partNumber,description:part.description,action:'CHECK OUT',date:new Date().toISOString(),user:checkedOutBy,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder,serialNumber,deliveredTo,businessUnit,duration:days,notes,batchId:part.batchId||''});
   this.reset();document.getElementById('checkout-notes-card').style.display='none';
-  playSound('out');showToast('Part '+part.partNumber+' checked out (SO: '+salesOrder+')','success');refreshAll();
+  playSound('out');showToast('Part '+part.partNumber+' checked out (SO: '+salesOrder+')'+(part.batchId?', '+(left-1)+' left in the box':''),'success');refreshAll();
 });
 
 // ---- SEARCH ----
@@ -1604,8 +1717,8 @@ setupSortHeaders('log-table',logSort,()=>renderLogTable());
 function dlCSV(fn,rows){const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');const b=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();URL.revokeObjectURL(a.href);}
 function exportActiveCSV(){
   const parts=loadData(KEYS.parts);if(!parts.length){showToast('No data','warning');return;}
-  const rows=[['Part Number','Sales Order','Description','Check-In Date','Time','Days','Location','Sent From','Checked In By','Status','Stage','Condition','Damage Notes','Notes']];
-  parts.forEach(p=>{const d=daysBetween(p.checkinDate);rows.push([p.partNumber,p.salesOrder||'',p.description,fmtDate(p.checkinDate),fmtTime(p.checkinDate),d,(p.shelf||''),p.sentFrom,p.checkedInBy,d>=14?'Critical':d>=7?'Warning':'OK',p.stage||'Checked In',p.condition||'No damage',p.damageNotes||'',p.notes]);});
+  const rows=[['Part Number','Sales Order','Description','Check-In Date','Time','Days','Location','Sent From','Checked In By','Status','Stage','Condition','Damage Notes','Notes','Box']];
+  parts.forEach(p=>{const d=daysBetween(p.checkinDate);const box=p.batchId?boxRange(p)+' (#'+p.batchSeq+' of '+p.batchSize+')':'';rows.push([p.partNumber,p.salesOrder||'',p.description,fmtDate(p.checkinDate),fmtTime(p.checkinDate),d,(p.shelf||''),p.sentFrom,p.checkedInBy,d>=14?'Critical':d>=7?'Warning':'OK',p.stage||'Checked In',p.condition||'No damage',p.damageNotes||'',p.notes,box]);});
   dlCSV('foutsbros-quarantine-active-'+new Date().toISOString().slice(0,10)+'.csv',rows);showToast('CSV exported','success');
 }
 function exportLogCSV(){
