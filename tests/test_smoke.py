@@ -203,6 +203,20 @@ def test_sample_data_uses_the_real_business_units():
     assert used <= units, f"sample data uses units the app does not know: {sorted(used - units)}"
 
 
+def test_movement_log_fits_without_side_scrolling(html):
+    """Grant, 2026-10-02: the log scrolled sideways once it reached 15 columns.
+
+    Measured on sample data: all 14 columns fit at 1280px wide only with the log tab
+    at full width, wrapping headers, and the time stacked under the date.
+    """
+    assert ".container:has(#tab-log.active){max-width:none}" in html, (
+        "the Movement Log is back inside the 1320px page width"
+    )
+    assert "#log-table th{white-space:normal" in html, "log headers no longer wrap"
+    assert "<th>Time</th>" not in html, "Time is its own column again; it belongs under the date"
+    assert 'class="log-time"' in html, "the log row lost the time under the date"
+
+
 def test_log_table_header_and_row_agree(html):
     """A column added to the header but not the row shifts every cell after it."""
     head = html[html.index('<table id="log-table">'):html.index("</thead>", html.index('<table id="log-table">'))]

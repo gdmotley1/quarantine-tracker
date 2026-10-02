@@ -75,3 +75,13 @@ new Movement Log columns, the log search and the log CSV. Recorded in decisions.
 
 Tested on sample data with the safer order: wait for `_fbReady`, then `fbRef.off()` and
 stub `fbRef.set`. Production was re-read afterwards and was untouched.
+
+## 2026-10-02: Movement Log fits without side-scrolling
+
+Grant asked for the log to be wide enough to see every column. With Serial #, Delivered
+To and Business Unit added it had 15 columns and needed 1512px inside a 1225px box at a
+1920 screen. The log tab now uses the full window width (`.container:has(#tab-log.active)`),
+its headers wrap, padding is a little tighter, Description and Notes can shrink to 110px,
+and the time sits under the date instead of in its own column. Measured on sample data:
+fits at 1920, 1366 and 1280. Below about 1280 it scrolls again; the other tabs keep the
+1320px width. The CSV still exports Date and Time as separate columns.
