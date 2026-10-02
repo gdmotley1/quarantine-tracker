@@ -61,7 +61,8 @@ def stringify(obj):
 # use is still an open question, so sample data must not quietly answer it by
 # seeding customer-coded numbers.
 #
-# Locations are Cage and Warehouse (Grant, 2026-09-25). They must match LOCATIONS
+# Locations are New Warehouse, Cage, Small Parts and Other (Grant, 2026-10-02,
+# replacing Cage and Warehouse). They must match LOCATIONS
 # in index.html, or a restored part shows a location the heatmap cannot count.
 
 # Parts that came and went. These sit in the log only, and their numbers are lower
@@ -72,20 +73,20 @@ COMPLETED = [
     # Serial # is optional on check-out, so two of these leave it blank.
     ("CSP-001", "Ryder Cab Door Decal Set", "Ryder", "Sarah L", "Cage", "SO-10344", 40, 33, "RY-55120-0417",
      "Marcus J", "VAN"),
-    ("CSP-002", "Enterprise Fleet Logo Panel Wrap", "Enterprise", "Grant Motley", "Warehouse", "SO-10351", 35, 28, "",
+    ("CSP-002", "Enterprise Fleet Logo Panel Wrap", "Enterprise", "Grant Motley", "New Warehouse", "SO-10351", 35, 28, "",
      "Tasha W", "STC"),
-    ("CSP-003", "Hertz Rear Roll-Up Door Graphic", "Hertz", "Dave R", "Warehouse", "SO-10358", 30, 12, "HZ-2209-8813",
+    ("CSP-003", "Hertz Rear Roll-Up Door Graphic", "Hertz", "Dave R", "New Warehouse", "SO-10358", 30, 12, "HZ-2209-8813",
      "Marcus J", "FCV"),
     ("CSP-004", "U-Haul Box Side Mural Panel", "U-Haul", "Mike T", "Cage", "SO-10362", 26, 20, "",
      "Luis P", "FIRE"),
 ]
 
 # Parts still in quarantine. Days-ago values are chosen to spread across the three
-# status bands and to exercise every stage and condition badge, across both
-# locations.
+# status bands (OK under 30 days, Warning 30-59, Critical 60+, Grant 2026-10-02)
+# and to exercise every stage and condition badge, across all four locations.
 ACTIVE = [
     dict(num="CSP-005", desc="Ryder Reflective Tape Kit", frm="Ryder", by="Sarah L",
-         loc="Cage", so="SO-10377", days=21, stage="Escalated",
+         loc="Cage", so="SO-10377", days=82, stage="Escalated",
          condition="Significant damage",
          damage="Two rolls arrived with the adhesive backing torn",
          notes="Replacement requested from Ryder",
@@ -93,36 +94,36 @@ ACTIVE = [
          thread=[("Sarah L", 19, "Adhesive backing torn on two rolls. Cannot install."),
                  ("Lori", 16, "Opened a claim with Ryder. Replacement ships this week.")]),
     dict(num="CSP-006", desc="Ryder DOT Number Decal", frm="Ryder", by="Sarah L",
-         loc="Cage", so="SO-10377", days=19, stage="Checked In",
+         loc="Cage", so="SO-10377", days=71, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-007", desc="Penske Rear Chevron Reflective Strip", frm="Penske", by="Mike T",
-         loc="Cage", so="SO-10381", days=16, stage="Missing",
+         loc="Small Parts", so="SO-10381", days=64, stage="Missing",
          condition="No damage", damage="",
          notes="Not in the cage at the Monday count",
          thread=[("Mike T", 3, "Checked the cage and the warehouse floor, no sign of it. Flagged as missing.")]),
     dict(num="CSP-008", desc="Penske Fleet Number Decal", frm="Penske", by="Mike T",
-         loc="Cage", so="SO-10381", days=12, stage="Checked In",
+         loc="Small Parts", so="SO-10381", days=52, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-009", desc="Enterprise Fleet Logo Panel Wrap", frm="Enterprise", by="Grant Motley",
-         loc="Warehouse", so="SO-10391", days=10, stage="Checked In",
+         loc="New Warehouse", so="SO-10391", days=44, stage="Checked In",
          condition="Minor damage", damage="Corner of the wrap creased in shipping",
          notes="", thread=[]),
     dict(num="CSP-010", desc="Enterprise DOT Number Decal", frm="Enterprise", by="Grant Motley",
-         loc="Warehouse", so="SO-10391", days=9, stage="Checked In",
+         loc="New Warehouse", so="SO-10391", days=37, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-011", desc="U-Haul Box Side Mural Panel", frm="U-Haul", by="Dave R",
-         loc="Warehouse", so="SO-10398", days=8, stage="Checked In",
+         loc="Other", so="SO-10398", days=31, stage="Checked In",
          condition="Minor damage", damage="Small scuff along the bottom edge",
          notes="Scuff is below the body line, Dawn okayed installing it",
          thread=[("Dave R", 8, "Scuffed on arrival. Photographed before it went on the shelf.")]),
     dict(num="CSP-012", desc="Hertz Gold Stripe Accent Kit", frm="Hertz", by="Dave R",
-         loc="Cage", so="SO-10402", days=5, stage="Checked In",
+         loc="Cage", so="SO-10402", days=24, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-013", desc="Hertz Rear Roll-Up Door Graphic", frm="Hertz", by="Dave R",
-         loc="Warehouse", so="SO-10402", days=4, stage="Checked In",
+         loc="New Warehouse", so="SO-10402", days=15, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-014", desc="Budget Cab Door Number Decal", frm="Budget", by="Sarah L",
-         loc="Cage", so="SO-10406", days=3, stage="Checked In",
+         loc="Small Parts", so="SO-10406", days=6, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
     # Check-in has required Description, Sent From and Checked In By since
     # 2026-09-25, so every record here carries them. Old backups still hold
@@ -130,10 +131,10 @@ ACTIVE = [
     # required; the app has to keep rendering those without throwing, which is
     # why the blank fields are empty strings rather than nulls everywhere.
     dict(num="CSP-015", desc="Budget Rear Door Number Decal", frm="Budget", by="Mike T",
-         loc="Warehouse", so="SO-10409", days=1,
+         loc="Other", so="SO-10409", days=1,
          stage="Checked In", condition="No damage", damage="", notes="", thread=[]),
     dict(num="CSP-016", desc="Penske Mudflap Logo Pair", frm="Penske", by="Mike T",
-         loc="Warehouse", so="SO-10411", days=0, stage="Checked In",
+         loc="New Warehouse", so="SO-10411", days=0, stage="Checked In",
          condition="No damage", damage="", notes="", thread=[]),
 ]
 
@@ -142,7 +143,7 @@ ACTIVE = [
 # single parts so auto-numbering still lands on the next free CSP number.
 BOX = dict(
     first=17, qty=6, desc="Geotab GO9 Telematics Device", frm="Ryder", by="Mike T",
-    loc="Warehouse", so="SO-10415", days=6,
+    loc="New Warehouse", so="SO-10415", days=6,
     pulled={
         "CSP-017": dict(days=4, by="Mike T", serial="G9-7Q2K-31880", to="Luis P", bu="VAN"),
         "CSP-018": dict(days=2, by="Sarah L", serial="G9-7Q2K-31902", to="Luis P", bu="VAN"),

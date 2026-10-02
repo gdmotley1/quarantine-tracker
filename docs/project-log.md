@@ -112,3 +112,17 @@ placeholder entries like "F" / "V" / "C"). Grant confirmed a full wipe. Backed u
 to `backup-before-cleanup-2026-10-02.json` (gitignored; SHA-256 of parts+log+logId
 matched the live data before the reset), then set `app_state` to empty. Next part in is
 CSP-001. Restore with `restoreData` from the browser console if ever needed.
+
+## 2026-10-02: 30/60-day aging, four locations, SO- prefix
+
+Aging moved from 7/14 to 30/60 days and into `WARN_DAYS`/`CRIT_DAYS`; nine literal
+thresholds and four hand-written labels were replaced. Locations became New Warehouse,
+Cage, Small Parts, Other, and the heatmap grid now fits any count instead of two. Both
+Sales Order fields show a fixed "SO-"; a hand-typed one is stripped live, and the confirm
+dialog, toast and Recent Activity stopped printing "SO " in front of a value that already
+carries it. Sample data now spreads across all four locations and all three bands.
+
+Verified on sample data: badges and filters split 9 OK / 4 Warning / 3 Critical, the
+heatmap showed 8/3/3/2, and SO 55501 stored as SO-55501 and printed once. The dashboard
+counters looked stuck at first because the preview tab was hidden, which pauses
+requestAnimationFrame; with rAF routed through a timer they read correctly.

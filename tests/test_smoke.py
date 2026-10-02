@@ -441,15 +441,85 @@ def test_save_alert_is_hidden_when_printing(html):
 # underlying field is still `shelf`, so existing backups keep restoring.
 
 
-def test_locations_are_cage_and_warehouse(html):
-    assert "const LOCATIONS=['Cage','Warehouse'];" in html, (
-        "LOCATIONS is the single source of truth for the two locations"
+def test_locations_are_the_four_named_places(html):
+    """Grant, 2026-10-02: New Warehouse, Cage, Small Parts, Other (was Cage, Warehouse)."""
+    assert "const LOCATIONS=['New Warehouse','Cage','Small Parts','Other'];" in html, (
+        "LOCATIONS is the single source of truth for the locations"
+    )
+    assert "repeat(2,1fr);gap:.6rem}" not in html.split(".shelf-grid{")[1][:80], (
+        "the heatmap grid is fixed at two cells; it must fit however many locations exist"
     )
 
 
 def test_no_numbered_zones_remain(html):
     assert "Zone" not in html, "a 'Zone' label survived the rename"
     assert "i<=4" not in html, "a hardcoded 1-4 zone loop survived"
+
+
+# ----------------------------------------------------------------- aging bands
+# Grant, 2026-10-02: OK under 30 days, Warning 30-59, Critical 60+ (was 7 and 14).
+
+
+def test_aging_bands_come_from_one_place(html):
+    assert "const WARN_DAYS=30,CRIT_DAYS=60;" in html, "the aging bands moved or changed"
+    script = html[html.index("<script>"):]
+    stray = re.findall(r"d>=\d+|>=\s*(?:7|14)\b|<14\b", script)
+    assert not stray, f"a hardcoded day threshold is back: {stray}; use WARN_DAYS/CRIT_DAYS"
+    for word in ("statusClass", "statusLabel"):
+        body = _function_body(html, word)
+        assert "CRIT_DAYS" in body and "WARN_DAYS" in body, f"{word} ignores the band constants"
+
+
+def test_aging_labels_are_filled_from_the_constants(html):
+    """Fixed text drifted once: the key said 0-6/7-13/14+ after the rules changed."""
+    for old in ("0–6 days", "7–13 days", "14+ days", "Critical 14+", "0-6 days", "7-13 days"):
+        assert old not in html, f"stale aging label: {old}"
+    for el in ("band-ok", "band-warn", "band-crit", "crit-days-label"):
+        assert f'id="{el}"' in html and f"set('{el}'," in html, f"{el} is not filled from the constants"
+
+
+# ---------------------------------------------------------------- sales order
+# Grant, 2026-10-02: both SO fields show a fixed "SO-" so people type only the number.
+
+
+def test_sales_order_fields_show_the_prefix(html):
+    for field in ("ci-so", "co-so"):
+        wrap = re.search(r'<div class="so-wrap"><span class="so-prefix"[^>]*>SO-</span>'
+                         r'<input[^>]*id="' + field + r'"[^>]*></div>', html)
+        assert wrap, f"{field} lost its visible SO- prefix"
+        assert 'class="so-input"' in wrap.group(0), f"{field} no longer strips a typed SO-"
+
+
+def test_sales_order_is_stored_with_one_prefix(html):
+    """Rev M fixed a doubled 'SO' once; the prefix must be added exactly once."""
+    assert "soValue(document.getElementById('ci-so'))" in html, "check-in stores the raw SO box"
+    assert "soValue(document.getElementById('co-so'))" in html, "check-out stores the raw SO box"
+    assert "soField.value=soNumber(p.salesOrder)" in html, "the check-out prefill would show SO-SO-"
+    for doubled in ("' to SO '+salesOrder", "(SO: '+salesOrder", "' (SO: '+esc(l.salesOrder)"):
+        assert doubled not in html, f"a message would read 'SO SO-...': {doubled}"
+
+
+def test_sales_order_prefix_logic_runs_correctly():
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node not available")
+    html = INDEX.read_text(encoding="utf-8")
+    start = html.index("const SO_PREFIX=")
+    code = html[start:html.index("document.querySelectorAll('.so-input')", start)]
+    cases = ["98765", "SO-98765", "so 98765", "SO#98765", "SO98765", " SO- 98765 ", "", "SO-",
+             "SOUTH-1"]
+    harness = code + "console.log(JSON.stringify(" + str(cases).replace("'", '"') + \
+        ".map(v=>soValue({value:v}))));"
+    with tempfile.TemporaryDirectory() as td:
+        js = Path(td) / "so.js"
+        js.write_text(harness, encoding="utf-8")
+        r = subprocess.run([node, str(js)], capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 0, r.stderr
+    import json
+    assert json.loads(r.stdout) == [
+        "SO-98765", "SO-98765", "SO-98765", "SO-98765", "SO-98765", "SO-98765", "", "",
+        "SO-SOUTH-1",
+    ]
 
 
 def test_location_sort_is_textual(html):
@@ -481,7 +551,10 @@ def test_sample_data_uses_the_real_locations():
     assert declared, "LOCATIONS is missing from index.html"
     locations = set(re.findall(r"'([^']+)'", declared.group(1)))
     used = set(re.findall(r'loc="([^"]*)"', script))
-    used |= set(re.findall(r'"(Cage|Warehouse)"', script))
+    # COMPLETED tuples carry the location as the fifth string; catch any of them,
+    # and any leftover bare "Warehouse" from before the rename.
+    used |= set(re.findall(r'^\s*\("CSP-\d+", "[^"]*", "[^"]*", "[^"]*", "([^"]*)"', script, re.M))
+    used |= set(re.findall(r'"(Warehouse)"', script))
     stray = used - locations
     assert not stray, f"sample data writes locations the app does not know: {sorted(stray)}"
     assert used, "sample data sets no location at all"

@@ -62,6 +62,25 @@ box of 50 is 50 parts in Total Active. Any new screen that lists parts should go
 `partAndBoxmates()`. Records without a `batchId` (everything before this date) are
 single parts. `test_box_logic_runs_correctly` runs the real functions in node.
 
+## Aging bands, locations and the SO- prefix (2026-10-02)
+
+Three calls from Grant on the same day:
+
+- **Aging:** OK under 30 days, Warning 30 to 59, Critical 60+ (was 7 and 14). Set in
+  `WARN_DAYS` and `CRIT_DAYS`; every badge, filter, KPI, chart and label reads them.
+- **Locations:** New Warehouse, Cage, Small Parts, Other (was Cage, Warehouse). "New
+  Warehouse" is a place name, confirmed with Grant, not "the new list".
+- **Sales Order:** both SO fields show a fixed "SO-" and people type only the number,
+  so every stored SO has the same shape. A typed "SO-" is stripped so it is never
+  doubled.
+
+**Why:** customer parts can wait months for their truck, so 7/14-day alarms were noise.
+The locations match the plant. The SO prefix standardises the field for the floor.
+
+**How to apply:** change the bands or locations only in their constants. Store SO through
+`soValue()`. The gate fails on a literal day threshold, a stale band label, a missing
+SO- prefix, or a doubled one.
+
 ## Blank fields are stored as empty strings, never null (2026-08-19)
 
 **Why:** Firebase Realtime Database drops any key whose value is null. A field written

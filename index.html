@@ -128,8 +128,8 @@ nav button.active::after{left:0;right:0}
 .kpi.s-await .kpi-value{color:var(--amber)}
 
 /* SHELF HEATMAP */
-.shelf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
-@media(max-width:640px){.shelf-grid{grid-template-columns:repeat(1,1fr)}}
+.shelf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}
+@media(max-width:640px){.shelf-grid{grid-template-columns:repeat(2,1fr)}}
 .shelf-cell{border-radius:var(--radius);border:1px solid var(--border);padding:.7rem .5rem;text-align:center;transition:box-shadow .2s var(--ease),border-color .2s var(--ease);cursor:default;position:relative;background:#f8fafc}
 .shelf-cell .shelf-num{font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:600;margin-bottom:.25rem}
 .shelf-cell .shelf-count{font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums}
@@ -142,7 +142,7 @@ nav button.active::after{left:0;right:0}
 .shelf-cell.shelf-occupied:hover{box-shadow:var(--shadow-md)}
 .shelf-cell.shelf-occupied:active{transform:scale(.97)}
 
-/* RING PULSE (14+ days) */
+/* RING PULSE (critical) */
 .hold-days-ring.ring-critical svg{animation:ringPulse 2.5s ease-in-out infinite}
 
 /* SHELF DETAIL MODAL */
@@ -379,6 +379,12 @@ th.sortable.desc::after{content:'\25BC ';opacity:.9;color:var(--primary)}
 .form-hint-lead{font-size:.8rem;color:var(--text-dim);margin:-.35rem 0 1.1rem;line-height:1.5}
 .tag-opt,.tag-auto{font-size:.6rem;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--text-muted);background:#f1f5f9;border:1px solid var(--border);border-radius:99px;padding:.1rem .4rem;margin-left:.4rem;vertical-align:middle}
 .tag-auto{color:var(--primary);border-color:var(--primary)}
+/* Sales Order: the SO- is printed on the field so nobody types it, and every
+   stored number comes out the same shape. */
+.so-wrap{display:flex;align-items:stretch}
+.so-prefix{display:flex;align-items:center;padding:0 .7rem;background:#f1f5f9;border:1px solid var(--border-light);border-right:none;border-radius:8px 0 0 8px;font-size:.88rem;font-weight:700;color:var(--text);letter-spacing:.3px;user-select:none}
+.so-wrap input{flex:1;min-width:0;border-radius:0 8px 8px 0}
+.so-wrap:focus-within .so-prefix{border-color:var(--primary);color:var(--primary)}
 .field-hint{font-size:.72rem;color:var(--text-muted);line-height:1.4}
 .box-qty{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
 .locked-wrap{position:relative;display:flex;align-items:center}
@@ -578,7 +584,7 @@ body.readonly-mode .readonly-banner{display:flex}
         <div class="kpi-value" id="stat-total">0</div>
       </div>
       <div class="kpi s-crit kpi-click" onclick="switchTab('active');document.getElementById('search-active').value='critical';renderActiveTable('critical');">
-        <div class="kpi-label"><span class="kpi-dot" style="background:var(--red)"></span>Critical 14+ Days</div>
+        <div class="kpi-label"><span class="kpi-dot" style="background:var(--red)"></span>Critical <span id="crit-days-label">60</span>+ Days</div>
         <div class="kpi-value" id="stat-critical">0</div>
       </div>
       <div class="kpi s-await kpi-click" onclick="switchTab('active')">
@@ -638,7 +644,7 @@ body.readonly-mode .readonly-banner{display:flex}
       <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Active Quarantine Parts</h2>
       <div class="actions-bar">
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="search-active" placeholder="Search parts..."></div>
-        <div class="status-key"><span class="badge badge-green"><span class="badge-dot"></span>OK</span> 0–6 days <span class="badge badge-yellow"><span class="badge-dot"></span>Warning</span> 7–13 days <span class="badge badge-red"><span class="badge-dot"></span>Critical</span> 14+ days</div>
+        <div class="status-key"><span class="badge badge-green"><span class="badge-dot"></span>OK</span> <span id="band-ok">0–29 days</span> <span class="badge badge-yellow"><span class="badge-dot"></span>Warning</span> <span id="band-warn">30–59 days</span> <span class="badge badge-red"><span class="badge-dot"></span>Critical</span> <span id="band-crit">60+ days</span></div>
         <button class="btn btn-outline btn-sm" onclick="exportActiveCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
       </div>
       <div class="table-wrap"><table id="active-table"><thead><tr><th class="sortable" data-sort="partNumber">Part #</th><th class="sortable" data-sort="salesOrder">Sales Order</th><th class="sortable" data-sort="description">Description</th><th>Qty</th><th class="sortable" data-sort="checkinDate">Check-In</th><th class="sortable desc" data-sort="days">Days</th><th class="sortable" data-sort="shelf">Location</th><th class="sortable" data-sort="sentFrom">Sent From</th><th class="sortable" data-sort="checkedInBy">By</th><th>Status</th><th class="sortable" data-sort="stage">Stage</th><th>Condition</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
@@ -677,7 +683,7 @@ body.readonly-mode .readonly-banner{display:flex}
           </div>
           <div class="form-group">
             <label for="ci-so">Sales Order # <span class="tag-opt">optional</span></label>
-            <input type="text" id="ci-so" placeholder="e.g. SO-98765">
+            <div class="so-wrap"><span class="so-prefix" aria-hidden="true">SO-</span><input type="text" id="ci-so" class="so-input" placeholder="98765" aria-label="Sales Order number, after SO-"></div>
           </div>
           <div class="form-group">
             <label>Location <span class="tag-opt">optional</span></label>
@@ -744,7 +750,7 @@ body.readonly-mode .readonly-banner{display:flex}
       <form id="checkout-form" novalidate>
         <div class="form-grid">
           <div class="form-group full"><label for="co-part">Select Part *</label><select id="co-part" required><option value="">-- Select a part --</option></select></div>
-          <div class="form-group"><label for="co-so">Sales Order # *</label><input type="text" id="co-so" required placeholder="e.g. SO-98765"></div>
+          <div class="form-group"><label for="co-so">Sales Order # *</label><div class="so-wrap"><span class="so-prefix" aria-hidden="true">SO-</span><input type="text" id="co-so" class="so-input" required placeholder="98765" aria-label="Sales Order number, after SO-"></div></div>
           <div class="form-group"><label for="co-by">Checked Out By *</label><input type="text" id="co-by" required placeholder="Your name"></div>
           <div class="form-group"><label for="co-to">Delivered To *</label><input type="text" id="co-to" required placeholder="Who is receiving the part"></div>
           <div class="form-group"><label for="co-bu">Business Unit *</label><select id="co-bu" required><option value="">-- Select business unit --</option></select></div>
@@ -878,7 +884,10 @@ const fbAuth = firebase.auth();
 const KEYS={parts:'parts',log:'log',logId:'logId'};
 let DB={parts:[],log:[],logId:0};
 // The two places a part can physically sit. Stored on the legacy `shelf` field.
-const LOCATIONS=['Cage','Warehouse'];
+const LOCATIONS=['New Warehouse','Cage','Small Parts','Other'];
+// Aging bands (Grant, 2026-10-02): OK under 30 days, Warning 30 to 59, Critical 60+.
+// Every status badge, filter, KPI and chart reads these two numbers.
+const WARN_DAYS=30,CRIT_DAYS=60;
 // Where a pulled part is going (Grant, 2026-10-01). Builds the check-out dropdown.
 const BUSINESS_UNITS=['FIRE','VAN','STC','FCV'];
 let _fbReady=false;
@@ -958,10 +967,18 @@ async function restoreData(e){
 function daysBetween(ds){return Math.floor((new Date()-new Date(ds))/86400000);}
 function fmtDate(d){return new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'2-digit',day:'2-digit'});}
 function fmtTime(d){return new Date(d).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
-function statusClass(d){return d>=14?'red':d>=7?'yellow':'green';}
+// The band labels in the markup are filled from WARN_DAYS/CRIT_DAYS so they can't drift.
+(function(){
+  const set=(id,t)=>{const el=document.getElementById(id);if(el)el.textContent=t;};
+  set('band-ok','0–'+(WARN_DAYS-1)+' days');
+  set('band-warn',WARN_DAYS+'–'+(CRIT_DAYS-1)+' days');
+  set('band-crit',CRIT_DAYS+'+ days');
+  set('crit-days-label',CRIT_DAYS);
+})();
+function statusClass(d){return d>=CRIT_DAYS?'red':d>=WARN_DAYS?'yellow':'green';}
 function statusLabel(d){
-  if(d>=14)return'<span class="badge badge-red"><span class="badge-dot"></span>Critical</span>';
-  if(d>=7)return'<span class="badge badge-yellow"><span class="badge-dot"></span>Warning</span>';
+  if(d>=CRIT_DAYS)return'<span class="badge badge-red"><span class="badge-dot"></span>Critical</span>';
+  if(d>=WARN_DAYS)return'<span class="badge badge-yellow"><span class="badge-dot"></span>Warning</span>';
   return'<span class="badge badge-green"><span class="badge-dot"></span>OK</span>';
 }
 function shelfBadge(s){return s?'<span class="badge badge-shelf">'+esc(s)+'</span>':'-';}
@@ -1144,6 +1161,18 @@ document.getElementById('ci-condition').addEventListener('change',function(){
   else{grp.style.display='none';ta.value='';}
 });
 
+// ---- SALES ORDER: the field shows a fixed SO-, people type only the number ----
+// Stored as 'SO-' + what they typed, so every record has the same shape. If someone
+// types the SO- anyway it is stripped (Rev M once stored 'SO-SO-...').
+const SO_PREFIX='SO-';
+function soNumber(v){return String(v||'').trim().replace(/^so(?=[-#:\s\d])[-#:\s]*/i,'').trim();}
+function soValue(el){const n=soNumber(el&&el.value);return n?SO_PREFIX+n:'';}
+document.querySelectorAll('.so-input').forEach(el=>{
+  // Strip a typed SO- as soon as it appears, so they can see it is already there.
+  el.addEventListener('input',()=>{const n=soNumber(el.value);if(n!==el.value.trim()&&/^so[-#:\s]/i.test(el.value.trim()))el.value=n;});
+  el.addEventListener('blur',()=>{el.value=soNumber(el.value);});
+});
+
 // ---- QUANTITY: keep the part-number box showing the range a box will take ----
 document.getElementById('ci-qty').addEventListener('input',()=>fillNextPartNumber());
 // A form reset fires before the fields go back to their defaults, so refill after.
@@ -1166,7 +1195,7 @@ function renderDashboard(){
   parts.forEach(p=>{
     total++;
     const d=daysBetween(p.checkinDate);
-    if(d>=14)crit++;
+    if(d>=CRIT_DAYS)crit++;
     if(new Date(p.checkinDate).toLocaleDateString('en-US')===todayStr)today++;
     const stage=p.stage||'Checked In';
     stageCounts[stage]=(stageCounts[stage]||0)+1;
@@ -1196,12 +1225,12 @@ function renderDashboard(){
   '</div>';
 
   // Aging chart
-  let g=0,y=0,r=0;parts.forEach(p=>{const d=daysBetween(p.checkinDate);if(d>=14)r++;else if(d>=7)y++;else g++;});
+  let g=0,y=0,r=0;parts.forEach(p=>{const d=daysBetween(p.checkinDate);if(d>=CRIT_DAYS)r++;else if(d>=WARN_DAYS)y++;else g++;});
   const mx=Math.max(g,y,r,1);
   document.getElementById('aging-chart').innerHTML='<div class="bar-chart">'+
-    '<div class="bar-row"><span class="bar-label">0-6 days</span><div class="bar-track"><div class="bar-fill green" style="width:'+((g/mx)*100)+'%">'+g+'</div></div></div>'+
-    '<div class="bar-row"><span class="bar-label">7-13 days</span><div class="bar-track"><div class="bar-fill neutral" style="width:'+((y/mx)*100)+'%">'+y+'</div></div></div>'+
-    '<div class="bar-row"><span class="bar-label">14+ days</span><div class="bar-track"><div class="bar-fill red" style="width:'+((r/mx)*100)+'%">'+r+'</div></div></div>'+
+    '<div class="bar-row"><span class="bar-label">0-'+(WARN_DAYS-1)+' days</span><div class="bar-track"><div class="bar-fill green" style="width:'+((g/mx)*100)+'%">'+g+'</div></div></div>'+
+    '<div class="bar-row"><span class="bar-label">'+WARN_DAYS+'-'+(CRIT_DAYS-1)+' days</span><div class="bar-track"><div class="bar-fill neutral" style="width:'+((y/mx)*100)+'%">'+y+'</div></div></div>'+
+    '<div class="bar-row"><span class="bar-label">'+CRIT_DAYS+'+ days</span><div class="bar-track"><div class="bar-fill red" style="width:'+((r/mx)*100)+'%">'+r+'</div></div></div>'+
   '</div>';
 
   // Volume chart (last 14 days)
@@ -1261,7 +1290,7 @@ function renderDashboard(){
       const isStage=l.action&&l.action.startsWith('STAGE:');
       const dotClass=isIn?'dot-in':isStage?'dot-stage':'dot-out';
       const who=n>1?esc(first)+' – '+esc(l.partNumber)+'</strong> ('+n+' parts)<strong>':esc(l.partNumber);
-      return'<li><span class="activity-dot '+dotClass+'"></span><strong>'+who+'</strong> \u2014 '+l.action+' by '+esc(l.user)+' on '+fmtDate(l.date)+' at '+fmtTime(l.date)+(l.salesOrder?' (SO: '+esc(l.salesOrder)+')':'')+'</li>';
+      return'<li><span class="activity-dot '+dotClass+'"></span><strong>'+who+'</strong> \u2014 '+l.action+' by '+esc(l.user)+' on '+fmtDate(l.date)+' at '+fmtTime(l.date)+(l.salesOrder?' ('+esc(l.salesOrder)+')':'')+'</li>';
     }).join('');}
 }
 
@@ -1308,8 +1337,8 @@ function renderActiveTable(filter=''){
   const f=(filter||document.getElementById('search-active').value).toLowerCase();
   const filtered=sortData(parts.filter(p=>{
     if(!f)return true;
-    if(f==='critical')return daysBetween(p.checkinDate)>=14;
-    if(f==='warning')return daysBetween(p.checkinDate)>=7&&daysBetween(p.checkinDate)<14;
+    if(f==='critical')return daysBetween(p.checkinDate)>=CRIT_DAYS;
+    if(f==='warning')return daysBetween(p.checkinDate)>=WARN_DAYS&&daysBetween(p.checkinDate)<CRIT_DAYS;
     if(f==='missing')return (p.stage||'Checked In')==='Missing';
     return (p.partNumber||'').toLowerCase().includes(f)||(p.description||'').toLowerCase().includes(f)||(p.sentFrom||'').toLowerCase().includes(f)||(p.checkedInBy||'').toLowerCase().includes(f)||(p.shelf||'').toLowerCase().includes(f)||(p.salesOrder||'').toLowerCase().includes(f)||(p.stage||'checked in').toLowerCase().includes(f)||(p.condition||'').toLowerCase().includes(f);
   }),activeSort.col,activeSort.dir,'active');
@@ -1447,7 +1476,7 @@ document.getElementById('co-part').addEventListener('change',function(){
   // Pre-populate SO# from part record if available
   if(p&&p.salesOrder){
     const soField=document.getElementById('co-so');
-    if(!soField.value)soField.value=p.salesOrder;
+    if(!soField.value)soField.value=soNumber(p.salesOrder);
   }
 });
 function renderCheckoutNotes(partId){
@@ -1508,7 +1537,7 @@ function openShelfModal(loc){
   const parts=loadData(KEYS.parts).filter(p=>p.shelf===loc).sort((a,b)=>daysBetween(b.checkinDate)-daysBetween(a.checkinDate));
   document.getElementById('shelf-modal-title').textContent=loc+' \u2014 '+parts.length+' Part'+(parts.length!==1?'s':'');
   document.getElementById('shelf-modal-list').innerHTML=groupByBox(parts).map(({lead:p,copies})=>{
-    const d=daysBetween(p.checkinDate);const clr=d>=14?'var(--red)':'var(--text-dim)';
+    const d=daysBetween(p.checkinDate);const clr=d>=CRIT_DAYS?'var(--red)':'var(--text-dim)';
     return'<li><div><span class="shelf-detail-part">'+esc(partLabel(p))+(p.batchId?' ×'+copies.length:'')+(p.salesOrder?' ('+esc(p.salesOrder)+')':'')+'</span><br><span class="shelf-detail-desc">'+esc(p.description||'no description')+(p.sentFrom?' \u2014 '+esc(p.sentFrom):'')+'</span></div><span class="shelf-detail-days" style="color:'+clr+'">'+d+' day'+(d!==1?'s':'')+'</span></li>';
   }).join('');
   const o=document.getElementById('shelf-modal-overlay');o.style.display='flex';requestAnimationFrame(()=>o.classList.add('show'));
@@ -1642,7 +1671,7 @@ document.getElementById('checkin-form').addEventListener('submit',async function
   const numbers=partNumberSeries(nextPartNumber(),qty);
   const partNumber=numbers[0];
   const condition=document.getElementById('ci-condition').value;
-  const salesOrder=document.getElementById('ci-so').value.trim();
+  const salesOrder=soValue(document.getElementById('ci-so'));
   const description=document.getElementById('ci-desc').value.trim();
   const sentFrom=document.getElementById('ci-from').value.trim();
   const checkedInBy=document.getElementById('ci-by').value.trim();
@@ -1677,6 +1706,8 @@ document.getElementById('checkin-form').addEventListener('submit',async function
 })();
 document.getElementById('checkout-form').addEventListener('submit',async function(e){
   e.preventDefault();
+  // Reduce the SO box to just the number first, so a lone "SO-" counts as blank.
+  const soEl=document.getElementById('co-so');soEl.value=soNumber(soEl.value);
   const missing=validateRequired([
     {el:document.getElementById('co-part'),label:'Part'},
     {el:document.getElementById('co-so'),label:'Sales Order #'},
@@ -1685,7 +1716,7 @@ document.getElementById('checkout-form').addEventListener('submit',async functio
     {el:document.getElementById('co-bu'),label:'Business Unit'}
   ]);
   if(missing.length){showToast('Missing required: '+missing.join(', '),'warning');return;}
-  const partId=document.getElementById('co-part').value,salesOrder=document.getElementById('co-so').value.trim(),checkedOutBy=document.getElementById('co-by').value.trim(),notes=document.getElementById('co-notes').value.trim();
+  const partId=document.getElementById('co-part').value,salesOrder=soValue(document.getElementById('co-so')),checkedOutBy=document.getElementById('co-by').value.trim(),notes=document.getElementById('co-notes').value.trim();
   // Serial # is optional. The part record is deleted on check-out, so the serial lives
   // only on the CHECK OUT log row; blank is stored as '' like every other blank field.
   const serialNumber=document.getElementById('co-serial').value.trim();
@@ -1697,12 +1728,12 @@ document.getElementById('checkout-form').addEventListener('submit',async functio
   const part=parts[idx],days=daysBetween(part.checkinDate);
   const left=part.batchId?boxCopies(part.batchId).length:0;
   const fromBox=part.batchId?' from the box ('+left+' left, '+(left-1)+' after this)':'';
-  const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'"'+fromBox+' ('+days+' day(s), '+(part.shelf||'no location')+')'+(serialNumber?', serial '+serialNumber:'')+' to SO '+salesOrder+', delivered to '+deliveredTo+' ('+businessUnit+')?');
+  const ok=await showModal('Confirm Check Out','Check out "'+part.partNumber+' \u2014 '+part.description+'"'+fromBox+' ('+days+' day(s), '+(part.shelf||'no location')+')'+(serialNumber?', serial '+serialNumber:'')+' to '+salesOrder+', delivered to '+deliveredTo+' ('+businessUnit+')?');
   if(!ok)return;
   parts.splice(idx,1);saveData(KEYS.parts,parts);
   appendLog({partNumber:part.partNumber,description:part.description,action:'CHECK OUT',date:new Date().toISOString(),user:checkedOutBy,sentFrom:part.sentFrom,shelf:part.shelf,salesOrder,serialNumber,deliveredTo,businessUnit,duration:days,notes,batchId:part.batchId||''});
   this.reset();document.getElementById('checkout-notes-card').style.display='none';
-  playSound('out');showToast('Part '+part.partNumber+' checked out (SO: '+salesOrder+')'+(part.batchId?', '+(left-1)+' left in the box':''),'success');refreshAll();
+  playSound('out');showToast('Part '+part.partNumber+' checked out ('+salesOrder+')'+(part.batchId?', '+(left-1)+' left in the box':''),'success');refreshAll();
 });
 
 // ---- SEARCH ----
@@ -1718,7 +1749,7 @@ function dlCSV(fn,rows){const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/
 function exportActiveCSV(){
   const parts=loadData(KEYS.parts);if(!parts.length){showToast('No data','warning');return;}
   const rows=[['Part Number','Sales Order','Description','Check-In Date','Time','Days','Location','Sent From','Checked In By','Status','Stage','Condition','Damage Notes','Notes','Box']];
-  parts.forEach(p=>{const d=daysBetween(p.checkinDate);const box=p.batchId?boxRange(p)+' (#'+p.batchSeq+' of '+p.batchSize+')':'';rows.push([p.partNumber,p.salesOrder||'',p.description,fmtDate(p.checkinDate),fmtTime(p.checkinDate),d,(p.shelf||''),p.sentFrom,p.checkedInBy,d>=14?'Critical':d>=7?'Warning':'OK',p.stage||'Checked In',p.condition||'No damage',p.damageNotes||'',p.notes,box]);});
+  parts.forEach(p=>{const d=daysBetween(p.checkinDate);const box=p.batchId?boxRange(p)+' (#'+p.batchSeq+' of '+p.batchSize+')':'';rows.push([p.partNumber,p.salesOrder||'',p.description,fmtDate(p.checkinDate),fmtTime(p.checkinDate),d,(p.shelf||''),p.sentFrom,p.checkedInBy,d>=CRIT_DAYS?'Critical':d>=WARN_DAYS?'Warning':'OK',p.stage||'Checked In',p.condition||'No damage',p.damageNotes||'',p.notes,box]);});
   dlCSV('foutsbros-quarantine-active-'+new Date().toISOString().slice(0,10)+'.csv',rows);showToast('CSV exported','success');
 }
 function exportLogCSV(){

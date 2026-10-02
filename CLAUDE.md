@@ -55,11 +55,19 @@ throws. The search filters do exactly that. The gate guards the known ones.
 **"Location" is stored in a field named `shelf`.** Renaming it would break every
 existing backup file on restore. The UI says Location, the data says shelf. Leave it.
 
-**The two locations are Cage and Warehouse** (Grant, 2026-09-25, replacing zones 1-4).
-`LOCATIONS` near the top of the script is the single source of truth: the check-in
-dropdown and the dashboard heatmap both build from it, so adding a third location is a
-one-line change. Backups taken before this date hold `shelf` values of "1" to "4";
-they still restore and simply display whatever string they carry.
+**The locations are New Warehouse, Cage, Small Parts and Other** (Grant, 2026-10-02,
+replacing Cage and Warehouse, which replaced zones 1-4). `LOCATIONS` near the top of
+the script is the single source of truth: the check-in dropdown and the dashboard
+heatmap both build from it, so adding one is a one-line change. Older backups hold
+"Warehouse" or "1" to "4"; they still restore and display whatever string they carry.
+
+**Aging bands live in `WARN_DAYS` and `CRIT_DAYS`** (30 and 60, Grant 2026-10-02; were
+7 and 14). Badges, filters, KPIs, the aging chart and the on-screen labels all read
+them. Never write a day threshold as a literal number; the gate fails if you do.
+
+**Sales Order fields show a fixed "SO-"** and people type only the number. Store with
+`soValue()`, which adds the prefix once and strips one typed by hand. Messages print the
+stored value as is, never `'SO '+salesOrder` (that doubled it once, in Rev M).
 
 **A box of identical parts is many records shown as one line** (Grant, 2026-10-02).
 Check-in Quantity creates one part per copy, tagged with `batchId`. List screens go
