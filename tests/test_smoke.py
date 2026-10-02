@@ -648,6 +648,13 @@ def test_header_only_offers_print_and_kiosk(html):
         assert fn in html, f"{fn} was deleted; it is the console-only escape hatch"
 
 
+def test_tabs_show_no_shortcut_numbers(html):
+    """Grant, 2026-10-02: the small 1-5 next to each tab name came off."""
+    nav = html[html.index('<nav id="main-nav">'):html.index("</nav>")]
+    assert "nav-key" not in html, "the tab shortcut numbers are back"
+    assert not re.search(r"</?span", nav), "a tab label carries extra markup again"
+
+
 def test_export_csv_is_still_offered(html):
     assert html.count("Export CSV") >= 2, "both tables should still export CSV"
 
