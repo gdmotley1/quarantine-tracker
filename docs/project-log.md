@@ -103,3 +103,12 @@ every copy, and escalating the box moved every copy with one log row each.
 The Qty column and box ranges pushed Active Quarantine to 1373px at a 1366 screen, so it
 got the Movement Log's full-width treatment, and a box's number range wraps onto two
 lines. Both tables now fit at 1280, 1366 and 1920.
+
+## 2026-10-02: Test records cleared from production
+
+After Grant tested the box feature on the live site, the database held only test data:
+16 parts and 20 log rows (CSP-001 to CSP-018, including a 15-copy GeoTab box and
+placeholder entries like "F" / "V" / "C"). Grant confirmed a full wipe. Backed up first
+to `backup-before-cleanup-2026-10-02.json` (gitignored; SHA-256 of parts+log+logId
+matched the live data before the reset), then set `app_state` to empty. Next part in is
+CSP-001. Restore with `restoreData` from the browser console if ever needed.
